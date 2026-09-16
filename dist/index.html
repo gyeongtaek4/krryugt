@@ -151,7 +151,7 @@
     .eyebrow { margin: 0 0 4px; color: var(--brand); font-size: .77rem; font-weight: 800; letter-spacing: .06em; }
     h1 { margin: 0; font-size: clamp(1.65rem, 2.4vw, 2.15rem); line-height: 1.25; letter-spacing: -.045em; }
     .heading-copy { margin: 7px 0 0; color: var(--ink-soft); font-size: .9rem; }
-    .heading-actions { display: flex; gap: 10px; }
+    .heading-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 
     .button {
       min-height: 43px;
@@ -305,6 +305,15 @@
     .remaining-badge { display: inline-flex; margin-top: 4px; padding: 3px 7px; border-radius: 7px; color: var(--brand-dark); background: var(--brand-wash); font-size: .68rem; font-weight: 800; }
     .remaining-badge.soon { color: #b2741f; background: #fff6e7; }
     .remaining-badge.urgent { color: #bb5555; background: #fff0f0; }
+    .row-edit { min-height: 31px; padding: 0 11px; border: 1px solid var(--brand-soft); border-radius: 8px; color: var(--brand-dark); background: var(--white); font-size: .72rem; font-weight: 800; cursor: pointer; }
+    .row-edit:hover { background: var(--brand-wash); }
+    .form-grid { margin: 22px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+    .form-field { display: grid; gap: 6px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label { color: var(--ink-soft); font-size: .76rem; font-weight: 750; }
+    .form-field input { width: 100%; height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--white); font-size: .83rem; outline: 0; }
+    .form-field input:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
+    .form-hint { margin: -8px 0 16px; color: var(--grey); font-size: .72rem; }
 
     .modal-backdrop { position: fixed; inset: 0; z-index: 60; padding: 20px; display: none; place-items: center; background: rgba(18, 33, 30, .42); backdrop-filter: blur(4px); }
     .modal-backdrop.open { display: grid; }
@@ -369,6 +378,8 @@
       .filter-select { width: 100%; flex-basis: 100%; }
       .reset-filter { margin-left: 0; align-self: flex-start; }
       .source-strip { align-items: flex-start; flex-direction: column; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field.full { grid-column: auto; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -523,6 +534,8 @@
             <p class="heading-copy">조직별 담당자와 배정 차량 정보를 한눈에 확인합니다.</p>
           </div>
           <div class="heading-actions">
+            <button class="button" id="exportVehiclesButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Excel 내려받기</button>
+            <button class="button" id="addVehicleButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>직접 추가</button>
             <button class="button primary" id="vehicleUploadButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>담당자 Excel 업로드</button>
           </div>
         </section>
@@ -552,7 +565,7 @@
           </div>
           <div class="table-wrap">
             <table class="vehicle-table">
-              <thead><tr><th>본부</th><th>부</th><th>팀</th><th>담당자(정)</th><th>담당자(부)</th><th>차량번호</th><th>차종</th></tr></thead>
+              <thead><tr><th>본부</th><th>부</th><th>팀</th><th>담당자(정)</th><th>담당자(부)</th><th>차량번호</th><th>차종</th><th>관리</th></tr></thead>
               <tbody id="vehicleTableBody"></tbody>
             </table>
           </div>
@@ -568,6 +581,8 @@
             <p class="heading-copy">차량별 렌탈료와 계약기간, 남은 계약기간을 확인합니다.</p>
           </div>
           <div class="heading-actions">
+            <button class="button" id="exportContractsButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Excel 내려받기</button>
+            <button class="button" id="addContractButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>직접 추가</button>
             <button class="button primary" id="contractUploadButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>계약정보 Excel 업로드</button>
           </div>
         </section>
@@ -597,7 +612,7 @@
           </div>
           <div class="table-wrap">
             <table class="vehicle-table">
-              <thead><tr><th>본부</th><th>부</th><th>팀</th><th>담당자(정)</th><th>담당자(부)</th><th>차종</th><th>차량번호</th><th>월 렌탈료</th><th>계약기간</th><th>총 계약기간 / 남은 기간</th></tr></thead>
+              <thead><tr><th>본부</th><th>부</th><th>팀</th><th>담당자(정)</th><th>담당자(부)</th><th>차종</th><th>차량번호</th><th>월 렌탈료</th><th>계약기간</th><th>총 계약기간 / 남은 기간</th><th>관리</th></tr></thead>
               <tbody id="contractTableBody"></tbody>
             </table>
           </div>
@@ -634,6 +649,48 @@
       <div class="upload-error" id="contractUploadError"></div>
       <ul class="required-columns" aria-label="계약정보 필수 열"><li>본부</li><li>부</li><li>팀</li><li>담당자(정)</li><li>담당자(부)</li><li>차종</li><li>차량번호</li><li>렌탈료</li><li>계약시작</li><li>계약종료</li></ul>
       <div class="modal-actions"><button class="button" id="cancelContractUpload">취소</button><button class="button primary" id="confirmContractUpload">자료 확인하기</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="vehicleFormModal" role="dialog" aria-modal="true" aria-labelledby="vehicleFormTitle">
+    <div class="modal">
+      <div class="modal-header"><div><h2 id="vehicleFormTitle">차량현황 직접 추가</h2><p>조직과 담당자, 차량 정보를 입력해 주세요.</p></div><button class="close-button" id="closeVehicleForm" aria-label="닫기">✕</button></div>
+      <form id="vehicleForm">
+        <div class="form-grid">
+          <div class="form-field"><label for="vfHeadquarters">본부 *</label><input id="vfHeadquarters" required></div>
+          <div class="form-field"><label for="vfDivision">부 *</label><input id="vfDivision" required></div>
+          <div class="form-field"><label for="vfTeam">팀 *</label><input id="vfTeam" required></div>
+          <div class="form-field"><label for="vfPrimary">담당자(정) *</label><input id="vfPrimary" required></div>
+          <div class="form-field"><label for="vfSecondary">담당자(부)</label><input id="vfSecondary"></div>
+          <div class="form-field"><label for="vfPlate">차량번호 *</label><input id="vfPlate" required></div>
+          <div class="form-field full"><label for="vfModel">차종 *</label><input id="vfModel" required></div>
+        </div>
+        <div class="upload-error" id="vehicleFormError"></div>
+        <div class="modal-actions"><button class="button" type="button" id="cancelVehicleForm">취소</button><button class="button primary" type="submit">저장하기</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="contractFormModal" role="dialog" aria-modal="true" aria-labelledby="contractFormTitle">
+    <div class="modal">
+      <div class="modal-header"><div><h2 id="contractFormTitle">차량계약정보 직접 추가</h2><p>계약에 필요한 정보를 입력해 주세요.</p></div><button class="close-button" id="closeContractForm" aria-label="닫기">✕</button></div>
+      <form id="contractForm">
+        <div class="form-grid">
+          <div class="form-field"><label for="cfHeadquarters">본부 *</label><input id="cfHeadquarters" required></div>
+          <div class="form-field"><label for="cfDivision">부 *</label><input id="cfDivision" required></div>
+          <div class="form-field"><label for="cfTeam">팀 *</label><input id="cfTeam" required></div>
+          <div class="form-field"><label for="cfPrimary">담당자(정) *</label><input id="cfPrimary" required></div>
+          <div class="form-field"><label for="cfSecondary">담당자(부)</label><input id="cfSecondary"></div>
+          <div class="form-field"><label for="cfModel">차종 *</label><input id="cfModel" required></div>
+          <div class="form-field"><label for="cfPlate">차량번호 *</label><input id="cfPlate" required></div>
+          <div class="form-field"><label for="cfFee">월 렌탈료(원) *</label><input id="cfFee" type="number" min="0" step="1000" required></div>
+          <div class="form-field"><label for="cfStart">계약시작 *</label><input id="cfStart" type="month" required></div>
+          <div class="form-field"><label for="cfEnd">계약종료 *</label><input id="cfEnd" type="month" required></div>
+        </div>
+        <p class="form-hint">총 계약기간과 남은 계약기간은 시작·종료년월을 기준으로 자동 계산됩니다.</p>
+        <div class="upload-error" id="contractFormError"></div>
+        <div class="modal-actions"><button class="button" type="button" id="cancelContractForm">취소</button><button class="button primary" type="submit">저장하기</button></div>
+      </form>
     </div>
   </div>
 
@@ -680,6 +737,10 @@
       { '본부':'경영지원본부','부':'재무부','팀':'회계팀','담당자(정)':'신지우','담당자(부)':'강민서','차종':'쏘나타','차량번호':'89주 6402','렌탈료':'860000','계약시작':'2023-12','계약종료':'2026-11' },
       { '본부':'물류운영본부','부':'운송관리부','팀':'수도권운영팀','담당자(정)':'조성민','담당자(부)':'배유나','차종':'스타리아','차량번호':'94하 5127','렌탈료':'1210000','계약시작':'2025-06','계약종료':'2029-05' }
     ];
+    const vehicleFormModal = document.getElementById('vehicleFormModal');
+    const contractFormModal = document.getElementById('contractFormModal');
+    let editingVehicleIndex = null;
+    let editingContractIndex = null;
 
     function showToast(message) {
       toastMessage.textContent = message;
@@ -759,18 +820,19 @@
       const headquarters = document.getElementById('headquartersFilter').value;
       const division = document.getElementById('divisionFilter').value;
       const team = document.getElementById('teamFilter').value;
-      const filtered = vehicleData.filter(row => {
+      const filtered = vehicleData.map((row, index) => ({ row, index })).filter(item => {
+        const row = item.row;
         const matchesFilter = (!headquarters || row['본부'] === headquarters) && (!division || row['부'] === division) && (!team || row['팀'] === team);
         const searchable = requiredColumns.map(key => row[key]).join(' ').toLowerCase();
         return matchesFilter && (!keyword || searchable.includes(keyword));
       });
       const body = document.getElementById('vehicleTableBody');
-      body.innerHTML = filtered.length ? filtered.map(row => `<tr>
+      body.innerHTML = filtered.length ? filtered.map(item => { const row = item.row; return `<tr>
         <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
         <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
         <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
-        <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td>
-      </tr>`).join('') : '<tr><td class="empty-table" colspan="7">조건에 맞는 차량이 없습니다.</td></tr>';
+        <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td><button class="row-edit" data-vehicle-edit="${item.index}">수정</button></td>
+      </tr>`; }).join('') : '<tr><td class="empty-table" colspan="8">조건에 맞는 차량이 없습니다.</td></tr>';
       document.getElementById('recordCount').textContent = `${filtered.length}건`;
       document.getElementById('totalVehicles').textContent = `${vehicleData.length}대`;
       document.getElementById('totalHeadquarters').textContent = `${uniqueValues('본부').length}개`;
@@ -830,13 +892,14 @@
       const headquarters = document.getElementById('contractHeadquartersFilter').value;
       const division = document.getElementById('contractDivisionFilter').value;
       const team = document.getElementById('contractTeamFilter').value;
-      const filtered = contractData.filter(row => {
+      const filtered = contractData.map((row, index) => ({ row, index })).filter(item => {
+        const row = item.row;
         const matchesFilter = (!headquarters || row['본부'] === headquarters) && (!division || row['부'] === division) && (!team || row['팀'] === team);
         const searchable = contractColumns.map(key => row[key]).join(' ').toLowerCase();
         return matchesFilter && (!keyword || searchable.includes(keyword));
       });
       const body = document.getElementById('contractTableBody');
-      body.innerHTML = filtered.length ? filtered.map(row => {
+      body.innerHTML = filtered.length ? filtered.map(item => { const row = item.row;
         const total = monthSpan(row['계약시작'], row['계약종료']);
         const remaining = remainingMonths(row['계약종료']);
         const stateClass = remaining <= 3 ? 'urgent' : remaining <= 12 ? 'soon' : '';
@@ -847,9 +910,9 @@
           <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
           <td>${escapeHtml(row['차종'])}</td><td class="plate">${escapeHtml(row['차량번호'])}</td><td class="money">${rentalNumber(row['렌탈료']).toLocaleString('ko-KR')}원</td>
           <td><div class="contract-period"><strong>${escapeHtml(formatYearMonth(row['계약시작']))} ~ ${escapeHtml(formatYearMonth(row['계약종료']))}</strong></div></td>
-          <td><div class="contract-period"><strong>총 ${total}개월</strong><span class="remaining-badge ${stateClass}">${remainingText}</span></div></td>
+          <td><div class="contract-period"><strong>총 ${total}개월</strong><span class="remaining-badge ${stateClass}">${remainingText}</span></div></td><td><button class="row-edit" data-contract-edit="${item.index}">수정</button></td>
         </tr>`;
-      }).join('') : '<tr><td class="empty-table" colspan="10">조건에 맞는 계약정보가 없습니다.</td></tr>';
+      }).join('') : '<tr><td class="empty-table" colspan="11">조건에 맞는 계약정보가 없습니다.</td></tr>';
       const totalFee = contractData.reduce((sum, row) => sum + rentalNumber(row['렌탈료']), 0);
       const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 12; }).length;
       document.getElementById('contractRecordCount').textContent = `${filtered.length}건`;
@@ -887,6 +950,87 @@
       });
       if (!cleanRows.length) throw new Error('필수 열 아래에 입력된 데이터가 없습니다.');
       return cleanRows;
+    }
+
+    function openVehicleForm(index = null) {
+      editingVehicleIndex = index;
+      document.getElementById('vehicleForm').reset();
+      document.getElementById('vehicleFormError').classList.remove('show');
+      document.getElementById('vehicleFormTitle').textContent = index === null ? '차량현황 직접 추가' : '차량현황 정보 수정';
+      if (index !== null) {
+        const row = vehicleData[index];
+        document.getElementById('vfHeadquarters').value = row['본부'];
+        document.getElementById('vfDivision').value = row['부'];
+        document.getElementById('vfTeam').value = row['팀'];
+        document.getElementById('vfPrimary').value = row['담당자(정)'];
+        document.getElementById('vfSecondary').value = row['담당자(부)'];
+        document.getElementById('vfPlate').value = row['차량번호'];
+        document.getElementById('vfModel').value = row['차종'];
+      }
+      vehicleFormModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => document.getElementById('vfHeadquarters').focus(), 0);
+    }
+
+    function closeVehicleForm() {
+      vehicleFormModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function openContractForm(index = null) {
+      editingContractIndex = index;
+      document.getElementById('contractForm').reset();
+      document.getElementById('contractFormError').classList.remove('show');
+      document.getElementById('contractFormTitle').textContent = index === null ? '차량계약정보 직접 추가' : '차량계약정보 수정';
+      if (index !== null) {
+        const row = contractData[index];
+        document.getElementById('cfHeadquarters').value = row['본부'];
+        document.getElementById('cfDivision').value = row['부'];
+        document.getElementById('cfTeam').value = row['팀'];
+        document.getElementById('cfPrimary').value = row['담당자(정)'];
+        document.getElementById('cfSecondary').value = row['담당자(부)'];
+        document.getElementById('cfModel').value = row['차종'];
+        document.getElementById('cfPlate').value = row['차량번호'];
+        document.getElementById('cfFee').value = rentalNumber(row['렌탈료']);
+        document.getElementById('cfStart').value = normalizeYearMonth(row['계약시작']);
+        document.getElementById('cfEnd').value = normalizeYearMonth(row['계약종료']);
+      }
+      contractFormModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => document.getElementById('cfHeadquarters').focus(), 0);
+    }
+
+    function closeContractForm() {
+      contractFormModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function downloadExcel(rows, sheetName, fileName) {
+      if (!window.XLSX) { showToast('Excel 기능을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      XLSX.writeFile(workbook, fileName);
+      showToast(`${fileName} 파일을 내려받았습니다.`);
+    }
+
+    function exportVehicleData() {
+      downloadExcel(vehicleData.map(row => Object.fromEntries(requiredColumns.map(column => [column, row[column] || '']))), '차량현황', '차량현황.xlsx');
+    }
+
+    function exportContractData() {
+      const rows = contractData.map(row => {
+        const total = monthSpan(row['계약시작'], row['계약종료']);
+        const remaining = remainingMonths(row['계약종료']);
+        return {
+          '본부': row['본부'], '부': row['부'], '팀': row['팀'], '담당자(정)': row['담당자(정)'], '담당자(부)': row['담당자(부)'],
+          '차종': row['차종'], '차량번호': row['차량번호'], '렌탈료': rentalNumber(row['렌탈료']),
+          '계약시작': normalizeYearMonth(row['계약시작']), '계약종료': normalizeYearMonth(row['계약종료']),
+          '계약기간': `${formatYearMonth(row['계약시작'])} ~ ${formatYearMonth(row['계약종료'])}`,
+          '총계약기간': `${total}개월`, '남은계약기간': remaining ? `${remaining}개월` : '계약 종료'
+        };
+      });
+      downloadExcel(rows, '차량계약정보', '차량계약정보.xlsx');
     }
 
     function showUploadError(message) {
@@ -947,6 +1091,68 @@
     document.getElementById('closeContractModal').addEventListener('click', () => toggleContractModal(false));
     document.getElementById('cancelContractUpload').addEventListener('click', () => toggleContractModal(false));
     contractModal.addEventListener('click', event => { if (event.target === contractModal) toggleContractModal(false); });
+    document.getElementById('addVehicleButton').addEventListener('click', () => openVehicleForm());
+    document.getElementById('addContractButton').addEventListener('click', () => openContractForm());
+    document.getElementById('exportVehiclesButton').addEventListener('click', exportVehicleData);
+    document.getElementById('exportContractsButton').addEventListener('click', exportContractData);
+    document.getElementById('closeVehicleForm').addEventListener('click', closeVehicleForm);
+    document.getElementById('cancelVehicleForm').addEventListener('click', closeVehicleForm);
+    document.getElementById('closeContractForm').addEventListener('click', closeContractForm);
+    document.getElementById('cancelContractForm').addEventListener('click', closeContractForm);
+    vehicleFormModal.addEventListener('click', event => { if (event.target === vehicleFormModal) closeVehicleForm(); });
+    contractFormModal.addEventListener('click', event => { if (event.target === contractFormModal) closeContractForm(); });
+
+    document.getElementById('vehicleTableBody').addEventListener('click', event => {
+      const button = event.target.closest('[data-vehicle-edit]');
+      if (button) openVehicleForm(Number(button.dataset.vehicleEdit));
+    });
+    document.getElementById('contractTableBody').addEventListener('click', event => {
+      const button = event.target.closest('[data-contract-edit]');
+      if (button) openContractForm(Number(button.dataset.contractEdit));
+    });
+
+    document.getElementById('vehicleForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const row = {
+        '본부': document.getElementById('vfHeadquarters').value.trim(),
+        '부': document.getElementById('vfDivision').value.trim(),
+        '팀': document.getElementById('vfTeam').value.trim(),
+        '담당자(정)': document.getElementById('vfPrimary').value.trim(),
+        '담당자(부)': document.getElementById('vfSecondary').value.trim(),
+        '차량번호': document.getElementById('vfPlate').value.trim(),
+        '차종': document.getElementById('vfModel').value.trim()
+      };
+      if (editingVehicleIndex === null) vehicleData.push(row); else vehicleData[editingVehicleIndex] = row;
+      refreshFilters(); renderVehicles(); closeVehicleForm();
+      showToast(editingVehicleIndex === null ? '차량정보를 추가했습니다.' : '차량정보를 수정했습니다.');
+    });
+
+    document.getElementById('contractForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const start = document.getElementById('cfStart').value;
+      const end = document.getElementById('cfEnd').value;
+      if (!monthSpan(start, end)) {
+        const error = document.getElementById('contractFormError');
+        error.textContent = '계약종료는 계약시작과 같거나 이후여야 합니다.';
+        error.classList.add('show');
+        return;
+      }
+      const row = {
+        '본부': document.getElementById('cfHeadquarters').value.trim(),
+        '부': document.getElementById('cfDivision').value.trim(),
+        '팀': document.getElementById('cfTeam').value.trim(),
+        '담당자(정)': document.getElementById('cfPrimary').value.trim(),
+        '담당자(부)': document.getElementById('cfSecondary').value.trim(),
+        '차종': document.getElementById('cfModel').value.trim(),
+        '차량번호': document.getElementById('cfPlate').value.trim(),
+        '렌탈료': document.getElementById('cfFee').value,
+        '계약시작': start,
+        '계약종료': end
+      };
+      if (editingContractIndex === null) contractData.push(row); else contractData[editingContractIndex] = row;
+      refreshContractFilters(); renderContracts(); closeContractForm();
+      showToast(editingContractIndex === null ? '차량계약정보를 추가했습니다.' : '차량계약정보를 수정했습니다.');
+    });
 
     fileInput.addEventListener('change', event => {
       const file = event.target.files[0];
@@ -1055,7 +1261,7 @@
     document.getElementById('noticeButton').addEventListener('click', () => showToast('확인이 필요한 계약 만료 차량이 3대 있습니다.'));
 
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); toggleSidebar(false); }
+      if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); closeVehicleForm(); closeContractForm(); toggleSidebar(false); }
     });
 
     refreshFilters();
