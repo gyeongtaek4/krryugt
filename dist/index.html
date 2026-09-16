@@ -474,6 +474,22 @@
         </div>
       </header>
 
+      <div class="content view" id="closingView">
+        <div class="page-heading"><div><h1>월별 비용마감자료</h1><p>현재 차량정보와 분리하여, 선택한 월의 확정 비용을 보관합니다.</p></div></div>
+        <section class="panel" style="margin-bottom:24px">
+          <div class="panel-header"><div class="month-control"><label for="closingMonth">마감월도</label><input class="month-picker" id="closingMonth" type="month" value="2026-09"></div><strong id="closingStatus">미마감</strong></div>
+          <div style="padding:0 24px 24px"><p>① 월도 선택 → ② 비용자료 업로드 → ③ 확인 → ④ 마감 확정 및 보관파일 저장</p>
+            <p>Excel 첫 행: 차량번호, 렌탈료, 주유비, 통행료, 주차비. 금액 단위는 원이며, 차량별 한 행으로 작성하세요. 렌탈료는 필수이고 나머지 비용은 생략하면 0원입니다.</p>
+            <label class="button">비용자료 업로드 <input id="closingUpload" type="file" accept=".xlsx,.xls,.csv" style="max-width:220px"></label>
+            <button class="button primary" id="closingConfirm">마감 확정 · 보관파일 저장</button>
+            <button class="button" id="closingDownload">전체 보관파일 다운로드</button>
+            <label class="button">보관파일 불러오기 <input id="closingRestore" type="file" accept=".json" style="max-width:220px"></label>
+            <p id="closingMessage" role="status">Supabase 연결 전에는 파일 보관 방식입니다. 새로고침 후 보관파일을 불러오세요. 원본 Excel도 함께 보관하세요.</p>
+          </div>
+        </section>
+        <section class="panel" style="margin-bottom:24px"><div class="panel-header"><h2 class="panel-title">선택월 비용자료</h2><strong id="closingTotal">—</strong></div><div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량번호</th><th>렌탈료</th><th>주유비</th><th>통행료</th><th>주차비</th></tr></thead><tbody id="closingRows"></tbody></table></div></section>
+        <section class="panel"><div class="panel-header"><h2 class="panel-title">확정 마감자료 목록</h2></div><div class="table-wrap"><table class="vehicle-table"><thead><tr><th>마감월도</th><th>차량수</th><th>렌트비용</th><th>총 비용</th><th>확정일</th><th>조회</th></tr></thead><tbody id="closingArchiveRows"></tbody></table></div></section>
+      </div>
       <div class="content view active" id="dashboardView">
         <section class="page-heading">
           <div>
@@ -931,12 +947,15 @@
       const isVehicles = page === '차량 현황';
       const isContracts = page === '차량계약정보';
       const isDriving = page === '운행기록데이터';
-      document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving);
+      const isClosing = page === '월별 비용마감자료';
+      document.getElementById('closingView').classList.toggle('active', isClosing);
+      document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing);
       document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
       document.getElementById('contractsView').classList.toggle('active', isContracts);
       document.getElementById('drivingView').classList.toggle('active', isDriving);
       document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : isDriving ? '운행기록데이터' : '대시보드';
       document.querySelectorAll('.nav-button').forEach(item => item.classList.toggle('active', item.dataset.page === page));
+      if (isClosing) { document.getElementById('breadcrumbCurrent').textContent = page; renderClosing(); }
       if (isDriving) renderDriving();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -955,12 +974,35 @@
       return String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
     }
 
-    // 월별 비용 자료가 연결되기 전의 화면 확인용 데이터입니다. 단위: 만원.
-    const rentMonthlyData = {
-      '2025-08': 9700, '2025-09': 9820, '2025-10': 9980, '2025-11': 10120, '2025-12': 10260,
-      '2026-01': 10440, '2026-02': 10680, '2026-03': 10820, '2026-04': 10970, '2026-05': 11100,
-      '2026-06': 11280, '2026-07': 11390, '2026-08': 11480, '2026-09': 11240
-    };
+      // 확정 마감자료에서 계산하는 월별 렌트비용입니다. 단위: 만원.
+    const rentMonthlyData = {};
+    const closingArchive = {};
+    let closingDraft = null;
+    const costKeys = ['렌탈료', '주유비', '통행료', '주차비'];
+    const closingMonthValue = () => document.getElementById('closingMonth').value;
+    const won = value => `${value.toLocaleString('ko-KR')}원`;
+    function closingTotals(rows) { return costKeys.map(key => rows.reduce((sum, row) => sum + row[key], 0)); }
+    function renderClosing() {
+      const month = closingMonthValue(), saved = closingArchive[month];
+      const rows = saved ? saved.rows : closingDraft && closingDraft.month === month ? closingDraft.rows : [];
+      document.getElementById('closingStatus').textContent = saved ? '마감 확정 · 수정 잠금' : rows.length ? '확정 전 검토' : '미마감';
+      document.getElementById('closingUpload').disabled = !!saved;
+      document.getElementById('closingConfirm').disabled = !!saved || !rows.length;
+      const totals = closingTotals(rows);
+      document.getElementById('closingTotal').textContent = rows.length ? `총 비용 ${won(totals.reduce((a,b)=>a+b,0))}` : '—';
+      document.getElementById('closingRows').innerHTML = rows.length ? rows.map(row=>`<tr>${['본부','부','팀','차량번호'].map(key=>`<td>${escapeHtml(row[key] || '미매칭')}</td>`).join('')}${costKeys.map(key=>`<td>${won(row[key])}</td>`).join('')}</tr>`).join('') : '<tr><td colspan="8" class="empty-table">선택월의 자료를 업로드하거나 보관파일을 불러오세요.</td></tr>';
+      document.getElementById('closingArchiveRows').innerHTML = Object.keys(closingArchive).sort().reverse().map(key=>{const item=closingArchive[key], totals=closingTotals(item.rows);return `<tr><td>${escapeHtml(key)}</td><td>${item.rows.length}대</td><td>${won(totals[0])}</td><td>${won(totals.reduce((a,b)=>a+b,0))}</td><td>${escapeHtml(item.confirmedAt)}</td><td><button class="row-edit" data-closing-month="${escapeHtml(key)}">조회</button></td></tr>`;}).join('') || '<tr><td colspan="6" class="empty-table">확정된 비용마감자료가 없습니다.</td></tr>';
+    }
+    function downloadClosingArchive() {
+      if (!Object.keys(closingArchive).length) { showToast('확정된 마감자료가 없습니다.'); return; }
+      const url=URL.createObjectURL(new Blob([JSON.stringify({format:'fleet-cost-archive-v1',months:closingArchive},null,2)],{type:'application/json'}));
+      const link=document.createElement('a');link.href=url;link.download=`차량비용마감자료_${new Date().toISOString().slice(0,10)}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+    function syncClosingDashboard() {
+      Object.keys(rentMonthlyData).forEach(key=>delete rentMonthlyData[key]);
+      Object.entries(closingArchive).forEach(([month,item])=>rentMonthlyData[month]=closingTotals(item.rows)[0]/10000);
+      renderRentChart();
+    }
 
     function shiftRentMonth(month, offset) {
       const [year, number] = month.split('-').map(Number);
@@ -983,6 +1025,18 @@
 
     function renderRentChart() {
       const reference = document.getElementById('rentReferenceMonth').value;
+      const selectedClosing=closingArchive[reference];
+      const selectedCosts=selectedClosing ? closingTotals(selectedClosing.rows).slice(1) : null;
+      const extraTotal=selectedCosts ? selectedCosts.reduce((a,b)=>a+b,0) : null;
+      document.querySelector('.cost-panel .panel-subtitle').textContent=`${reference || '기준월 선택 필요'} · ${selectedClosing ? '확정 마감자료' : '미마감'}`;
+      document.querySelector('.cost-total strong').textContent=extraTotal===null?'—':won(extraTotal);
+      document.querySelectorAll('.cost-item').forEach((item,index)=>{
+        const value=selectedCosts?.[index], ratio=extraTotal ? value/extraTotal*100 : 0;
+        item.querySelector('.cost-value').textContent=value===undefined?'—':won(value);
+        item.querySelector('small').textContent=selectedCosts ? `전체 부대비용의 ${ratio.toFixed(1)}%` : '확정 자료 없음';
+        item.querySelector('.cost-progress i').style.setProperty('--value',`${ratio}%`);
+      });
+      document.querySelector('.cost-source-note').textContent='선택한 기준월의 확정 비용마감자료입니다. 현재 차량정보와 별도로 집계합니다.';
       const chart = document.getElementById('rentChart');
       const valid = /^\d{4}-(0[1-9]|1[0-2])$/.test(reference);
       const months = valid ? Array.from({ length: 12 }, (_, index) => shiftRentMonth(reference, index - 11)) : [];
@@ -995,7 +1049,7 @@
       document.getElementById('rentAverageLabel').textContent = label;
       document.getElementById('rentAverageNote').textContent = !valid ? '조회할 기준월을 선택해 주세요.' : average === null
         ? '선택한 조회기간에 집계된 월 렌트비용이 없습니다.'
-        : `그래프에 표시된 월 렌트비용 합계 ÷ ${displayedValues.length}개월 · 미집계 월 제외 · 예시 데이터`;
+        : `확정 마감자료의 월 렌트비용 합계 ÷ ${displayedValues.length}개월 · 미마감 월 제외`;
       if (!valid) {
         document.getElementById('rentChartPeriod').textContent = '기준월을 선택해 주세요.';
         chart.innerHTML = '<title id="rentChartTitle">기준월 선택 필요</title><desc id="rentChartDesc">기준월을 선택하면 최근 12개월을 표시합니다.</desc>';
@@ -1729,9 +1783,72 @@
       });
     });
 
+    const closingNav=document.createElement('li');
+    closingNav.innerHTML='<button class="nav-button" data-page="월별 비용마감자료"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v17H5V4Zm3 5h8m-8 4h8m-8 4h5" stroke="currentColor" stroke-width="1.7"/></svg>월별 비용마감자료</button>';
+    document.querySelector('[data-page="운행기록데이터"]').closest('li').after(closingNav);
+    document.getElementById('closingMonth').addEventListener('change',()=>{closingDraft=null;document.getElementById('closingUpload').value='';renderClosing();});
+    document.getElementById('closingUpload').addEventListener('change',async event=>{
+      const file=event.target.files[0], month=closingMonthValue();
+      if(!file)return;
+      try {
+        if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))throw Error('마감월도를 선택하세요.');
+        if(closingArchive[month])throw Error('이미 확정된 월도는 덮어쓸 수 없습니다.');
+        if(file.size>20*1024*1024)throw Error('파일은 20MB 이하로 올려주세요.');
+        if(!window.XLSX)throw Error('Excel 기능을 불러오지 못했습니다. 잠시 후 다시 시도하세요.');
+        const workbook=XLSX.read(await file.arrayBuffer(),{type:'array'});
+        const raw=XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{defval:'',raw:false});
+        if(!raw.length)throw Error('비용자료가 비어 있습니다.');
+        const seen=new Set();
+        const rows=raw.map((row,index)=>{
+          const plate=String(row['차량번호']||'').trim(),normalized=normalizePlate(plate);
+          if(!normalized||seen.has(normalized))throw Error(`${index+2}행: 차량번호 누락 또는 중복입니다.`);
+          seen.add(normalized);
+          if(String(row['렌탈료']??'').trim()==='')throw Error(`${index+2}행: 렌탈료를 입력하세요.`);
+          const result={'차량번호':plate};
+          costKeys.forEach(key=>{const text=String(row[key]??'').trim().replace(/[,\s원₩]/g,'');const value=text===''?0:Number(text);if(!Number.isSafeInteger(value)||value<0)throw Error(`${index+2}행: ${key}는 0 이상의 정수(원)여야 합니다.`);result[key]=value;});
+          const vehicle=vehicleForPlate(plate);
+          ['본부','부','팀'].forEach(key=>result[key]=String(row[key]||vehicle?.[key]||''));
+          return result;
+        });
+        if(closingMonthValue()!==month)throw Error('월도가 변경되었습니다. 다시 업로드하세요.');
+        closingDraft={month,rows,source:file.name};renderClosing();
+        const missing=rows.filter(row=>!row['본부']||!row['부']||!row['팀']).length;
+        document.getElementById('closingMessage').textContent=missing?`조직정보 미매칭 ${missing}건입니다. 차량현황을 수정하거나 Excel에 본부, 부, 팀을 입력한 뒤 다시 업로드하세요.`:`${rows.length}대 검토 준비 완료. 확정하면 부서정보와 비용을 이 월도에 고정하고 보관파일을 다운로드합니다.`;
+      }catch(error){showToast(error.message);event.target.value='';}
+    });
+    document.getElementById('closingConfirm').addEventListener('click',()=>{
+      const month=closingMonthValue();
+      if(closingArchive[month]||!closingDraft||closingDraft.month!==month)return;
+      if(closingDraft.rows.some(row=>!row['본부']||!row['부']||!row['팀'])){showToast('미매칭 조직정보를 먼저 확인해 주세요.');return;}
+      if(!confirm(`${month} 비용자료를 확정하고 보관파일을 다운로드할까요? 확정된 월도는 수정되지 않습니다.`))return;
+      closingArchive[month]={rows:JSON.parse(JSON.stringify(closingDraft.rows)),source:closingDraft.source,confirmedAt:new Date().toISOString()};
+      closingDraft=null;renderClosing();syncClosingDashboard();downloadClosingArchive();
+      document.getElementById('closingMessage').textContent='마감 확정 완료. 다운로드된 JSON 보관파일을 안전한 폴더에 저장하세요. 다음 접속 시 불러오면 복원됩니다.';
+    });
+    document.getElementById('closingDownload').addEventListener('click',downloadClosingArchive);
+    document.getElementById('closingArchiveRows').addEventListener('click',event=>{const button=event.target.closest('[data-closing-month]');if(button){document.getElementById('closingMonth').value=button.dataset.closingMonth;closingDraft=null;renderClosing();}});
+    document.getElementById('closingRestore').addEventListener('change',async event=>{
+      const file=event.target.files[0];if(!file)return;
+      try{
+        if(file.size>20*1024*1024)throw Error('보관파일은 20MB 이하만 지원합니다.');
+        const data=JSON.parse(await file.text());
+        if(data.format!=='fleet-cost-archive-v1'||!data.months||typeof data.months!=='object'||Array.isArray(data.months))throw Error('지원하지 않는 보관파일입니다.');
+        const entries=Object.entries(data.months);if(!entries.length)throw Error('보관파일이 비어 있습니다.');
+        const restored={};
+        for(const [month,item] of entries){
+          if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)||!Array.isArray(item.rows)||!item.rows.length||typeof item.confirmedAt!=='string')throw Error('마감자료 형식이 올바르지 않습니다.');
+          const seen=new Set();
+          for(const row of item.rows){if(!row||typeof row['차량번호']!=='string'||!normalizePlate(row['차량번호'])||seen.has(normalizePlate(row['차량번호']))||costKeys.some(key=>!Number.isSafeInteger(row[key])||row[key]<0)||['본부','부','팀'].some(key=>typeof row[key]!=='string'||!row[key]))throw Error('보관자료에 누락 또는 잘못된 값이 있습니다.');seen.add(normalizePlate(row['차량번호']));}
+          if(closingArchive[month]&&JSON.stringify(closingArchive[month])!==JSON.stringify(item))throw Error(`${month}에 다른 확정자료가 있어 불러오기를 취소했습니다. 기존 자료는 유지됩니다.`);
+          restored[month]=item;
+        }
+        Object.assign(closingArchive,restored);closingDraft=null;renderClosing();syncClosingDashboard();showToast('보관자료를 불러왔습니다.');
+      }catch(error){showToast(error.message||'보관파일을 읽을 수 없습니다.');}finally{event.target.value='';}
+    });
+    renderClosing();
     document.querySelectorAll('.nav-button').forEach(button => {
       button.addEventListener('click', () => {
-        if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '운행기록데이터') showView(button.dataset.page);
+        if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료') showView(button.dataset.page);
         else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
         toggleSidebar(false);
       });
