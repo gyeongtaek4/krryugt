@@ -205,7 +205,7 @@
     .period-tab { min-width: 44px; height: 31px; padding: 0 9px; border: 0; border-radius: 8px; color: var(--grey); background: transparent; font-size: .72rem; font-weight: 700; cursor: pointer; }
     .period-tab.active { color: var(--brand-dark); background: var(--white); box-shadow: 0 2px 8px rgba(26, 61, 53, .07); }
 
-    .chart-summary { display: flex; align-items: baseline; gap: 9px; margin-bottom: 6px; }
+    .chart-summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 9px; margin-bottom: 6px; }
     .chart-summary strong { font-size: 1.55rem; letter-spacing: -.04em; }
     .chart-summary span { color: var(--brand); font-size: .76rem; font-weight: 750; }
     .combo-chart-scroll { overflow-x: auto; padding-top: 4px; }
@@ -489,55 +489,24 @@
             <span class="metric-meta"><span class="change">+4대</span>&nbsp; 전월 대비</span>
           </article>
           <article class="metric-card">
-            <div class="metric-top"><span class="metric-label">월 렌트 비용</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span></div>
-            <p class="metric-value">1억 1,240만원</p>
-            <span class="metric-meta"><span class="change">-2.1%</span>&nbsp; 전월 대비 절감</span>
+            <div class="metric-top"><span class="metric-label">평균 렌트 비용</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span></div>
+            <p class="metric-value" id="dashboardRentAverage">-</p>
+            <span class="metric-meta" id="dashboardRentAverageLabel">선택월의 3개월 평균</span>
           </article>
         </section>
 
         <section class="grid-main">
           <article class="panel">
             <div class="panel-header">
-              <div><h2 class="panel-title">월별 렌트 비용 추이</h2><p class="panel-subtitle">1월~12월 · 부가세 포함 · 단위 만원</p></div>
-              <span class="year-badge">2026년 · 1년 단위</span>
+              <div><h2 class="panel-title">월별 렌트 비용 추이</h2><p class="panel-subtitle" id="rentChartPeriod">기준월까지 최근 12개월 · 예시 데이터</p></div>
+              <div class="month-control"><label for="rentReferenceMonth">기준월</label><input class="month-picker" id="rentReferenceMonth" type="month" value="2026-09" required></div>
             </div>
-            <div class="chart-summary"><strong>1억 1,240만원</strong><span>전월보다 240만원 감소</span></div>
+            <div class="chart-summary" aria-live="polite"><strong id="rentAverageAmount">-</strong><span id="rentAverageLabel">선택월의 3개월 평균</span></div>
+            <p class="panel-subtitle" id="rentAverageNote">평균은 기준월과 직전 2개월의 월 렌트비용을 기준으로 계산합니다.</p>
             <div class="combo-chart-scroll">
-              <svg class="combo-chart" viewBox="0 0 940 315" role="img" aria-labelledby="rentChartTitle rentChartDesc">
-                <title id="rentChartTitle">2026년 월별 렌트비용 추이</title>
-                <desc id="rentChartDesc">1월부터 12월까지 한 해 단위로 표시합니다. 막대는 월 렌트비용, 초록색 선은 3개월 평균이며 10월부터 12월은 아직 집계되지 않았습니다.</desc>
-                <g aria-hidden="true">
-                  <line class="grid-line" x1="78" y1="30" x2="920" y2="30"/><line class="grid-line" x1="78" y1="66.7" x2="920" y2="66.7"/>
-                  <line class="grid-line" x1="78" y1="103.3" x2="920" y2="103.3"/><line class="grid-line" x1="78" y1="140" x2="920" y2="140"/>
-                  <line class="grid-line" x1="78" y1="176.7" x2="920" y2="176.7"/><line class="grid-line" x1="78" y1="213.3" x2="920" y2="213.3"/>
-                  <line class="grid-line" x1="78" y1="250" x2="920" y2="250"/>
-                  <text class="axis-label" x="67" y="34" text-anchor="end">12,000</text><text class="axis-label" x="67" y="70.7" text-anchor="end">11,500</text>
-                  <text class="axis-label" x="67" y="107.3" text-anchor="end">11,000</text><text class="axis-label" x="67" y="144" text-anchor="end">10,500</text>
-                  <text class="axis-label" x="67" y="180.7" text-anchor="end">10,000</text><text class="axis-label" x="67" y="217.3" text-anchor="end">9,500</text>
-                  <text class="axis-label" x="67" y="254" text-anchor="end">9,000</text>
-                </g>
-                <g>
-                  <rect class="rent-bar" x="99" y="144.4" width="22" height="105.6" rx="4"><title>2026년 1월 1억 440만원</title></rect>
-                  <rect class="rent-bar" x="169" y="126.8" width="22" height="123.2" rx="4"><title>2026년 2월 1억 680만원</title></rect>
-                  <rect class="rent-bar" x="239" y="116.5" width="22" height="133.5" rx="4"><title>2026년 3월 1억 820만원</title></rect>
-                  <rect class="rent-bar" x="309" y="105.5" width="22" height="144.5" rx="4"><title>2026년 4월 1억 970만원</title></rect>
-                  <rect class="rent-bar" x="379" y="96" width="22" height="154" rx="4"><title>2026년 5월 1억 1,100만원</title></rect>
-                  <rect class="rent-bar" x="449" y="82.8" width="22" height="167.2" rx="4"><title>2026년 6월 1억 1,280만원</title></rect>
-                  <rect class="rent-bar" x="519" y="74.7" width="22" height="175.3" rx="4"><title>2026년 7월 1억 1,390만원</title></rect>
-                  <rect class="rent-bar" x="589" y="68.1" width="22" height="181.9" rx="4"><title>2026년 8월 1억 1,480만원</title></rect>
-                  <rect class="rent-bar" x="659" y="85.7" width="22" height="164.3" rx="4"><title>2026년 9월 1억 1,240만원</title></rect>
-                </g>
-                <polyline class="average-line" points="110,144.4 180,135.6 250,129.2 320,116.3 390,106.8 460,94.4 530,84.5 600,75.3 670,76.2"/>
-                <g aria-hidden="true"><circle class="average-dot" cx="110" cy="144.4" r="3.8"/><circle class="average-dot" cx="180" cy="135.6" r="3.8"/><circle class="average-dot" cx="250" cy="129.2" r="3.8"/><circle class="average-dot" cx="320" cy="116.3" r="3.8"/><circle class="average-dot" cx="390" cy="106.8" r="3.8"/><circle class="average-dot" cx="460" cy="94.4" r="3.8"/><circle class="average-dot" cx="530" cy="84.5" r="3.8"/><circle class="average-dot" cx="600" cy="75.3" r="3.8"/><circle class="average-dot" cx="670" cy="76.2" r="4.4"/></g>
-                <text class="future-month" x="810" y="205" text-anchor="middle">10~12월 미집계</text>
-                <g aria-hidden="true">
-                  <text class="month-label" x="110" y="271" text-anchor="middle">1월</text><text class="month-label" x="180" y="271" text-anchor="middle">2월</text><text class="month-label" x="250" y="271" text-anchor="middle">3월</text>
-                  <text class="month-label" x="320" y="271" text-anchor="middle">4월</text><text class="month-label" x="390" y="271" text-anchor="middle">5월</text><text class="month-label" x="460" y="271" text-anchor="middle">6월</text>
-                  <text class="month-label" x="530" y="271" text-anchor="middle">7월</text><text class="month-label" x="600" y="271" text-anchor="middle">8월</text><text class="month-label" x="670" y="271" text-anchor="middle">9월</text>
-                  <text class="month-label" x="740" y="271" text-anchor="middle">10월</text><text class="month-label" x="810" y="271" text-anchor="middle">11월</text><text class="month-label" x="880" y="271" text-anchor="middle">12월</text>
-                  <line class="grid-line" x1="80" y1="285" x2="920" y2="285"/>
-                  <text class="year-label" x="500" y="305" text-anchor="middle">2026년</text>
-                </g>
+<svg class="combo-chart" id="rentChart" viewBox="0 0 940 315" role="img" aria-labelledby="rentChartTitle rentChartDesc">
+                <title id="rentChartTitle">월별 렌트비용 추이</title>
+                <desc id="rentChartDesc">선택한 기준월까지 최근 12개월의 월 비용과 3개월 평균입니다.</desc>
               </svg>
             </div>
             <div class="combo-legend" aria-label="그래프 범례"><span><i></i>월 렌트비용</span><span><i class="line"></i>3개월 평균</span></div>
@@ -980,6 +949,99 @@
 
     function escapeHtml(value) {
       return String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    }
+
+    // 월별 비용 자료가 연결되기 전의 화면 확인용 데이터입니다. 단위: 만원.
+    const rentMonthlyData = {
+      '2025-08': 9700, '2025-09': 9820, '2025-10': 9980, '2025-11': 10120, '2025-12': 10260,
+      '2026-01': 10440, '2026-02': 10680, '2026-03': 10820, '2026-04': 10970, '2026-05': 11100,
+      '2026-06': 11280, '2026-07': 11390, '2026-08': 11480, '2026-09': 11240
+    };
+
+    function shiftRentMonth(month, offset) {
+      const [year, number] = month.split('-').map(Number);
+      const date = new Date(Date.UTC(year, number - 1 + offset, 1));
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function rentAverageForMonth(month) {
+      const readings = [0, -1, -2].map(offset => rentMonthlyData[shiftRentMonth(month, offset)]);
+      return readings.every(value => Number.isFinite(value)) ? readings.reduce((sum, value) => sum + value, 0) / 3 : null;
+    }
+
+    function formatRentAmount(value) {
+      if (value === null || !Number.isFinite(value)) return '—';
+      const amount = Math.round(value);
+      const hundredMillion = Math.floor(amount / 10000);
+      const remainder = amount % 10000;
+      return hundredMillion ? `${hundredMillion}억${remainder ? ` ${remainder.toLocaleString('ko-KR')}만원` : '원'}` : `${amount.toLocaleString('ko-KR')}만원`;
+    }
+
+    function renderRentChart() {
+      const reference = document.getElementById('rentReferenceMonth').value;
+      const chart = document.getElementById('rentChart');
+      const valid = /^\d{4}-(0[1-9]|1[0-2])$/.test(reference);
+      const average = valid ? rentAverageForMonth(reference) : null;
+      const monthLabel = valid ? `${reference.slice(0, 4)}년 ${Number(reference.slice(5))}월` : '기준월 선택 필요';
+      const label = `${monthLabel} · 3개월 평균`;
+      document.getElementById('rentAverageAmount').textContent = formatRentAmount(average);
+      document.getElementById('dashboardRentAverage').textContent = formatRentAmount(average);
+      document.getElementById('rentAverageLabel').textContent = label;
+      document.getElementById('dashboardRentAverageLabel').textContent = label;
+      document.getElementById('rentAverageNote').textContent = !valid ? '조회할 기준월을 선택해 주세요.' : average === null
+        ? '평균 계산에 필요한 기준월과 직전 2개월의 자료가 모두 있어야 합니다. 현재는 예시 데이터입니다.'
+        : `${shiftRentMonth(reference, -2).replace('-', '.')}~${reference.replace('-', '.')} 월 렌트비용 합계 ÷ 3 · 예시 데이터`;
+      if (!valid) {
+        document.getElementById('rentChartPeriod').textContent = '기준월을 선택해 주세요.';
+        chart.innerHTML = '<title id="rentChartTitle">기준월 선택 필요</title><desc id="rentChartDesc">기준월을 선택하면 최근 12개월을 표시합니다.</desc>';
+        return;
+      }
+
+      const months = Array.from({ length: 12 }, (_, index) => shiftRentMonth(reference, index - 11));
+      const values = months.map(month => rentMonthlyData[month] ?? null);
+      const averages = months.map(rentAverageForMonth);
+      document.getElementById('rentChartPeriod').textContent = `${months[0].replace('-', '.')}~${reference.replace('-', '.')} · 최근 12개월 · 부가세 포함 · 단위 만원`;
+      const known = [...values, ...averages].filter(value => value !== null);
+      const low = known.length ? Math.max(0, Math.floor(Math.min(...known) / 1000) * 1000) : 9000;
+      const high = known.length ? Math.max(low + 1000, Math.ceil(Math.max(...known) / 1000) * 1000) : 12000;
+      const yFor = value => 250 - (value - low) / (high - low) * 220;
+      let markup = `<title id="rentChartTitle">${monthLabel} 기준 최근 12개월 렌트비용</title><desc id="rentChartDesc">막대는 월 비용, 선은 각 월과 직전 2개월의 평균입니다. 자료가 없는 달은 미집계로 표시합니다.</desc>`;
+      for (let tick = 0; tick <= 6; tick++) {
+        const y = 30 + tick * 220 / 6;
+        const amount = high - tick * (high - low) / 6;
+        markup += `<line class="grid-line" x1="78" y1="${y}" x2="920" y2="${y}"/><text class="axis-label" x="67" y="${y + 4}" text-anchor="end">${Math.round(amount).toLocaleString('ko-KR')}</text>`;
+      }
+      months.forEach((month, index) => {
+        const x = 110 + index * 70;
+        const value = values[index];
+        markup += value === null ? `<text class="future-month" x="${x}" y="235" text-anchor="middle">미집계</text>`
+          : `<rect class="rent-bar" x="${x - 11}" y="${yFor(value)}" width="22" height="${250 - yFor(value)}" rx="4"><title>${month.replace('-', '.')} · 월 렌트비용 ${formatRentAmount(value)}</title></rect>`;
+        markup += `<text class="month-label" x="${x}" y="271" text-anchor="middle">${Number(month.slice(5))}월</text>`;
+      });
+      let points = [];
+      const flushLine = () => {
+        if (points.length > 1) markup += `<polyline class="average-line" points="${points.join(' ')}"/>`;
+        points = [];
+      };
+      averages.forEach((value, index) => {
+        if (value === null) { flushLine(); return; }
+        points.push(`${110 + index * 70},${yFor(value)}`);
+      });
+      flushLine();
+      averages.forEach((value, index) => {
+        if (value !== null) markup += `<circle class="average-dot" cx="${110 + index * 70}" cy="${yFor(value)}" r="${index === 11 ? 4.4 : 3.8}"><title>${months[index].replace('-', '.')} · 3개월 평균 ${formatRentAmount(value)}</title></circle>`;
+      });
+      const years = [];
+      months.forEach((month, index) => {
+        const year = month.slice(0, 4);
+        if (!years.length || years[years.length - 1].year !== year) years.push({ year, start: index, end: index });
+        else years[years.length - 1].end = index;
+      });
+      years.forEach(group => {
+        const start = 80 + group.start * 70, end = 150 + group.end * 70;
+        markup += `<line class="grid-line" x1="${start}" y1="285" x2="${end}" y2="285"/><text class="year-label" x="${(start + end) / 2}" y="305" text-anchor="middle">${group.year}년</text>`;
+      });
+      chart.innerHTML = markup;
     }
 
     function initials(name) {
@@ -1694,6 +1756,7 @@
 
     document.getElementById('usageMonth').addEventListener('change', renderDriving);
     document.getElementById('drivingSearch').addEventListener('input', renderDriving);
+    document.getElementById('rentReferenceMonth').addEventListener('change', renderRentChart);
 
     document.getElementById('reportButton').addEventListener('click', () => showToast('보고서 다운로드 기능은 데이터 연결 단계에서 추가할 예정입니다.'));
     document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보'));
@@ -1708,6 +1771,7 @@
     refreshContractFilters();
     renderContracts();
     renderDriving();
+    renderRentChart();
   </script>
 </body>
 </html>
