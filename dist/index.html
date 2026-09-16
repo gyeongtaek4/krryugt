@@ -213,12 +213,12 @@
     .combo-chart .grid-line { stroke: var(--line); stroke-width: 1; }
     .combo-chart .axis-label, .combo-chart .month-label { fill: var(--grey); font-family: inherit; font-size: 11px; }
     .combo-chart .year-label { fill: var(--ink-soft); font-family: inherit; font-size: 11px; font-weight: 700; }
-    .combo-chart .rent-bar { fill: var(--brand-soft); stroke: var(--brand); stroke-width: .7; opacity: .82; }
+    .combo-chart .rent-bar { fill: var(--brand-soft); stroke: none; opacity: .76; }
     .combo-chart .average-line { fill: none; stroke: var(--brand); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
     .combo-chart .average-dot { fill: var(--white); stroke: var(--brand); stroke-width: 2.2; }
     .combo-legend { display: flex; justify-content: center; gap: 22px; margin-top: 8px; color: var(--ink-soft); font-size: .75rem; }
     .combo-legend span { display: inline-flex; align-items: center; gap: 7px; }
-    .combo-legend i { width: 22px; height: 9px; border: 1px solid var(--brand); background: var(--brand-soft); opacity: .82; }
+    .combo-legend i { width: 22px; height: 9px; border: 0; border-radius: 3px; background: var(--brand-soft); opacity: .76; }
     .combo-legend i.line { height: 0; border: 0; border-top: 3px solid var(--brand); background: transparent; opacity: 1; }
 
     .cost-panel { display: flex; flex-direction: column; }
@@ -514,18 +514,18 @@
                   <text class="axis-label" x="67" y="254" text-anchor="end">9,000</text>
                 </g>
                 <g>
-                  <rect class="rent-bar" x="94" y="178.1" width="32" height="71.9" rx="3"><title>2025년 10월 9,980만원</title></rect>
-                  <rect class="rent-bar" x="164" y="167.9" width="32" height="82.1" rx="3"><title>2025년 11월 1억 120만원</title></rect>
-                  <rect class="rent-bar" x="234" y="157.6" width="32" height="92.4" rx="3"><title>2025년 12월 1억 260만원</title></rect>
-                  <rect class="rent-bar" x="304" y="144.4" width="32" height="105.6" rx="3"><title>2026년 1월 1억 440만원</title></rect>
-                  <rect class="rent-bar" x="374" y="126.8" width="32" height="123.2" rx="3"><title>2026년 2월 1억 680만원</title></rect>
-                  <rect class="rent-bar" x="444" y="116.5" width="32" height="133.5" rx="3"><title>2026년 3월 1억 820만원</title></rect>
-                  <rect class="rent-bar" x="514" y="105.5" width="32" height="144.5" rx="3"><title>2026년 4월 1억 970만원</title></rect>
-                  <rect class="rent-bar" x="584" y="96" width="32" height="154" rx="3"><title>2026년 5월 1억 1,100만원</title></rect>
-                  <rect class="rent-bar" x="654" y="82.8" width="32" height="167.2" rx="3"><title>2026년 6월 1억 1,280만원</title></rect>
-                  <rect class="rent-bar" x="724" y="74.7" width="32" height="175.3" rx="3"><title>2026년 7월 1억 1,390만원</title></rect>
-                  <rect class="rent-bar" x="794" y="68.1" width="32" height="181.9" rx="3"><title>2026년 8월 1억 1,480만원</title></rect>
-                  <rect class="rent-bar" x="864" y="85.7" width="32" height="164.3" rx="3"><title>2026년 9월 1억 1,240만원</title></rect>
+                  <rect class="rent-bar" x="99" y="178.1" width="22" height="71.9" rx="4"><title>2025년 10월 9,980만원</title></rect>
+                  <rect class="rent-bar" x="169" y="167.9" width="22" height="82.1" rx="4"><title>2025년 11월 1억 120만원</title></rect>
+                  <rect class="rent-bar" x="239" y="157.6" width="22" height="92.4" rx="4"><title>2025년 12월 1억 260만원</title></rect>
+                  <rect class="rent-bar" x="309" y="144.4" width="22" height="105.6" rx="4"><title>2026년 1월 1억 440만원</title></rect>
+                  <rect class="rent-bar" x="379" y="126.8" width="22" height="123.2" rx="4"><title>2026년 2월 1억 680만원</title></rect>
+                  <rect class="rent-bar" x="449" y="116.5" width="22" height="133.5" rx="4"><title>2026년 3월 1억 820만원</title></rect>
+                  <rect class="rent-bar" x="519" y="105.5" width="22" height="144.5" rx="4"><title>2026년 4월 1억 970만원</title></rect>
+                  <rect class="rent-bar" x="589" y="96" width="22" height="154" rx="4"><title>2026년 5월 1억 1,100만원</title></rect>
+                  <rect class="rent-bar" x="659" y="82.8" width="22" height="167.2" rx="4"><title>2026년 6월 1억 1,280만원</title></rect>
+                  <rect class="rent-bar" x="729" y="74.7" width="22" height="175.3" rx="4"><title>2026년 7월 1억 1,390만원</title></rect>
+                  <rect class="rent-bar" x="799" y="68.1" width="22" height="181.9" rx="4"><title>2026년 8월 1억 1,480만원</title></rect>
+                  <rect class="rent-bar" x="869" y="85.7" width="22" height="164.3" rx="4"><title>2026년 9월 1억 1,240만원</title></rect>
                 </g>
                 <polyline class="average-line" points="110,178.1 180,173 250,167.9 320,156.6 390,142.9 460,129.2 530,116.3 600,106.8 670,94.4 740,84.5 810,76 880,76.2"/>
                 <g aria-hidden="true"><circle class="average-dot" cx="110" cy="178.1" r="3.8"/><circle class="average-dot" cx="180" cy="173" r="3.8"/><circle class="average-dot" cx="250" cy="167.9" r="3.8"/><circle class="average-dot" cx="320" cy="156.6" r="3.8"/><circle class="average-dot" cx="390" cy="142.9" r="3.8"/><circle class="average-dot" cx="460" cy="129.2" r="3.8"/><circle class="average-dot" cx="530" cy="116.3" r="3.8"/><circle class="average-dot" cx="600" cy="106.8" r="3.8"/><circle class="average-dot" cx="670" cy="94.4" r="3.8"/><circle class="average-dot" cx="740" cy="84.5" r="3.8"/><circle class="average-dot" cx="810" cy="76" r="3.8"/><circle class="average-dot" cx="880" cy="76.2" r="4.4"/></g>
