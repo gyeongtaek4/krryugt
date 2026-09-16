@@ -509,8 +509,8 @@
           </article>
           <article class="metric-card">
             <div class="metric-top"><span class="metric-label">렌트 계약금액</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span></div>
-            <label class="contract-amount-field"><input id="dashboardContractAmount" type="number" min="0" step="1" inputmode="numeric" placeholder="금액 입력" aria-label="렌트 계약금액 (원)"><span>원</span></label>
-            <span class="metric-meta">계약금액을 직접 입력하세요.</span>
+            <p class="metric-value" id="dashboardContractAmount" aria-live="polite">—</p>
+            <span class="metric-meta">차량계약정보 전체 월 렌탈료 합계</span>
           </article>
         </section>
 
@@ -1225,6 +1225,7 @@
         </tr>`;
       }).join('') : '<tr><td class="empty-table" colspan="11">조건에 맞는 계약정보가 없습니다.</td></tr>';
       const totalFee = contractData.reduce((sum, row) => sum + rentalNumber(row['렌탈료']), 0);
+      document.getElementById('dashboardContractAmount').textContent = `${totalFee.toLocaleString('ko-KR')}원`;
       const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 12; }).length;
       document.getElementById('contractRecordCount').textContent = `${filtered.length}건`;
       document.getElementById('totalContracts').textContent = `${contractData.length}대`;
