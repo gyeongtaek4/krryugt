@@ -298,6 +298,13 @@
     .required-columns li { padding: 5px 9px; border-radius: 8px; color: var(--brand-dark); background: var(--brand-wash); font-size: .7rem; font-weight: 750; }
     .upload-error { display: none; margin: -7px 0 15px; padding: 10px 12px; border-radius: 10px; color: #b64e4e; background: #fff0f0; font-size: .75rem; }
     .upload-error.show { display: block; }
+    .money { color: var(--ink); font-weight: 800; }
+    .contract-period { line-height: 1.35; }
+    .contract-period strong { display: block; font-size: .8rem; }
+    .contract-period span { color: var(--grey); font-size: .7rem; }
+    .remaining-badge { display: inline-flex; margin-top: 4px; padding: 3px 7px; border-radius: 7px; color: var(--brand-dark); background: var(--brand-wash); font-size: .68rem; font-weight: 800; }
+    .remaining-badge.soon { color: #b2741f; background: #fff6e7; }
+    .remaining-badge.urgent { color: #bb5555; background: #fff0f0; }
 
     .modal-backdrop { position: fixed; inset: 0; z-index: 60; padding: 20px; display: none; place-items: center; background: rgba(18, 33, 30, .42); backdrop-filter: blur(4px); }
     .modal-backdrop.open { display: grid; }
@@ -383,7 +390,7 @@
       <ul class="nav-list">
         <li><button class="nav-button active" data-page="대시보드"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>대시보드</button></li>
         <li><button class="nav-button" data-page="차량 현황"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>차량 현황</button></li>
-        <li><button class="nav-button" data-page="계약 · 비용 분석"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>계약 · 비용 분석</button></li>
+        <li><button class="nav-button" data-page="차량계약정보"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>차량계약정보</button></li>
         <li><button class="nav-button" data-page="경영 보고서"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>경영 보고서</button></li>
       </ul>
 
@@ -552,6 +559,51 @@
           <div class="source-strip"><span>표시된 자료: <strong id="sourceFileName">예시 데이터</strong></span><span id="sourceUpdated">Excel 업로드 전 · 화면 확인용</span></div>
         </section>
       </div>
+
+      <div class="content view" id="contractsView">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">렌탈 계약 · 기간 정보</p>
+            <h1>차량계약정보</h1>
+            <p class="heading-copy">차량별 렌탈료와 계약기간, 남은 계약기간을 확인합니다.</p>
+          </div>
+          <div class="heading-actions">
+            <button class="button primary" id="contractUploadButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>계약정보 Excel 업로드</button>
+          </div>
+        </section>
+
+        <section class="vehicle-summary" aria-label="계약정보 요약">
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>전체 계약 차량</span><strong id="totalContracts">10대</strong></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>월 렌탈료 합계</span><strong id="totalRentalFee">980만원</strong></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14v12H5V8Zm3-4v6m8-6v6M5 12h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>12개월 내 계약 만료</span><strong id="contractsExpiring">3대</strong></div></article>
+        </section>
+
+        <section class="upload-guide">
+          <div class="upload-guide-copy"><span class="upload-guide-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><strong>Excel 자료를 올리면 계약정보가 자동으로 바뀝니다.</strong><p>계약시작과 계약종료는 2024-01처럼 년-월 형식으로 입력하면 총 기간과 남은 기간을 자동 계산합니다.</p></div></div>
+          <button class="button" id="contractGuideUploadButton">파일 선택</button>
+        </section>
+
+        <section class="panel vehicle-panel">
+          <div class="vehicle-toolbar">
+            <div class="vehicle-title-wrap"><h2>차량 계약 목록</h2><span class="record-count" id="contractRecordCount">10건</span></div>
+            <label class="search-box"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="contractSearch" placeholder="차량번호, 차종, 담당자 검색" aria-label="차량계약정보 검색"></label>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">조직 필터</span>
+            <select class="filter-select" id="contractHeadquartersFilter" aria-label="계약 본부 선택"><option value="">전체 본부</option></select>
+            <select class="filter-select" id="contractDivisionFilter" aria-label="계약 부 선택"><option value="">전체 부</option></select>
+            <select class="filter-select" id="contractTeamFilter" aria-label="계약 팀 선택"><option value="">전체 팀</option></select>
+            <button class="reset-filter" id="resetContractFilters">필터 초기화</button>
+          </div>
+          <div class="table-wrap">
+            <table class="vehicle-table">
+              <thead><tr><th>본부</th><th>부</th><th>팀</th><th>담당자(정)</th><th>담당자(부)</th><th>차종</th><th>차량번호</th><th>월 렌탈료</th><th>계약기간</th><th>총 계약기간 / 남은 기간</th></tr></thead>
+              <tbody id="contractTableBody"></tbody>
+            </table>
+          </div>
+          <div class="source-strip"><span>표시된 자료: <strong id="contractSourceFileName">예시 데이터</strong></span><span id="contractSourceUpdated">Excel 업로드 전 · 화면 확인용</span></div>
+        </section>
+      </div>
     </main>
   </div>
 
@@ -567,6 +619,21 @@
       <div class="upload-error" id="uploadError"></div>
       <ul class="required-columns" aria-label="필수 열"><li>본부</li><li>부</li><li>팀</li><li>담당자(정)</li><li>담당자(부)</li><li>차량번호</li><li>차종</li></ul>
       <div class="modal-actions"><button class="button" id="cancelUpload">취소</button><button class="button primary" id="confirmUpload">자료 확인하기</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="contractUploadModal" role="dialog" aria-modal="true" aria-labelledby="contractUploadTitle">
+    <div class="modal">
+      <div class="modal-header"><div><h2 id="contractUploadTitle">차량계약정보 업로드</h2><p>차량 계약 정보가 들어 있는 Excel 또는 CSV 파일을 선택해 주세요.</p></div><button class="close-button" id="closeContractModal" aria-label="닫기">✕</button></div>
+      <label class="drop-zone" for="contractFileInput">
+        <span class="drop-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <strong id="contractFileLabel">파일을 끌어놓거나 눌러서 선택</strong>
+        <span>지원 형식: .xlsx, .xls, .csv · 최대 20MB</span>
+      </label>
+      <input type="file" id="contractFileInput" accept=".xlsx,.xls,.csv">
+      <div class="upload-error" id="contractUploadError"></div>
+      <ul class="required-columns" aria-label="계약정보 필수 열"><li>본부</li><li>부</li><li>팀</li><li>담당자(정)</li><li>담당자(부)</li><li>차종</li><li>차량번호</li><li>렌탈료</li><li>계약시작</li><li>계약종료</li></ul>
+      <div class="modal-actions"><button class="button" id="cancelContractUpload">취소</button><button class="button primary" id="confirmContractUpload">자료 확인하기</button></div>
     </div>
   </div>
 
@@ -597,6 +664,22 @@
       { '본부':'물류운영본부', '부':'운송관리부', '팀':'수도권운영팀', '담당자(정)':'조성민', '담당자(부)':'배유나', '차량번호':'94하 5127', '차종':'스타리아' },
       { '본부':'물류운영본부', '부':'운송관리부', '팀':'지방운영팀', '담당자(정)':'임태호', '담당자(부)':'문가영', '차량번호':'11호 2486', '차종':'봉고3' }
     ];
+    const contractModal = document.getElementById('contractUploadModal');
+    const contractFileInput = document.getElementById('contractFileInput');
+    const contractUploadError = document.getElementById('contractUploadError');
+    const contractColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차종', '차량번호', '렌탈료', '계약시작', '계약종료'];
+    let contractData = [
+      { '본부':'영업본부','부':'국내영업부','팀':'영업1팀','담당자(정)':'김민준','담당자(부)':'이서연','차종':'그랜저','차량번호':'12가 3456','렌탈료':'1150000','계약시작':'2024-01','계약종료':'2027-12' },
+      { '본부':'영업본부','부':'국내영업부','팀':'영업1팀','담당자(정)':'김민준','담당자(부)':'이서연','차종':'쏘렌토','차량번호':'34나 7890','렌탈료':'1080000','계약시작':'2023-11','계약종료':'2026-10' },
+      { '본부':'영업본부','부':'국내영업부','팀':'영업2팀','담당자(정)':'박지훈','담당자(부)':'최유진','차종':'K5','차량번호':'45다 2211','렌탈료':'820000','계약시작':'2025-03','계약종료':'2029-02' },
+      { '본부':'영업본부','부':'해외영업부','팀':'글로벌영업팀','담당자(정)':'정하늘','담당자(부)':'윤서준','차종':'투싼','차량번호':'18라 9034','렌탈료':'930000','계약시작':'2024-07','계약종료':'2027-06' },
+      { '본부':'기술지원본부','부':'고객지원부','팀':'현장지원1팀','담당자(정)':'최도윤','담당자(부)':'김예은','차종':'아반떼','차량번호':'56다 1122','렌탈료':'690000','계약시작':'2024-12','계약종료':'2027-11' },
+      { '본부':'기술지원본부','부':'고객지원부','팀':'현장지원1팀','담당자(정)':'최도윤','담당자(부)':'김예은','차종':'카니발','차량번호':'67마 4589','렌탈료':'1260000','계약시작':'2023-10','계약종료':'2026-09' },
+      { '본부':'기술지원본부','부':'품질관리부','팀':'품질보증팀','담당자(정)':'장현우','담당자(부)':'오수빈','차종':'스포티지','차량번호':'23거 7741','렌탈료':'910000','계약시작':'2025-01','계약종료':'2028-12' },
+      { '본부':'경영지원본부','부':'총무부','팀':'자산관리팀','담당자(정)':'이준호','담당자(부)':'한지민','차종':'그랜저','차량번호':'31도 8265','렌탈료':'1170000','계약시작':'2024-05','계약종료':'2028-04' },
+      { '본부':'경영지원본부','부':'재무부','팀':'회계팀','담당자(정)':'신지우','담당자(부)':'강민서','차종':'쏘나타','차량번호':'89주 6402','렌탈료':'860000','계약시작':'2023-12','계약종료':'2026-11' },
+      { '본부':'물류운영본부','부':'운송관리부','팀':'수도권운영팀','담당자(정)':'조성민','담당자(부)':'배유나','차종':'스타리아','차량번호':'94하 5127','렌탈료':'1210000','계약시작':'2025-06','계약종료':'2029-05' }
+    ];
 
     function showToast(message) {
       toastMessage.textContent = message;
@@ -622,11 +705,23 @@
 
     function showView(page) {
       const isVehicles = page === '차량 현황';
-      document.getElementById('dashboardView').classList.toggle('active', !isVehicles);
+      const isContracts = page === '차량계약정보';
+      document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts);
       document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
-      document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : '대시보드';
+      document.getElementById('contractsView').classList.toggle('active', isContracts);
+      document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : '대시보드';
       document.querySelectorAll('.nav-button').forEach(item => item.classList.toggle('active', item.dataset.page === page));
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleContractModal(open) {
+      contractModal.classList.toggle('open', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+      if (open) {
+        contractUploadError.classList.remove('show');
+        contractUploadError.textContent = '';
+        document.getElementById('closeContractModal').focus();
+      }
     }
 
     function escapeHtml(value) {
@@ -680,6 +775,118 @@
       document.getElementById('totalVehicles').textContent = `${vehicleData.length}대`;
       document.getElementById('totalHeadquarters').textContent = `${uniqueValues('본부').length}개`;
       document.getElementById('totalManagers').textContent = `${uniqueValues('담당자(정)').length}명`;
+    }
+
+    function parseYearMonth(value) {
+      const match = String(value || '').trim().match(/(\d{4})\D*(\d{1,2})/);
+      if (!match) return null;
+      const year = Number(match[1]), month = Number(match[2]);
+      return month >= 1 && month <= 12 ? { year, month } : null;
+    }
+
+    function normalizeYearMonth(value) {
+      const parsed = parseYearMonth(value);
+      return parsed ? `${parsed.year}-${String(parsed.month).padStart(2, '0')}` : String(value || '').trim();
+    }
+
+    function monthSpan(start, end) {
+      const from = parseYearMonth(start), to = parseYearMonth(end);
+      if (!from || !to) return 0;
+      return Math.max(0, (to.year - from.year) * 12 + to.month - from.month + 1);
+    }
+
+    function remainingMonths(end) {
+      const to = parseYearMonth(end), now = new Date();
+      if (!to) return 0;
+      return Math.max(0, (to.year - now.getFullYear()) * 12 + to.month - (now.getMonth() + 1) + 1);
+    }
+
+    function formatYearMonth(value) {
+      const parsed = parseYearMonth(value);
+      return parsed ? `${parsed.year}.${String(parsed.month).padStart(2, '0')}` : value;
+    }
+
+    function rentalNumber(value) {
+      return Number(String(value || '').replace(/[^0-9.-]/g, '')) || 0;
+    }
+
+    function contractUniqueValues(key, rows = contractData) {
+      return [...new Set(rows.map(row => row[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+    }
+
+    function refreshContractFilters() {
+      const headquarters = document.getElementById('contractHeadquartersFilter');
+      const division = document.getElementById('contractDivisionFilter');
+      const team = document.getElementById('contractTeamFilter');
+      setSelectOptions(headquarters, '본부', contractUniqueValues('본부'));
+      const divisionRows = headquarters.value ? contractData.filter(row => row['본부'] === headquarters.value) : contractData;
+      setSelectOptions(division, '부', contractUniqueValues('부', divisionRows));
+      const teamRows = divisionRows.filter(row => !division.value || row['부'] === division.value);
+      setSelectOptions(team, '팀', contractUniqueValues('팀', teamRows));
+    }
+
+    function renderContracts() {
+      const keyword = document.getElementById('contractSearch').value.trim().toLowerCase();
+      const headquarters = document.getElementById('contractHeadquartersFilter').value;
+      const division = document.getElementById('contractDivisionFilter').value;
+      const team = document.getElementById('contractTeamFilter').value;
+      const filtered = contractData.filter(row => {
+        const matchesFilter = (!headquarters || row['본부'] === headquarters) && (!division || row['부'] === division) && (!team || row['팀'] === team);
+        const searchable = contractColumns.map(key => row[key]).join(' ').toLowerCase();
+        return matchesFilter && (!keyword || searchable.includes(keyword));
+      });
+      const body = document.getElementById('contractTableBody');
+      body.innerHTML = filtered.length ? filtered.map(row => {
+        const total = monthSpan(row['계약시작'], row['계약종료']);
+        const remaining = remainingMonths(row['계약종료']);
+        const stateClass = remaining <= 3 ? 'urgent' : remaining <= 12 ? 'soon' : '';
+        const remainingText = remaining ? `${remaining}개월 남음` : '계약 종료';
+        return `<tr>
+          <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
+          <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
+          <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
+          <td>${escapeHtml(row['차종'])}</td><td class="plate">${escapeHtml(row['차량번호'])}</td><td class="money">${rentalNumber(row['렌탈료']).toLocaleString('ko-KR')}원</td>
+          <td><div class="contract-period"><strong>${escapeHtml(formatYearMonth(row['계약시작']))} ~ ${escapeHtml(formatYearMonth(row['계약종료']))}</strong></div></td>
+          <td><div class="contract-period"><strong>총 ${total}개월</strong><span class="remaining-badge ${stateClass}">${remainingText}</span></div></td>
+        </tr>`;
+      }).join('') : '<tr><td class="empty-table" colspan="10">조건에 맞는 계약정보가 없습니다.</td></tr>';
+      const totalFee = contractData.reduce((sum, row) => sum + rentalNumber(row['렌탈료']), 0);
+      const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 12; }).length;
+      document.getElementById('contractRecordCount').textContent = `${filtered.length}건`;
+      document.getElementById('totalContracts').textContent = `${contractData.length}대`;
+      document.getElementById('totalRentalFee').textContent = `${Math.round(totalFee / 10000).toLocaleString('ko-KR')}만원`;
+      document.getElementById('contractsExpiring').textContent = `${expiring}대`;
+    }
+
+    function showContractUploadError(message) {
+      contractUploadError.textContent = message;
+      contractUploadError.classList.add('show');
+    }
+
+    async function readContractFile(file) {
+      const extension = file.name.split('.').pop().toLowerCase();
+      if (file.size > 20 * 1024 * 1024) throw new Error('파일 크기는 20MB 이하여야 합니다.');
+      let rows;
+      if (window.XLSX) {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: 'array' });
+        rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '', raw: false });
+      } else if (extension === 'csv') rows = parseCsv(await file.text());
+      else throw new Error('Excel 읽기 기능을 불러오지 못했습니다. 잠시 후 다시 시도하거나 CSV 파일을 사용해 주세요.');
+      if (!rows.length) throw new Error('파일에 표시할 계약정보가 없습니다.');
+      const normalize = value => String(value).replace(/\s/g, '');
+      const headerMap = Object.keys(rows[0]).reduce((map, key) => (map[normalize(key)] = key, map), {});
+      const missing = contractColumns.filter(column => !headerMap[normalize(column)]);
+      if (missing.length) throw new Error(`필수 열이 없습니다: ${missing.join(', ')}`);
+      const cleanRows = rows.map(row => Object.fromEntries(contractColumns.map(column => [column, String(row[headerMap[normalize(column)]] ?? '').trim()])))
+        .filter(row => contractColumns.some(column => row[column]));
+      cleanRows.forEach((row, index) => {
+        row['계약시작'] = normalizeYearMonth(row['계약시작']);
+        row['계약종료'] = normalizeYearMonth(row['계약종료']);
+        if (!parseYearMonth(row['계약시작']) || !parseYearMonth(row['계약종료'])) throw new Error(`${index + 2}행의 계약시작 또는 계약종료 형식을 확인해 주세요.`);
+      });
+      if (!cleanRows.length) throw new Error('필수 열 아래에 입력된 데이터가 없습니다.');
+      return cleanRows;
     }
 
     function showUploadError(message) {
@@ -736,12 +943,24 @@
     document.getElementById('closeModal').addEventListener('click', () => toggleModal(false));
     document.getElementById('cancelUpload').addEventListener('click', () => toggleModal(false));
     modal.addEventListener('click', event => { if (event.target === modal) toggleModal(false); });
+    ['contractUploadButton', 'contractGuideUploadButton'].forEach(id => document.getElementById(id).addEventListener('click', () => toggleContractModal(true)));
+    document.getElementById('closeContractModal').addEventListener('click', () => toggleContractModal(false));
+    document.getElementById('cancelContractUpload').addEventListener('click', () => toggleContractModal(false));
+    contractModal.addEventListener('click', event => { if (event.target === contractModal) toggleContractModal(false); });
 
     fileInput.addEventListener('change', event => {
       const file = event.target.files[0];
       if (file) {
         document.getElementById('fileLabel').textContent = file.name;
         uploadError.classList.remove('show');
+      }
+    });
+
+    contractFileInput.addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (file) {
+        document.getElementById('contractFileLabel').textContent = file.name;
+        contractUploadError.classList.remove('show');
       }
     });
 
@@ -770,6 +989,31 @@
       }
     });
 
+    document.getElementById('confirmContractUpload').addEventListener('click', async () => {
+      const file = contractFileInput.files[0];
+      if (!file) { showContractUploadError('먼저 업로드할 파일을 선택해 주세요.'); return; }
+      const button = document.getElementById('confirmContractUpload');
+      button.disabled = true;
+      button.textContent = '자료 확인 중...';
+      try {
+        contractData = await readContractFile(file);
+        document.getElementById('contractSearch').value = '';
+        ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'].forEach(id => document.getElementById(id).value = '');
+        refreshContractFilters();
+        renderContracts();
+        document.getElementById('contractSourceFileName').textContent = file.name;
+        document.getElementById('contractSourceUpdated').textContent = `${new Date().toLocaleString('ko-KR')} 반영`;
+        toggleContractModal(false);
+        showView('차량계약정보');
+        showToast(`${contractData.length}건의 차량계약정보를 불러왔습니다.`);
+      } catch (error) {
+        showContractUploadError(error.message || '파일을 읽는 중 문제가 발생했습니다.');
+      } finally {
+        button.disabled = false;
+        button.textContent = '자료 확인하기';
+      }
+    });
+
     document.querySelectorAll('.period-tab').forEach(button => {
       button.addEventListener('click', () => {
         document.querySelectorAll('.period-tab').forEach(item => item.classList.remove('active'));
@@ -780,7 +1024,7 @@
 
     document.querySelectorAll('.nav-button').forEach(button => {
       button.addEventListener('click', () => {
-        if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황') showView(button.dataset.page);
+        if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보') showView(button.dataset.page);
         else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
         toggleSidebar(false);
       });
@@ -796,16 +1040,28 @@
       refreshFilters(); renderVehicles();
     });
 
+    document.getElementById('contractSearch').addEventListener('input', renderContracts);
+    document.getElementById('contractHeadquartersFilter').addEventListener('change', () => { document.getElementById('contractDivisionFilter').value = ''; document.getElementById('contractTeamFilter').value = ''; refreshContractFilters(); renderContracts(); });
+    document.getElementById('contractDivisionFilter').addEventListener('change', () => { document.getElementById('contractTeamFilter').value = ''; refreshContractFilters(); renderContracts(); });
+    document.getElementById('contractTeamFilter').addEventListener('change', renderContracts);
+    document.getElementById('resetContractFilters').addEventListener('click', () => {
+      document.getElementById('contractSearch').value = '';
+      ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'].forEach(id => document.getElementById(id).value = '');
+      refreshContractFilters(); renderContracts();
+    });
+
     document.getElementById('reportButton').addEventListener('click', () => showToast('보고서 다운로드 기능은 데이터 연결 단계에서 추가할 예정입니다.'));
     document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량 현황'));
     document.getElementById('noticeButton').addEventListener('click', () => showToast('확인이 필요한 계약 만료 차량이 3대 있습니다.'));
 
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') { toggleModal(false); toggleSidebar(false); }
+      if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); toggleSidebar(false); }
     });
 
     refreshFilters();
     renderVehicles();
+    refreshContractFilters();
+    renderContracts();
   </script>
 </body>
 </html>
