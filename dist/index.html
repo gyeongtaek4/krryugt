@@ -253,6 +253,52 @@
     .data-note strong { display: block; font-size: .76rem; }
     .data-note p { margin: 3px 0 0; color: var(--grey); font-size: .7rem; }
 
+    .view { display: none; }
+    .view.active { display: block; }
+    .vehicle-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .summary-card { padding: 20px 22px; display: flex; align-items: center; gap: 15px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); }
+    .summary-card .metric-icon { flex: 0 0 auto; width: 42px; height: 42px; }
+    .summary-copy span { display: block; color: var(--ink-soft); font-size: .82rem; }
+    .summary-copy strong { display: block; margin-top: 2px; font-size: 1.35rem; letter-spacing: -.035em; }
+
+    .upload-guide { margin-bottom: 16px; padding: 19px 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border: 1px solid #cce8e1; border-radius: var(--radius); background: linear-gradient(135deg, var(--brand-wash), #f8fcfb); }
+    .upload-guide-copy { display: flex; align-items: center; gap: 14px; }
+    .upload-guide-icon { width: 42px; height: 42px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; color: var(--white); background: var(--brand); }
+    .upload-guide strong { display: block; font-size: .9rem; }
+    .upload-guide p { margin: 3px 0 0; color: var(--ink-soft); font-size: .78rem; }
+
+    .vehicle-panel { padding: 0; overflow: hidden; }
+    .vehicle-toolbar { padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--line); }
+    .vehicle-title-wrap { display: flex; align-items: baseline; gap: 8px; }
+    .vehicle-title-wrap h2 { margin: 0; font-size: 1rem; }
+    .record-count { color: var(--brand); font-size: .78rem; font-weight: 800; }
+    .search-box { width: min(330px, 100%); height: 42px; padding: 0 13px; display: flex; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
+    .search-box:focus-within { border-color: var(--brand-soft); background: var(--white); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
+    .search-box svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--grey); }
+    .search-box input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: .84rem; }
+    .search-box input::placeholder { color: var(--grey); }
+    .filter-row { padding: 14px 22px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--line); background: #fbfcfc; }
+    .filter-label { margin-right: 3px; color: var(--ink-soft); font-size: .78rem; font-weight: 750; }
+    .filter-select { min-width: 142px; height: 39px; padding: 0 34px 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink-soft); background: var(--white); font-size: .8rem; outline: 0; }
+    .filter-select:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .07); }
+    .reset-filter { margin-left: auto; border: 0; color: var(--brand-dark); background: transparent; font-size: .76rem; font-weight: 750; cursor: pointer; }
+    .reset-filter:hover { text-decoration: underline; }
+
+    .vehicle-table th { padding: 13px 16px; background: var(--white); font-size: .75rem; }
+    .vehicle-table td { padding: 15px 16px; font-size: .82rem; }
+    .vehicle-table tbody tr:hover { background: #f9fcfb; }
+    .vehicle-table .plate { color: var(--brand-dark); font-weight: 800; }
+    .person { display: flex; align-items: center; gap: 8px; }
+    .person-avatar { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 9px; color: var(--brand-dark); background: var(--brand-wash); font-size: .69rem; font-weight: 800; }
+    .person.secondary .person-avatar { color: #6b7573; background: #f0f2f2; }
+    .empty-table { padding: 58px 20px !important; color: var(--grey); text-align: center; }
+    .source-strip { padding: 13px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--grey); border-top: 1px solid var(--line); background: #fbfcfc; font-size: .73rem; }
+    .source-strip strong { color: var(--ink-soft); }
+    .required-columns { margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 7px; list-style: none; }
+    .required-columns li { padding: 5px 9px; border-radius: 8px; color: var(--brand-dark); background: var(--brand-wash); font-size: .7rem; font-weight: 750; }
+    .upload-error { display: none; margin: -7px 0 15px; padding: 10px 12px; border-radius: 10px; color: #b64e4e; background: #fff0f0; font-size: .75rem; }
+    .upload-error.show { display: block; }
+
     .modal-backdrop { position: fixed; inset: 0; z-index: 60; padding: 20px; display: none; place-items: center; background: rgba(18, 33, 30, .42); backdrop-filter: blur(4px); }
     .modal-backdrop.open { display: grid; }
     .modal { width: min(510px, 100%); padding: 25px; border-radius: 22px; background: var(--white); box-shadow: var(--shadow); animation: modal-in .2s ease-out; }
@@ -290,6 +336,12 @@
       .scrim { position: fixed; inset: 0; z-index: 20; background: rgba(18, 33, 30, .28); }
       .scrim.open { display: block; }
       .grid-main { grid-template-columns: 1fr; }
+      .vehicle-summary { grid-template-columns: 1fr; }
+      .vehicle-toolbar { align-items: stretch; flex-direction: column; }
+      .search-box { width: 100%; }
+      .filter-row { align-items: stretch; flex-wrap: wrap; }
+      .filter-label { width: 100%; }
+      .filter-select { flex: 1; min-width: 150px; }
     }
 
     @media (max-width: 650px) {
@@ -305,6 +357,11 @@
       .period-tabs { align-self: stretch; }
       .period-tab { flex: 1; }
       .button { padding-inline: 12px; }
+      .upload-guide { align-items: stretch; flex-direction: column; }
+      .upload-guide .button { width: 100%; }
+      .filter-select { width: 100%; flex-basis: 100%; }
+      .reset-filter { margin-left: 0; align-self: flex-start; }
+      .source-strip { align-items: flex-start; flex-direction: column; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -347,7 +404,7 @@
       <header class="topbar">
         <div style="display:flex; align-items:center; gap:12px">
           <button class="icon-button mobile-menu" id="menuButton" aria-label="메뉴 열기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-          <div class="breadcrumb">차량관리&nbsp;&nbsp;/&nbsp;&nbsp;<strong>대시보드</strong></div>
+          <div class="breadcrumb">차량관리&nbsp;&nbsp;/&nbsp;&nbsp;<strong id="breadcrumbCurrent">대시보드</strong></div>
         </div>
         <div class="top-actions">
           <button class="icon-button" aria-label="알림" id="noticeButton"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -356,7 +413,7 @@
         </div>
       </header>
 
-      <div class="content">
+      <div class="content view active" id="dashboardView">
         <section class="page-heading">
           <div>
             <p class="eyebrow">2026년 9월 현황</p>
@@ -452,37 +509,102 @@
           </article>
         </section>
       </div>
+
+      <div class="content view" id="vehiclesView">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">담당자 · 배정 정보</p>
+            <h1>차량현황</h1>
+            <p class="heading-copy">조직별 담당자와 배정 차량 정보를 한눈에 확인합니다.</p>
+          </div>
+          <div class="heading-actions">
+            <button class="button primary" id="vehicleUploadButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>담당자 Excel 업로드</button>
+          </div>
+        </section>
+
+        <section class="vehicle-summary" aria-label="차량현황 요약">
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>등록 차량</span><strong id="totalVehicles">12대</strong></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20h16M6 20V8l6-4 6 4v12M9 11h1m4 0h1m-6 4h1m4 0h1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>운영 본부</span><strong id="totalHeadquarters">4개</strong></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>주 담당자</span><strong id="totalManagers">9명</strong></div></article>
+        </section>
+
+        <section class="upload-guide">
+          <div class="upload-guide-copy"><span class="upload-guide-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><strong>Excel 자료를 올리면 차량현황이 자동으로 바뀝니다.</strong><p>첫 번째 행의 열 이름을 본부, 부, 팀, 담당자(정), 담당자(부), 차량번호, 차종으로 작성해 주세요.</p></div></div>
+          <button class="button" id="guideUploadButton">파일 선택</button>
+        </section>
+
+        <section class="panel vehicle-panel">
+          <div class="vehicle-toolbar">
+            <div class="vehicle-title-wrap"><h2>차량 담당자 목록</h2><span class="record-count" id="recordCount">12건</span></div>
+            <label class="search-box"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="vehicleSearch" placeholder="차량번호, 차종, 담당자 검색" aria-label="차량현황 검색"></label>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">조직 필터</span>
+            <select class="filter-select" id="headquartersFilter" aria-label="본부 선택"><option value="">전체 본부</option></select>
+            <select class="filter-select" id="divisionFilter" aria-label="부 선택"><option value="">전체 부</option></select>
+            <select class="filter-select" id="teamFilter" aria-label="팀 선택"><option value="">전체 팀</option></select>
+            <button class="reset-filter" id="resetFilters">필터 초기화</button>
+          </div>
+          <div class="table-wrap">
+            <table class="vehicle-table">
+              <thead><tr><th>본부</th><th>부</th><th>팀</th><th>담당자(정)</th><th>담당자(부)</th><th>차량번호</th><th>차종</th></tr></thead>
+              <tbody id="vehicleTableBody"></tbody>
+            </table>
+          </div>
+          <div class="source-strip"><span>표시된 자료: <strong id="sourceFileName">예시 데이터</strong></span><span id="sourceUpdated">Excel 업로드 전 · 화면 확인용</span></div>
+        </section>
+      </div>
     </main>
   </div>
 
   <div class="modal-backdrop" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
     <div class="modal">
-      <div class="modal-header"><div><h2 id="uploadTitle">렌터카 자료 업로드</h2><p>업체에서 받은 Excel 또는 CSV 파일을 선택해 주세요.</p></div><button class="close-button" id="closeModal" aria-label="닫기">✕</button></div>
+      <div class="modal-header"><div><h2 id="uploadTitle">담당자 자료 업로드</h2><p>차량 담당자 정보가 들어 있는 Excel 또는 CSV 파일을 선택해 주세요.</p></div><button class="close-button" id="closeModal" aria-label="닫기">✕</button></div>
       <label class="drop-zone" for="fileInput">
         <span class="drop-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <strong id="fileLabel">파일을 끌어놓거나 눌러서 선택</strong>
         <span>지원 형식: .xlsx, .xls, .csv · 최대 20MB</span>
       </label>
       <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+      <div class="upload-error" id="uploadError"></div>
+      <ul class="required-columns" aria-label="필수 열"><li>본부</li><li>부</li><li>팀</li><li>담당자(정)</li><li>담당자(부)</li><li>차량번호</li><li>차종</li></ul>
       <div class="modal-actions"><button class="button" id="cancelUpload">취소</button><button class="button primary" id="confirmUpload">자료 확인하기</button></div>
     </div>
   </div>
 
   <div class="toast" id="toast" role="status"><span class="toast-dot"></span><span id="toastMessage"></span></div>
 
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
     const sidebar = document.getElementById('sidebar');
     const scrim = document.getElementById('scrim');
     const modal = document.getElementById('uploadModal');
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toastMessage');
+    const uploadError = document.getElementById('uploadError');
+    const fileInput = document.getElementById('fileInput');
+    const requiredColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차량번호', '차종'];
     let toastTimer;
+    let vehicleData = [
+      { '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'김민준', '담당자(부)':'이서연', '차량번호':'12가 3456', '차종':'그랜저' },
+      { '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'김민준', '담당자(부)':'이서연', '차량번호':'34나 7890', '차종':'쏘렌토' },
+      { '본부':'영업본부', '부':'국내영업부', '팀':'영업2팀', '담당자(정)':'박지훈', '담당자(부)':'최유진', '차량번호':'45다 2211', '차종':'K5' },
+      { '본부':'영업본부', '부':'해외영업부', '팀':'글로벌영업팀', '담당자(정)':'정하늘', '담당자(부)':'윤서준', '차량번호':'18라 9034', '차종':'투싼' },
+      { '본부':'기술지원본부', '부':'고객지원부', '팀':'현장지원1팀', '담당자(정)':'최도윤', '담당자(부)':'김예은', '차량번호':'56다 1122', '차종':'아반떼' },
+      { '본부':'기술지원본부', '부':'고객지원부', '팀':'현장지원1팀', '담당자(정)':'최도윤', '담당자(부)':'김예은', '차량번호':'67마 4589', '차종':'카니발' },
+      { '본부':'기술지원본부', '부':'품질관리부', '팀':'품질보증팀', '담당자(정)':'장현우', '담당자(부)':'오수빈', '차량번호':'23거 7741', '차종':'스포티지' },
+      { '본부':'경영지원본부', '부':'총무부', '팀':'자산관리팀', '담당자(정)':'이준호', '담당자(부)':'한지민', '차량번호':'31도 8265', '차종':'그랜저' },
+      { '본부':'경영지원본부', '부':'총무부', '팀':'자산관리팀', '담당자(정)':'이준호', '담당자(부)':'한지민', '차량번호':'72오 3158', '차종':'K8' },
+      { '본부':'경영지원본부', '부':'재무부', '팀':'회계팀', '담당자(정)':'신지우', '담당자(부)':'강민서', '차량번호':'89주 6402', '차종':'쏘나타' },
+      { '본부':'물류운영본부', '부':'운송관리부', '팀':'수도권운영팀', '담당자(정)':'조성민', '담당자(부)':'배유나', '차량번호':'94하 5127', '차종':'스타리아' },
+      { '본부':'물류운영본부', '부':'운송관리부', '팀':'지방운영팀', '담당자(정)':'임태호', '담당자(부)':'문가영', '차량번호':'11호 2486', '차종':'봉고3' }
+    ];
 
     function showToast(message) {
       toastMessage.textContent = message;
       toast.classList.add('show');
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
     }
 
     function toggleSidebar(open) {
@@ -493,25 +615,161 @@
     function toggleModal(open) {
       modal.classList.toggle('open', open);
       document.body.style.overflow = open ? 'hidden' : '';
-      if (open) document.getElementById('closeModal').focus();
+      if (open) {
+        uploadError.classList.remove('show');
+        uploadError.textContent = '';
+        document.getElementById('closeModal').focus();
+      }
+    }
+
+    function showView(page) {
+      const isVehicles = page === '차량 현황';
+      document.getElementById('dashboardView').classList.toggle('active', !isVehicles);
+      document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
+      document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : '대시보드';
+      document.querySelectorAll('.nav-button').forEach(item => item.classList.toggle('active', item.dataset.page === page));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    }
+
+    function initials(name) {
+      const text = String(name || '-').trim();
+      return text === '-' ? '-' : text.slice(-2);
+    }
+
+    function uniqueValues(key, rows = vehicleData) {
+      return [...new Set(rows.map(row => row[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+    }
+
+    function setSelectOptions(select, label, values) {
+      const current = select.value;
+      select.innerHTML = `<option value="">전체 ${label}</option>` + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+      if (values.includes(current)) select.value = current;
+    }
+
+    function refreshFilters() {
+      const headquarters = document.getElementById('headquartersFilter');
+      const division = document.getElementById('divisionFilter');
+      const team = document.getElementById('teamFilter');
+      setSelectOptions(headquarters, '본부', uniqueValues('본부'));
+      const divisionRows = headquarters.value ? vehicleData.filter(row => row['본부'] === headquarters.value) : vehicleData;
+      setSelectOptions(division, '부', uniqueValues('부', divisionRows));
+      const teamRows = divisionRows.filter(row => !division.value || row['부'] === division.value);
+      setSelectOptions(team, '팀', uniqueValues('팀', teamRows));
+    }
+
+    function renderVehicles() {
+      const keyword = document.getElementById('vehicleSearch').value.trim().toLowerCase();
+      const headquarters = document.getElementById('headquartersFilter').value;
+      const division = document.getElementById('divisionFilter').value;
+      const team = document.getElementById('teamFilter').value;
+      const filtered = vehicleData.filter(row => {
+        const matchesFilter = (!headquarters || row['본부'] === headquarters) && (!division || row['부'] === division) && (!team || row['팀'] === team);
+        const searchable = requiredColumns.map(key => row[key]).join(' ').toLowerCase();
+        return matchesFilter && (!keyword || searchable.includes(keyword));
+      });
+      const body = document.getElementById('vehicleTableBody');
+      body.innerHTML = filtered.length ? filtered.map(row => `<tr>
+        <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
+        <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
+        <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
+        <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td>
+      </tr>`).join('') : '<tr><td class="empty-table" colspan="7">조건에 맞는 차량이 없습니다.</td></tr>';
+      document.getElementById('recordCount').textContent = `${filtered.length}건`;
+      document.getElementById('totalVehicles').textContent = `${vehicleData.length}대`;
+      document.getElementById('totalHeadquarters').textContent = `${uniqueValues('본부').length}개`;
+      document.getElementById('totalManagers').textContent = `${uniqueValues('담당자(정)').length}명`;
+    }
+
+    function showUploadError(message) {
+      uploadError.textContent = message;
+      uploadError.classList.add('show');
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [], cell = '', quoted = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i], next = text[i + 1];
+        if (char === '"' && quoted && next === '"') { cell += '"'; i++; }
+        else if (char === '"') quoted = !quoted;
+        else if (char === ',' && !quoted) { row.push(cell); cell = ''; }
+        else if ((char === '\n' || char === '\r') && !quoted) {
+          if (char === '\r' && next === '\n') i++;
+          row.push(cell); if (row.some(value => value.trim())) rows.push(row); row = []; cell = '';
+        } else cell += char;
+      }
+      row.push(cell); if (row.some(value => value.trim())) rows.push(row);
+      const headers = (rows.shift() || []).map(value => value.replace(/^\uFEFF/, '').trim());
+      return rows.map(values => Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ''])));
+    }
+
+    async function readVehicleFile(file) {
+      const extension = file.name.split('.').pop().toLowerCase();
+      if (file.size > 20 * 1024 * 1024) throw new Error('파일 크기는 20MB 이하여야 합니다.');
+      let rows;
+      if (window.XLSX) {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
+      } else if (extension === 'csv') {
+        rows = parseCsv(await file.text());
+      } else {
+        throw new Error('Excel 읽기 기능을 불러오지 못했습니다. 잠시 후 다시 시도하거나 CSV 파일을 사용해 주세요.');
+      }
+      if (!rows.length) throw new Error('파일에 표시할 데이터가 없습니다.');
+      const normalize = value => String(value).replace(/\s/g, '');
+      const headerMap = Object.keys(rows[0]).reduce((map, key) => (map[normalize(key)] = key, map), {});
+      const missing = requiredColumns.filter(column => !headerMap[normalize(column)]);
+      if (missing.length) throw new Error(`필수 열이 없습니다: ${missing.join(', ')}`);
+      const cleanRows = rows.map(row => Object.fromEntries(requiredColumns.map(column => [column, String(row[headerMap[normalize(column)]] ?? '').trim()])))
+        .filter(row => requiredColumns.some(column => row[column]));
+      if (!cleanRows.length) throw new Error('필수 열 아래에 입력된 데이터가 없습니다.');
+      return cleanRows;
     }
 
     document.getElementById('menuButton').addEventListener('click', () => toggleSidebar(true));
     scrim.addEventListener('click', () => toggleSidebar(false));
-    document.getElementById('uploadButton').addEventListener('click', () => toggleModal(true));
+    ['uploadButton', 'vehicleUploadButton', 'guideUploadButton'].forEach(id => document.getElementById(id).addEventListener('click', () => toggleModal(true)));
     document.getElementById('closeModal').addEventListener('click', () => toggleModal(false));
     document.getElementById('cancelUpload').addEventListener('click', () => toggleModal(false));
-    modal.addEventListener('click', (event) => { if (event.target === modal) toggleModal(false); });
+    modal.addEventListener('click', event => { if (event.target === modal) toggleModal(false); });
 
-    document.getElementById('fileInput').addEventListener('change', (event) => {
+    fileInput.addEventListener('change', event => {
       const file = event.target.files[0];
-      if (file) document.getElementById('fileLabel').textContent = file.name;
+      if (file) {
+        document.getElementById('fileLabel').textContent = file.name;
+        uploadError.classList.remove('show');
+      }
     });
 
-    document.getElementById('confirmUpload').addEventListener('click', () => {
-      const file = document.getElementById('fileInput').files[0];
-      toggleModal(false);
-      showToast(file ? `${file.name} 파일을 확인할 준비가 되었습니다.` : '먼저 업로드할 파일을 선택해 주세요.');
+    document.getElementById('confirmUpload').addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      if (!file) { showUploadError('먼저 업로드할 파일을 선택해 주세요.'); return; }
+      const button = document.getElementById('confirmUpload');
+      button.disabled = true;
+      button.textContent = '자료 확인 중...';
+      try {
+        vehicleData = await readVehicleFile(file);
+        document.getElementById('vehicleSearch').value = '';
+        ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => document.getElementById(id).value = '');
+        refreshFilters();
+        renderVehicles();
+        document.getElementById('sourceFileName').textContent = file.name;
+        document.getElementById('sourceUpdated').textContent = `${new Date().toLocaleString('ko-KR')} 반영`;
+        toggleModal(false);
+        showView('차량 현황');
+        showToast(`${vehicleData.length}건의 차량 담당자 정보를 불러왔습니다.`);
+      } catch (error) {
+        showUploadError(error.message || '파일을 읽는 중 문제가 발생했습니다.');
+      } finally {
+        button.disabled = false;
+        button.textContent = '자료 확인하기';
+      }
     });
 
     document.querySelectorAll('.period-tab').forEach(button => {
@@ -524,28 +782,33 @@
 
     document.querySelectorAll('.nav-button').forEach(button => {
       button.addEventListener('click', () => {
-        if (button.dataset.page === '대시보드') {
-          document.querySelectorAll('.nav-button').forEach(item => item.classList.remove('active'));
-          button.classList.add('active');
-        } else if (button.dataset.page === '데이터 업로드') {
-          toggleModal(true);
-        } else {
-          showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
-        }
+        if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황') showView(button.dataset.page);
+        else if (button.dataset.page === '데이터 업로드') toggleModal(true);
+        else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
         toggleSidebar(false);
       });
     });
 
+    document.getElementById('vehicleSearch').addEventListener('input', renderVehicles);
+    document.getElementById('headquartersFilter').addEventListener('change', () => { document.getElementById('divisionFilter').value = ''; document.getElementById('teamFilter').value = ''; refreshFilters(); renderVehicles(); });
+    document.getElementById('divisionFilter').addEventListener('change', () => { document.getElementById('teamFilter').value = ''; refreshFilters(); renderVehicles(); });
+    document.getElementById('teamFilter').addEventListener('change', renderVehicles);
+    document.getElementById('resetFilters').addEventListener('click', () => {
+      document.getElementById('vehicleSearch').value = '';
+      ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => document.getElementById(id).value = '');
+      refreshFilters(); renderVehicles();
+    });
+
     document.getElementById('reportButton').addEventListener('click', () => showToast('보고서 다운로드 기능은 데이터 연결 단계에서 추가할 예정입니다.'));
-    document.getElementById('allVehiclesButton').addEventListener('click', () => showToast('차량 전체 목록 화면은 다음 단계에서 추가할 수 있습니다.'));
+    document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량 현황'));
     document.getElementById('noticeButton').addEventListener('click', () => showToast('확인이 필요한 계약 만료 차량이 3대 있습니다.'));
 
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        toggleModal(false);
-        toggleSidebar(false);
-      }
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { toggleModal(false); toggleSidebar(false); }
     });
+
+    refreshFilters();
+    renderVehicles();
   </script>
 </body>
 </html>
