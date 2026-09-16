@@ -313,6 +313,21 @@
     .form-field input { width: 100%; height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--white); font-size: .83rem; outline: 0; }
     .form-field input:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
     .form-hint { margin: -8px 0 16px; color: var(--grey); font-size: .72rem; }
+    .usage-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .analysis-stack { display: grid; gap: 16px; }
+    .month-picker { height: 39px; padding: 0 11px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--white); font-size: .8rem; font-weight: 700; outline: 0; }
+    .month-picker:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .07); }
+    .analysis-toolbar { padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--line); }
+    .analysis-toolbar h2 { margin: 0; font-size: 1rem; }
+    .analysis-toolbar p { margin: 4px 0 0; color: var(--grey); font-size: .74rem; }
+    .month-control { display: flex; align-items: center; gap: 9px; }
+    .month-control label { color: var(--ink-soft); font-size: .76rem; font-weight: 750; }
+    .match-pill { display: inline-flex; align-items: center; min-height: 25px; padding: 0 8px; border-radius: 999px; color: var(--brand-dark); background: var(--brand-wash); font-size: .68rem; font-weight: 800; }
+    .match-pill.unmatched { color: #bb5555; background: #fff0f0; }
+    .distance-value { color: var(--brand-dark); font-weight: 820; }
+    .unmatched-row { background: #fffafa; }
+    .usage-note { padding: 13px 22px; display: flex; align-items: flex-start; gap: 10px; color: var(--ink-soft); background: #fbfcfc; border-top: 1px solid var(--line); font-size: .74rem; }
+    .usage-note svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 1px; color: var(--brand); }
 
     .modal-backdrop { position: fixed; inset: 0; z-index: 60; padding: 20px; display: none; place-items: center; background: rgba(18, 33, 30, .42); backdrop-filter: blur(4px); }
     .modal-backdrop.open { display: grid; }
@@ -352,6 +367,7 @@
       .scrim.open { display: block; }
       .grid-main { grid-template-columns: 1fr; }
       .vehicle-summary { grid-template-columns: 1fr; }
+      .usage-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .vehicle-toolbar { align-items: stretch; flex-direction: column; }
       .search-box { width: 100%; }
       .filter-row { align-items: stretch; flex-wrap: wrap; }
@@ -379,6 +395,9 @@
       .source-strip { align-items: flex-start; flex-direction: column; }
       .form-grid { grid-template-columns: 1fr; }
       .form-field.full { grid-column: auto; }
+      .usage-summary { grid-template-columns: 1fr; }
+      .analysis-toolbar { align-items: stretch; flex-direction: column; }
+      .month-control { justify-content: space-between; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -401,6 +420,7 @@
         <li><button class="nav-button active" data-page="대시보드"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>대시보드</button></li>
         <li><button class="nav-button" data-page="차량 현황"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>차량 현황</button></li>
         <li><button class="nav-button" data-page="차량계약정보"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>차량계약정보</button></li>
+        <li><button class="nav-button" data-page="운행기록데이터"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16h16l-2-6H6l-2 6Zm2 0v3m12-3v3M8 16h.01M16 16h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v4m0-4 2 2m-2-2-2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>운행기록데이터</button></li>
         <li><button class="nav-button" data-page="경영 보고서"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>경영 보고서</button></li>
       </ul>
 
@@ -618,6 +638,63 @@
           <div class="source-strip"><span>표시된 자료: <strong id="contractSourceFileName">예시 데이터</strong></span><span id="contractSourceUpdated">Excel 업로드 전 · 화면 확인용</span></div>
         </section>
       </div>
+
+      <div class="content view" id="drivingView">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">부서별 차량 이용 분석</p>
+            <h1>운행기록데이터</h1>
+            <p class="heading-copy">차량번호를 기준으로 조직정보를 연결하고 월별 주행거리와 운행일수를 분석합니다.</p>
+          </div>
+          <div class="heading-actions">
+            <button class="button" id="exportDrivingButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Excel 내려받기</button>
+            <button class="button" id="addDrivingButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>직접 추가</button>
+            <button class="button primary" id="drivingUploadButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>운행기록 Excel 업로드</button>
+          </div>
+        </section>
+
+        <section class="usage-summary" aria-label="월간 운행 요약">
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>운행 차량</span><strong id="usageVehicleCount">0대</strong></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 18a7 7 0 1 1 14 0M12 11l3-3M4 18h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>월 총 주행거리</span><strong id="usageTotalDistance">0km</strong></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14v12H5V8Zm3-4v6m8-6v6M5 12h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>운행일수</span><strong id="usageDayCount">0일</strong></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-10v6m0-10h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>차량현황 미매칭</span><strong id="usageUnmatchedCount">0건</strong></div></article>
+        </section>
+
+        <section class="upload-guide">
+          <div class="upload-guide-copy"><span class="upload-guide-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><strong>차량번호로 차량현황의 조직정보를 자동 연결합니다.</strong><p>Excel 첫 행을 차량번호, 키로수, 운행년월일로 작성해 주세요. 키로수는 누적 주행거리 기준입니다.</p></div></div>
+          <button class="button" id="drivingGuideUploadButton">파일 선택</button>
+        </section>
+
+        <div class="analysis-stack">
+          <section class="panel vehicle-panel">
+            <div class="analysis-toolbar">
+              <div><h2>부서별 월간 운행 분석</h2><p>같은 차량의 선택 월 첫 기록과 마지막 기록의 키로수 차이를 합산합니다.</p></div>
+              <div class="month-control"><label for="usageMonth">조회월</label><input class="month-picker" id="usageMonth" type="month" value="2026-09"></div>
+            </div>
+            <div class="table-wrap">
+              <table class="vehicle-table">
+                <thead><tr><th>본부</th><th>부</th><th>팀</th><th>운행 차량</th><th>월 주행거리</th><th>운행일수</th><th>차량당 평균</th></tr></thead>
+                <tbody id="usageAnalysisBody"></tbody>
+              </table>
+            </div>
+            <div class="usage-note"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-10v6m0-10h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>운행일수는 해당 부서 차량의 운행기록이 존재하는 서로 다른 날짜 수입니다. 차량번호가 차량현황에 없으면 분석에서 제외됩니다.</span></div>
+          </section>
+
+          <section class="panel vehicle-panel">
+            <div class="vehicle-toolbar">
+              <div class="vehicle-title-wrap"><h2>운행기록 상세</h2><span class="record-count" id="drivingRecordCount">0건</span></div>
+              <label class="search-box"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="drivingSearch" placeholder="차량번호, 부서, 차종 검색" aria-label="운행기록 검색"></label>
+            </div>
+            <div class="table-wrap">
+              <table class="vehicle-table">
+                <thead><tr><th>운행년월일</th><th>본부</th><th>부</th><th>팀</th><th>차량번호</th><th>차종</th><th>누적 키로수</th><th>매칭상태</th><th>관리</th></tr></thead>
+                <tbody id="drivingTableBody"></tbody>
+              </table>
+            </div>
+            <div class="source-strip"><span>표시된 자료: <strong id="drivingSourceFileName">예시 데이터</strong></span><span id="drivingSourceUpdated">Excel 업로드 전 · 화면 확인용</span></div>
+          </section>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -693,6 +770,37 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="drivingUploadModal" role="dialog" aria-modal="true" aria-labelledby="drivingUploadTitle">
+    <div class="modal">
+      <div class="modal-header"><div><h2 id="drivingUploadTitle">운행기록 업로드</h2><p>차량번호, 키로수, 운행년월일이 들어 있는 Excel 또는 CSV 파일을 선택해 주세요.</p></div><button class="close-button" id="closeDrivingUpload" aria-label="닫기">✕</button></div>
+      <label class="drop-zone" for="drivingFileInput">
+        <span class="drop-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <strong id="drivingFileLabel">파일을 끌어놓거나 눌러서 선택</strong>
+        <span>지원 형식: .xlsx, .xls, .csv · 최대 20MB</span>
+      </label>
+      <input type="file" id="drivingFileInput" accept=".xlsx,.xls,.csv">
+      <div class="upload-error" id="drivingUploadError"></div>
+      <ul class="required-columns" aria-label="운행기록 필수 열"><li>차량번호</li><li>키로수</li><li>운행년월일</li></ul>
+      <div class="modal-actions"><button class="button" id="cancelDrivingUpload">취소</button><button class="button primary" id="confirmDrivingUpload">자료 확인하기</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="drivingFormModal" role="dialog" aria-modal="true" aria-labelledby="drivingFormTitle">
+    <div class="modal">
+      <div class="modal-header"><div><h2 id="drivingFormTitle">운행기록 직접 추가</h2><p>차량번호와 누적 키로수, 운행일자를 입력해 주세요.</p></div><button class="close-button" id="closeDrivingForm" aria-label="닫기">✕</button></div>
+      <form id="drivingForm">
+        <div class="form-grid">
+          <div class="form-field full"><label for="dfPlate">차량번호 *</label><input id="dfPlate" required placeholder="예: 12가 3456"></div>
+          <div class="form-field"><label for="dfMileage">누적 키로수(km) *</label><input id="dfMileage" type="number" min="0" step="1" required></div>
+          <div class="form-field"><label for="dfDate">운행년월일 *</label><input id="dfDate" type="date" required></div>
+        </div>
+        <p class="form-hint">차량현황에 같은 차량번호가 있으면 본부·부·팀·차종이 자동으로 연결됩니다.</p>
+        <div class="upload-error" id="drivingFormError"></div>
+        <div class="modal-actions"><button class="button" type="button" id="cancelDrivingForm">취소</button><button class="button primary" type="submit">저장하기</button></div>
+      </form>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status"><span class="toast-dot"></span><span id="toastMessage"></span></div>
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -736,10 +844,37 @@
       { '본부':'경영지원본부','부':'재무부','팀':'회계팀','담당자(정)':'신지우','담당자(부)':'강민서','차종':'쏘나타','차량번호':'89주 6402','렌탈료':'860000','계약시작':'2023-12','계약종료':'2026-11' },
       { '본부':'물류운영본부','부':'운송관리부','팀':'수도권운영팀','담당자(정)':'조성민','담당자(부)':'배유나','차종':'스타리아','차량번호':'94하 5127','렌탈료':'1210000','계약시작':'2025-06','계약종료':'2029-05' }
     ];
+    const drivingUploadModal = document.getElementById('drivingUploadModal');
+    const drivingFormModal = document.getElementById('drivingFormModal');
+    const drivingFileInput = document.getElementById('drivingFileInput');
+    const drivingUploadError = document.getElementById('drivingUploadError');
+    const drivingColumns = ['차량번호', '키로수', '운행년월일'];
+    let drivingData = [
+      { '차량번호':'12가 3456', '키로수':'35120', '운행년월일':'2026-09-02' },
+      { '차량번호':'12가 3456', '키로수':'35640', '운행년월일':'2026-09-12' },
+      { '차량번호':'12가 3456', '키로수':'36210', '운행년월일':'2026-09-25' },
+      { '차량번호':'34나 7890', '키로수':'22800', '운행년월일':'2026-09-01' },
+      { '차량번호':'34나 7890', '키로수':'23310', '운행년월일':'2026-09-15' },
+      { '차량번호':'34나 7890', '키로수':'23950', '운행년월일':'2026-09-29' },
+      { '차량번호':'45다 2211', '키로수':'18500', '운행년월일':'2026-09-03' },
+      { '차량번호':'45다 2211', '키로수':'18940', '운행년월일':'2026-09-18' },
+      { '차량번호':'45다 2211', '키로수':'19200', '운행년월일':'2026-09-28' },
+      { '차량번호':'56다 1122', '키로수':'41200', '운행년월일':'2026-09-02' },
+      { '차량번호':'56다 1122', '키로수':'41630', '운행년월일':'2026-09-10' },
+      { '차량번호':'56다 1122', '키로수':'42110', '운행년월일':'2026-09-24' },
+      { '차량번호':'67마 4589', '키로수':'56800', '운행년월일':'2026-09-05' },
+      { '차량번호':'67마 4589', '키로수':'57600', '운행년월일':'2026-09-19' },
+      { '차량번호':'31도 8265', '키로수':'30750', '운행년월일':'2026-09-04' },
+      { '차량번호':'31도 8265', '키로수':'31240', '운행년월일':'2026-09-21' },
+      { '차량번호':'99미 9999', '키로수':'10420', '운행년월일':'2026-09-08' },
+      { '차량번호':'12가 3456', '키로수':'34200', '운행년월일':'2026-08-03' },
+      { '차량번호':'12가 3456', '키로수':'34980', '운행년월일':'2026-08-27' }
+    ];
     const vehicleFormModal = document.getElementById('vehicleFormModal');
     const contractFormModal = document.getElementById('contractFormModal');
     let editingVehicleIndex = null;
     let editingContractIndex = null;
+    let editingDrivingIndex = null;
 
     function showToast(message) {
       toastMessage.textContent = message;
@@ -766,11 +901,14 @@
     function showView(page) {
       const isVehicles = page === '차량 현황';
       const isContracts = page === '차량계약정보';
-      document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts);
+      const isDriving = page === '운행기록데이터';
+      document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving);
       document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
       document.getElementById('contractsView').classList.toggle('active', isContracts);
-      document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : '대시보드';
+      document.getElementById('drivingView').classList.toggle('active', isDriving);
+      document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : isDriving ? '운행기록데이터' : '대시보드';
       document.querySelectorAll('.nav-button').forEach(item => item.classList.toggle('active', item.dataset.page === page));
+      if (isDriving) renderDriving();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -920,9 +1058,119 @@
       document.getElementById('contractsExpiring').textContent = `${expiring}대`;
     }
 
+    function normalizePlate(value) {
+      return String(value || '').replace(/\s/g, '').toUpperCase();
+    }
+
+    function vehicleForPlate(plate) {
+      const normalized = normalizePlate(plate);
+      return vehicleData.find(row => normalizePlate(row['차량번호']) === normalized) || null;
+    }
+
+    function normalizeDrivingDate(value) {
+      const text = String(value ?? '').trim();
+      let match = text.match(/^(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+      if (!match && /^\d{8}$/.test(text)) match = [text, text.slice(0, 4), text.slice(4, 6), text.slice(6, 8)];
+      if (!match) return '';
+      const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+      const date = new Date(Date.UTC(year, month - 1, day));
+      if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return '';
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function mileageNumber(value) {
+      return Number(String(value ?? '').replace(/[^0-9.-]/g, '')) || 0;
+    }
+
+    function distanceForItems(items) {
+      const readings = items.map(item => mileageNumber(item.row['키로수']));
+      return readings.length > 1 ? Math.max(...readings) - Math.min(...readings) : 0;
+    }
+
+    function renderDriving() {
+      const month = document.getElementById('usageMonth').value;
+      const keyword = document.getElementById('drivingSearch').value.trim().toLowerCase();
+      const monthlyItems = drivingData.map((row, index) => ({ row, index, vehicle: vehicleForPlate(row['차량번호']) }))
+        .filter(item => normalizeDrivingDate(item.row['운행년월일']).slice(0, 7) === month);
+      const matchedItems = monthlyItems.filter(item => item.vehicle);
+      const unmatchedItems = monthlyItems.filter(item => !item.vehicle);
+
+      const byVehicle = new Map();
+      matchedItems.forEach(item => {
+        const key = normalizePlate(item.row['차량번호']);
+        if (!byVehicle.has(key)) byVehicle.set(key, []);
+        byVehicle.get(key).push(item);
+      });
+      const totalDistance = [...byVehicle.values()].reduce((sum, items) => sum + distanceForItems(items), 0);
+      const totalDays = new Set(matchedItems.map(item => normalizeDrivingDate(item.row['운행년월일']))).size;
+      document.getElementById('usageVehicleCount').textContent = `${byVehicle.size}대`;
+      document.getElementById('usageTotalDistance').textContent = `${totalDistance.toLocaleString('ko-KR')}km`;
+      document.getElementById('usageDayCount').textContent = `${totalDays}일`;
+      document.getElementById('usageUnmatchedCount').textContent = `${unmatchedItems.length}건`;
+
+      const byOrganization = new Map();
+      matchedItems.forEach(item => {
+        const vehicle = item.vehicle;
+        const key = [vehicle['본부'], vehicle['부'], vehicle['팀']].join('|');
+        if (!byOrganization.has(key)) byOrganization.set(key, { vehicle, items: [] });
+        byOrganization.get(key).items.push(item);
+      });
+      const analysisRows = [...byOrganization.values()].map(group => {
+        const vehicleGroups = new Map();
+        group.items.forEach(item => {
+          const key = normalizePlate(item.row['차량번호']);
+          if (!vehicleGroups.has(key)) vehicleGroups.set(key, []);
+          vehicleGroups.get(key).push(item);
+        });
+        const distance = [...vehicleGroups.values()].reduce((sum, items) => sum + distanceForItems(items), 0);
+        return {
+          vehicle: group.vehicle,
+          vehicleCount: vehicleGroups.size,
+          distance,
+          days: new Set(group.items.map(item => normalizeDrivingDate(item.row['운행년월일']))).size
+        };
+      }).sort((a, b) => b.distance - a.distance);
+      document.getElementById('usageAnalysisBody').innerHTML = analysisRows.length ? analysisRows.map(item => `<tr>
+        <td>${escapeHtml(item.vehicle['본부'])}</td><td>${escapeHtml(item.vehicle['부'])}</td><td>${escapeHtml(item.vehicle['팀'])}</td>
+        <td>${item.vehicleCount}대</td><td class="distance-value">${item.distance.toLocaleString('ko-KR')}km</td><td>${item.days}일</td>
+        <td>${Math.round(item.distance / item.vehicleCount).toLocaleString('ko-KR')}km</td>
+      </tr>`).join('') : '<tr><td class="empty-table" colspan="7">선택한 월에 분석할 운행기록이 없습니다.</td></tr>';
+
+      const filtered = monthlyItems.filter(item => {
+        const vehicle = item.vehicle || {};
+        const searchable = [item.row['차량번호'], vehicle['본부'], vehicle['부'], vehicle['팀'], vehicle['차종']].join(' ').toLowerCase();
+        return !keyword || searchable.includes(keyword);
+      }).sort((a, b) => normalizeDrivingDate(b.row['운행년월일']).localeCompare(normalizeDrivingDate(a.row['운행년월일'])) || normalizePlate(a.row['차량번호']).localeCompare(normalizePlate(b.row['차량번호']), 'ko'));
+      document.getElementById('drivingTableBody').innerHTML = filtered.length ? filtered.map(item => {
+        const vehicle = item.vehicle;
+        const date = normalizeDrivingDate(item.row['운행년월일']).replaceAll('-', '.');
+        return `<tr class="${vehicle ? '' : 'unmatched-row'}">
+          <td>${escapeHtml(date)}</td><td>${escapeHtml(vehicle ? vehicle['본부'] : '미매칭')}</td><td>${escapeHtml(vehicle ? vehicle['부'] : '-')}</td><td>${escapeHtml(vehicle ? vehicle['팀'] : '-')}</td>
+          <td class="plate">${escapeHtml(item.row['차량번호'])}</td><td>${escapeHtml(vehicle ? vehicle['차종'] : '-')}</td><td class="distance-value">${mileageNumber(item.row['키로수']).toLocaleString('ko-KR')}km</td>
+          <td><span class="match-pill ${vehicle ? '' : 'unmatched'}">${vehicle ? '연결 완료' : '차량현황 확인'}</span></td><td><button class="row-edit" data-driving-edit="${item.index}">수정</button></td>
+        </tr>`;
+      }).join('') : '<tr><td class="empty-table" colspan="9">조건에 맞는 운행기록이 없습니다.</td></tr>';
+      document.getElementById('drivingRecordCount').textContent = `${filtered.length}건`;
+    }
+
     function showContractUploadError(message) {
       contractUploadError.textContent = message;
       contractUploadError.classList.add('show');
+    }
+
+    function toggleDrivingUploadModal(open) {
+      drivingUploadModal.classList.toggle('open', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+      if (open) {
+        drivingUploadError.classList.remove('show');
+        drivingUploadError.textContent = '';
+        document.getElementById('closeDrivingUpload').focus();
+      }
+    }
+
+    function showDrivingUploadError(message) {
+      drivingUploadError.textContent = message;
+      drivingUploadError.classList.add('show');
     }
 
     async function readContractFile(file) {
@@ -1004,6 +1252,27 @@
       document.body.style.overflow = '';
     }
 
+    function openDrivingForm(index = null) {
+      editingDrivingIndex = index;
+      document.getElementById('drivingForm').reset();
+      document.getElementById('drivingFormError').classList.remove('show');
+      document.getElementById('drivingFormTitle').textContent = index === null ? '운행기록 직접 추가' : '운행기록 수정';
+      if (index !== null) {
+        const row = drivingData[index];
+        document.getElementById('dfPlate').value = row['차량번호'];
+        document.getElementById('dfMileage').value = mileageNumber(row['키로수']);
+        document.getElementById('dfDate').value = normalizeDrivingDate(row['운행년월일']);
+      }
+      drivingFormModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => document.getElementById('dfPlate').focus(), 0);
+    }
+
+    function closeDrivingForm() {
+      drivingFormModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
     function downloadExcel(rows, sheetName, fileName) {
       if (!window.XLSX) { showToast('Excel 기능을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
       const workbook = XLSX.utils.book_new();
@@ -1030,6 +1299,18 @@
         };
       });
       downloadExcel(rows, '차량계약정보', '차량계약정보.xlsx');
+    }
+
+    function exportDrivingData() {
+      const rows = drivingData.map(row => {
+        const vehicle = vehicleForPlate(row['차량번호']);
+        return {
+          '운행년월일': normalizeDrivingDate(row['운행년월일']), '차량번호': row['차량번호'], '키로수': mileageNumber(row['키로수']),
+          '본부': vehicle ? vehicle['본부'] : '', '부': vehicle ? vehicle['부'] : '', '팀': vehicle ? vehicle['팀'] : '',
+          '차종': vehicle ? vehicle['차종'] : '', '매칭상태': vehicle ? '연결 완료' : '미매칭'
+        };
+      });
+      downloadExcel(rows, '운행기록데이터', '운행기록데이터.xlsx');
     }
 
     function showUploadError(message) {
@@ -1080,6 +1361,36 @@
       return cleanRows;
     }
 
+    async function readDrivingFile(file) {
+      const extension = file.name.split('.').pop().toLowerCase();
+      if (file.size > 20 * 1024 * 1024) throw new Error('파일 크기는 20MB 이하여야 합니다.');
+      let rows;
+      if (window.XLSX) {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: 'array' });
+        rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '', raw: false });
+      } else if (extension === 'csv') rows = parseCsv(await file.text());
+      else throw new Error('Excel 읽기 기능을 불러오지 못했습니다. 잠시 후 다시 시도하거나 CSV 파일을 사용해 주세요.');
+      if (!rows.length) throw new Error('파일에 표시할 운행기록이 없습니다.');
+      const normalize = value => String(value).replace(/\s/g, '');
+      const headerMap = Object.keys(rows[0]).reduce((map, key) => (map[normalize(key)] = key, map), {});
+      const missing = drivingColumns.filter(column => !headerMap[normalize(column)]);
+      if (missing.length) throw new Error(`필수 열이 없습니다: ${missing.join(', ')}`);
+      const cleanRows = rows.map(row => Object.fromEntries(drivingColumns.map(column => [column, String(row[headerMap[normalize(column)]] ?? '').trim()])))
+        .filter(row => drivingColumns.some(column => row[column]));
+      cleanRows.forEach((row, index) => {
+        const date = normalizeDrivingDate(row['운행년월일']);
+        const mileageText = String(row['키로수']).replace(/[,\skm킬로미터]/gi, '');
+        if (!row['차량번호']) throw new Error(`${index + 2}행의 차량번호를 확인해 주세요.`);
+        if (!date) throw new Error(`${index + 2}행의 운행년월일 형식을 확인해 주세요. 예: 2026-09-16`);
+        if (mileageText === '' || !Number.isFinite(Number(mileageText)) || Number(mileageText) < 0) throw new Error(`${index + 2}행의 키로수를 숫자로 입력해 주세요.`);
+        row['운행년월일'] = date;
+        row['키로수'] = String(Number(mileageText));
+      });
+      if (!cleanRows.length) throw new Error('필수 열 아래에 입력된 데이터가 없습니다.');
+      return cleanRows.sort((a, b) => normalizeDrivingDate(a['운행년월일']).localeCompare(normalizeDrivingDate(b['운행년월일'])));
+    }
+
     document.getElementById('menuButton').addEventListener('click', () => toggleSidebar(true));
     scrim.addEventListener('click', () => toggleSidebar(false));
     ['vehicleUploadButton', 'guideUploadButton'].forEach(id => document.getElementById(id).addEventListener('click', () => toggleModal(true)));
@@ -1090,16 +1401,25 @@
     document.getElementById('closeContractModal').addEventListener('click', () => toggleContractModal(false));
     document.getElementById('cancelContractUpload').addEventListener('click', () => toggleContractModal(false));
     contractModal.addEventListener('click', event => { if (event.target === contractModal) toggleContractModal(false); });
+    ['drivingUploadButton', 'drivingGuideUploadButton'].forEach(id => document.getElementById(id).addEventListener('click', () => toggleDrivingUploadModal(true)));
+    document.getElementById('closeDrivingUpload').addEventListener('click', () => toggleDrivingUploadModal(false));
+    document.getElementById('cancelDrivingUpload').addEventListener('click', () => toggleDrivingUploadModal(false));
+    drivingUploadModal.addEventListener('click', event => { if (event.target === drivingUploadModal) toggleDrivingUploadModal(false); });
     document.getElementById('addVehicleButton').addEventListener('click', () => openVehicleForm());
     document.getElementById('addContractButton').addEventListener('click', () => openContractForm());
+    document.getElementById('addDrivingButton').addEventListener('click', () => openDrivingForm());
     document.getElementById('exportVehiclesButton').addEventListener('click', exportVehicleData);
     document.getElementById('exportContractsButton').addEventListener('click', exportContractData);
+    document.getElementById('exportDrivingButton').addEventListener('click', exportDrivingData);
     document.getElementById('closeVehicleForm').addEventListener('click', closeVehicleForm);
     document.getElementById('cancelVehicleForm').addEventListener('click', closeVehicleForm);
     document.getElementById('closeContractForm').addEventListener('click', closeContractForm);
     document.getElementById('cancelContractForm').addEventListener('click', closeContractForm);
+    document.getElementById('closeDrivingForm').addEventListener('click', closeDrivingForm);
+    document.getElementById('cancelDrivingForm').addEventListener('click', closeDrivingForm);
     vehicleFormModal.addEventListener('click', event => { if (event.target === vehicleFormModal) closeVehicleForm(); });
     contractFormModal.addEventListener('click', event => { if (event.target === contractFormModal) closeContractForm(); });
+    drivingFormModal.addEventListener('click', event => { if (event.target === drivingFormModal) closeDrivingForm(); });
 
     document.getElementById('vehicleTableBody').addEventListener('click', event => {
       const button = event.target.closest('[data-vehicle-edit]');
@@ -1108,6 +1428,10 @@
     document.getElementById('contractTableBody').addEventListener('click', event => {
       const button = event.target.closest('[data-contract-edit]');
       if (button) openContractForm(Number(button.dataset.contractEdit));
+    });
+    document.getElementById('drivingTableBody').addEventListener('click', event => {
+      const button = event.target.closest('[data-driving-edit]');
+      if (button) openDrivingForm(Number(button.dataset.drivingEdit));
     });
 
     document.getElementById('vehicleForm').addEventListener('submit', event => {
@@ -1122,7 +1446,7 @@
         '차종': document.getElementById('vfModel').value.trim()
       };
       if (editingVehicleIndex === null) vehicleData.push(row); else vehicleData[editingVehicleIndex] = row;
-      refreshFilters(); renderVehicles(); closeVehicleForm();
+      refreshFilters(); renderVehicles(); renderDriving(); closeVehicleForm();
       showToast(editingVehicleIndex === null ? '차량정보를 추가했습니다.' : '차량정보를 수정했습니다.');
     });
 
@@ -1153,6 +1477,24 @@
       showToast(editingContractIndex === null ? '차량계약정보를 추가했습니다.' : '차량계약정보를 수정했습니다.');
     });
 
+    document.getElementById('drivingForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const plate = document.getElementById('dfPlate').value.trim();
+      const mileage = Number(document.getElementById('dfMileage').value);
+      const date = normalizeDrivingDate(document.getElementById('dfDate').value);
+      const error = document.getElementById('drivingFormError');
+      if (!plate || !date || !Number.isFinite(mileage) || mileage < 0) {
+        error.textContent = '차량번호, 누적 키로수, 운행년월일을 올바르게 입력해 주세요.';
+        error.classList.add('show');
+        return;
+      }
+      const row = { '차량번호': plate, '키로수': String(mileage), '운행년월일': date };
+      if (editingDrivingIndex === null) drivingData.push(row); else drivingData[editingDrivingIndex] = row;
+      document.getElementById('usageMonth').value = date.slice(0, 7);
+      renderDriving(); closeDrivingForm();
+      showToast(editingDrivingIndex === null ? '운행기록을 추가했습니다.' : '운행기록을 수정했습니다.');
+    });
+
     fileInput.addEventListener('change', event => {
       const file = event.target.files[0];
       if (file) {
@@ -1169,6 +1511,14 @@
       }
     });
 
+    drivingFileInput.addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (file) {
+        document.getElementById('drivingFileLabel').textContent = file.name;
+        drivingUploadError.classList.remove('show');
+      }
+    });
+
     document.getElementById('confirmUpload').addEventListener('click', async () => {
       const file = fileInput.files[0];
       if (!file) { showUploadError('먼저 업로드할 파일을 선택해 주세요.'); return; }
@@ -1181,6 +1531,7 @@
         ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => document.getElementById(id).value = '');
         refreshFilters();
         renderVehicles();
+        renderDriving();
         document.getElementById('sourceFileName').textContent = file.name;
         document.getElementById('sourceUpdated').textContent = `${new Date().toLocaleString('ko-KR')} 반영`;
         toggleModal(false);
@@ -1219,6 +1570,32 @@
       }
     });
 
+    document.getElementById('confirmDrivingUpload').addEventListener('click', async () => {
+      const file = drivingFileInput.files[0];
+      if (!file) { showDrivingUploadError('먼저 업로드할 파일을 선택해 주세요.'); return; }
+      const button = document.getElementById('confirmDrivingUpload');
+      button.disabled = true;
+      button.textContent = '자료 확인 중...';
+      try {
+        drivingData = await readDrivingFile(file);
+        document.getElementById('drivingSearch').value = '';
+        const newestDate = drivingData.reduce((latest, row) => normalizeDrivingDate(row['운행년월일']) > latest ? normalizeDrivingDate(row['운행년월일']) : latest, '');
+        if (newestDate) document.getElementById('usageMonth').value = newestDate.slice(0, 7);
+        renderDriving();
+        document.getElementById('drivingSourceFileName').textContent = file.name;
+        document.getElementById('drivingSourceUpdated').textContent = `${new Date().toLocaleString('ko-KR')} 반영`;
+        toggleDrivingUploadModal(false);
+        showView('운행기록데이터');
+        const unmatchedCount = drivingData.filter(row => !vehicleForPlate(row['차량번호'])).length;
+        showToast(`${drivingData.length}건을 불러왔습니다. 차량현황 미매칭 ${unmatchedCount}건`);
+      } catch (error) {
+        showDrivingUploadError(error.message || '파일을 읽는 중 문제가 발생했습니다.');
+      } finally {
+        button.disabled = false;
+        button.textContent = '자료 확인하기';
+      }
+    });
+
     document.querySelectorAll('.period-tab').forEach(button => {
       button.addEventListener('click', () => {
         document.querySelectorAll('.period-tab').forEach(item => item.classList.remove('active'));
@@ -1229,7 +1606,7 @@
 
     document.querySelectorAll('.nav-button').forEach(button => {
       button.addEventListener('click', () => {
-        if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보') showView(button.dataset.page);
+        if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '운행기록데이터') showView(button.dataset.page);
         else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
         toggleSidebar(false);
       });
@@ -1255,18 +1632,22 @@
       refreshContractFilters(); renderContracts();
     });
 
+    document.getElementById('usageMonth').addEventListener('change', renderDriving);
+    document.getElementById('drivingSearch').addEventListener('input', renderDriving);
+
     document.getElementById('reportButton').addEventListener('click', () => showToast('보고서 다운로드 기능은 데이터 연결 단계에서 추가할 예정입니다.'));
     document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량 현황'));
     document.getElementById('noticeButton').addEventListener('click', () => showToast('확인이 필요한 계약 만료 차량이 3대 있습니다.'));
 
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); closeVehicleForm(); closeContractForm(); toggleSidebar(false); }
+      if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); toggleDrivingUploadModal(false); closeVehicleForm(); closeContractForm(); closeDrivingForm(); toggleSidebar(false); }
     });
 
     refreshFilters();
     renderVehicles();
     refreshContractFilters();
     renderContracts();
+    renderDriving();
   </script>
 </body>
 </html>
