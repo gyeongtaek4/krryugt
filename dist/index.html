@@ -566,14 +566,14 @@
         </section>
 
         <section class="upload-guide">
-          <div class="upload-guide-copy"><span class="upload-guide-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><strong>Excel 자료를 올리면 차량현황이 자동으로 바뀝니다.</strong><p>첫 번째 행의 열 이름을 본부, 부, 팀, 담당자(정), 담당자(부), 차량번호, 차종으로 작성해 주세요.</p></div></div>
+          <div class="upload-guide-copy"><span class="upload-guide-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><strong>Excel 자료를 올리면 차량현황이 자동으로 바뀝니다.</strong><p>첫 번째 행의 열 이름을 본부, 부, 팀, 담당자(정), 담당자(부), 차량번호, 차종, 지역, 주차장으로 작성해 주세요.</p></div></div>
           <button class="button" id="guideUploadButton">파일 선택</button>
         </section>
 
         <section class="panel vehicle-panel">
           <div class="vehicle-toolbar">
             <div class="vehicle-title-wrap"><h2>차량 담당자 목록</h2><span class="record-count" id="recordCount">12건</span></div>
-            <label class="search-box"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="vehicleSearch" placeholder="차량번호, 차종, 담당자 검색" aria-label="차량현황 검색"></label>
+            <label class="search-box"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="vehicleSearch" placeholder="차량번호, 차종, 지역, 주차장 검색" aria-label="차량현황 검색"></label>
           </div>
           <div class="filter-row">
             <span class="filter-label">조직 필터</span>
@@ -584,7 +584,7 @@
           </div>
           <div class="table-wrap">
             <table class="vehicle-table">
-              <thead><tr><th>본부</th><th>부</th><th>팀</th><th>담당자(정)</th><th>담당자(부)</th><th>차량번호</th><th>차종</th><th>관리</th></tr></thead>
+              <thead><tr><th>본부</th><th>부</th><th>팀</th><th>담당자(정)</th><th>담당자(부)</th><th>차량번호</th><th>차종</th><th>지역</th><th>주차장</th><th>관리</th></tr></thead>
               <tbody id="vehicleTableBody"></tbody>
             </table>
           </div>
@@ -708,7 +708,7 @@
       </label>
       <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
       <div class="upload-error" id="uploadError"></div>
-      <ul class="required-columns" aria-label="필수 열"><li>본부</li><li>부</li><li>팀</li><li>담당자(정)</li><li>담당자(부)</li><li>차량번호</li><li>차종</li></ul>
+      <ul class="required-columns" aria-label="필수 열"><li>본부</li><li>부</li><li>팀</li><li>담당자(정)</li><li>담당자(부)</li><li>차량번호</li><li>차종</li><li>지역</li><li>주차장</li></ul>
       <div class="modal-actions"><button class="button" id="cancelUpload">취소</button><button class="button primary" id="confirmUpload">자료 확인하기</button></div>
     </div>
   </div>
@@ -739,7 +739,9 @@
           <div class="form-field"><label for="vfPrimary">담당자(정) *</label><input id="vfPrimary" required></div>
           <div class="form-field"><label for="vfSecondary">담당자(부)</label><input id="vfSecondary"></div>
           <div class="form-field"><label for="vfPlate">차량번호 *</label><input id="vfPlate" required></div>
-          <div class="form-field full"><label for="vfModel">차종 *</label><input id="vfModel" required></div>
+          <div class="form-field"><label for="vfModel">차종 *</label><input id="vfModel" required></div>
+          <div class="form-field"><label for="vfRegion">지역</label><input id="vfRegion" placeholder="예: 서울"></div>
+          <div class="form-field"><label for="vfParking">주차장</label><input id="vfParking" placeholder="예: 본사 지하주차장"></div>
         </div>
         <div class="upload-error" id="vehicleFormError"></div>
         <div class="modal-actions"><button class="button" type="button" id="cancelVehicleForm">취소</button><button class="button primary" type="submit">저장하기</button></div>
@@ -812,21 +814,21 @@
     const toastMessage = document.getElementById('toastMessage');
     const uploadError = document.getElementById('uploadError');
     const fileInput = document.getElementById('fileInput');
-    const requiredColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차량번호', '차종'];
+    const requiredColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차량번호', '차종', '지역', '주차장'];
     let toastTimer;
     let vehicleData = [
-      { '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'김민준', '담당자(부)':'이서연', '차량번호':'12가 3456', '차종':'그랜저' },
-      { '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'김민준', '담당자(부)':'이서연', '차량번호':'34나 7890', '차종':'쏘렌토' },
-      { '본부':'영업본부', '부':'국내영업부', '팀':'영업2팀', '담당자(정)':'박지훈', '담당자(부)':'최유진', '차량번호':'45다 2211', '차종':'K5' },
-      { '본부':'영업본부', '부':'해외영업부', '팀':'글로벌영업팀', '담당자(정)':'정하늘', '담당자(부)':'윤서준', '차량번호':'18라 9034', '차종':'투싼' },
-      { '본부':'기술지원본부', '부':'고객지원부', '팀':'현장지원1팀', '담당자(정)':'최도윤', '담당자(부)':'김예은', '차량번호':'56다 1122', '차종':'아반떼' },
-      { '본부':'기술지원본부', '부':'고객지원부', '팀':'현장지원1팀', '담당자(정)':'최도윤', '담당자(부)':'김예은', '차량번호':'67마 4589', '차종':'카니발' },
-      { '본부':'기술지원본부', '부':'품질관리부', '팀':'품질보증팀', '담당자(정)':'장현우', '담당자(부)':'오수빈', '차량번호':'23거 7741', '차종':'스포티지' },
-      { '본부':'경영지원본부', '부':'총무부', '팀':'자산관리팀', '담당자(정)':'이준호', '담당자(부)':'한지민', '차량번호':'31도 8265', '차종':'그랜저' },
-      { '본부':'경영지원본부', '부':'총무부', '팀':'자산관리팀', '담당자(정)':'이준호', '담당자(부)':'한지민', '차량번호':'72오 3158', '차종':'K8' },
-      { '본부':'경영지원본부', '부':'재무부', '팀':'회계팀', '담당자(정)':'신지우', '담당자(부)':'강민서', '차량번호':'89주 6402', '차종':'쏘나타' },
-      { '본부':'물류운영본부', '부':'운송관리부', '팀':'수도권운영팀', '담당자(정)':'조성민', '담당자(부)':'배유나', '차량번호':'94하 5127', '차종':'스타리아' },
-      { '본부':'물류운영본부', '부':'운송관리부', '팀':'지방운영팀', '담당자(정)':'임태호', '담당자(부)':'문가영', '차량번호':'11호 2486', '차종':'봉고3' }
+      { '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'김민준', '담당자(부)':'이서연', '차량번호':'12가 3456', '차종':'그랜저', '지역':'서울', '주차장':'본사 지하주차장' },
+      { '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'김민준', '담당자(부)':'이서연', '차량번호':'34나 7890', '차종':'쏘렌토', '지역':'서울', '주차장':'본사 지하주차장' },
+      { '본부':'영업본부', '부':'국내영업부', '팀':'영업2팀', '담당자(정)':'박지훈', '담당자(부)':'최유진', '차량번호':'45다 2211', '차종':'K5', '지역':'경기', '주차장':'수원사업장 주차장' },
+      { '본부':'영업본부', '부':'해외영업부', '팀':'글로벌영업팀', '담당자(정)':'정하늘', '담당자(부)':'윤서준', '차량번호':'18라 9034', '차종':'투싼', '지역':'서울', '주차장':'본사 외부주차장' },
+      { '본부':'기술지원본부', '부':'고객지원부', '팀':'현장지원1팀', '담당자(정)':'최도윤', '담당자(부)':'김예은', '차량번호':'56다 1122', '차종':'아반떼', '지역':'대전', '주차장':'대전센터 주차장' },
+      { '본부':'기술지원본부', '부':'고객지원부', '팀':'현장지원1팀', '담당자(정)':'최도윤', '담당자(부)':'김예은', '차량번호':'67마 4589', '차종':'카니발', '지역':'대전', '주차장':'대전센터 주차장' },
+      { '본부':'기술지원본부', '부':'품질관리부', '팀':'품질보증팀', '담당자(정)':'장현우', '담당자(부)':'오수빈', '차량번호':'23거 7741', '차종':'스포티지', '지역':'충남', '주차장':'천안공장 주차장' },
+      { '본부':'경영지원본부', '부':'총무부', '팀':'자산관리팀', '담당자(정)':'이준호', '담당자(부)':'한지민', '차량번호':'31도 8265', '차종':'그랜저', '지역':'서울', '주차장':'본사 지하주차장' },
+      { '본부':'경영지원본부', '부':'총무부', '팀':'자산관리팀', '담당자(정)':'이준호', '담당자(부)':'한지민', '차량번호':'72오 3158', '차종':'K8', '지역':'서울', '주차장':'본사 지하주차장' },
+      { '본부':'경영지원본부', '부':'재무부', '팀':'회계팀', '담당자(정)':'신지우', '담당자(부)':'강민서', '차량번호':'89주 6402', '차종':'쏘나타', '지역':'서울', '주차장':'본사 외부주차장' },
+      { '본부':'물류운영본부', '부':'운송관리부', '팀':'수도권운영팀', '담당자(정)':'조성민', '담당자(부)':'배유나', '차량번호':'94하 5127', '차종':'스타리아', '지역':'인천', '주차장':'인천물류센터 주차장' },
+      { '본부':'물류운영본부', '부':'운송관리부', '팀':'지방운영팀', '담당자(정)':'임태호', '담당자(부)':'문가영', '차량번호':'11호 2486', '차종':'봉고3', '지역':'부산', '주차장':'부산물류센터 주차장' }
     ];
     const contractModal = document.getElementById('contractUploadModal');
     const contractFileInput = document.getElementById('contractFileInput');
@@ -968,8 +970,8 @@
         <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
         <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
         <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
-        <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td><button class="row-edit" data-vehicle-edit="${item.index}">수정</button></td>
-      </tr>`; }).join('') : '<tr><td class="empty-table" colspan="8">조건에 맞는 차량이 없습니다.</td></tr>';
+        <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td>${escapeHtml(row['지역'] || '-')}</td><td>${escapeHtml(row['주차장'] || '-')}</td><td><button class="row-edit" data-vehicle-edit="${item.index}">수정</button></td>
+      </tr>`; }).join('') : '<tr><td class="empty-table" colspan="10">조건에 맞는 차량이 없습니다.</td></tr>';
       document.getElementById('recordCount').textContent = `${filtered.length}건`;
       document.getElementById('totalVehicles').textContent = `${vehicleData.length}대`;
       document.getElementById('totalHeadquarters').textContent = `${uniqueValues('본부').length}개`;
@@ -1213,6 +1215,8 @@
         document.getElementById('vfSecondary').value = row['담당자(부)'];
         document.getElementById('vfPlate').value = row['차량번호'];
         document.getElementById('vfModel').value = row['차종'];
+        document.getElementById('vfRegion').value = row['지역'] || '';
+        document.getElementById('vfParking').value = row['주차장'] || '';
       }
       vehicleFormModal.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -1443,7 +1447,9 @@
         '담당자(정)': document.getElementById('vfPrimary').value.trim(),
         '담당자(부)': document.getElementById('vfSecondary').value.trim(),
         '차량번호': document.getElementById('vfPlate').value.trim(),
-        '차종': document.getElementById('vfModel').value.trim()
+        '차종': document.getElementById('vfModel').value.trim(),
+        '지역': document.getElementById('vfRegion').value.trim(),
+        '주차장': document.getElementById('vfParking').value.trim()
       };
       if (editingVehicleIndex === null) vehicleData.push(row); else vehicleData[editingVehicleIndex] = row;
       refreshFilters(); renderVehicles(); renderDriving(); closeVehicleForm();
