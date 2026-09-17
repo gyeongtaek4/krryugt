@@ -164,7 +164,10 @@ function renderClosing() {
   document.getElementById('closingAdminEdit').style.display = saved && !isEditing ? 'inline-flex' : 'none';
   document.getElementById('closingCorrectionReason').style.display = isEditing ? 'inline-block' : 'none';
   const totals = closingTotals(rows);
-  document.getElementById('closingTotal').textContent = rows.length ? `총 비용 ${won(totals.reduce((a,b)=>a+b,0))} · 부가세 포함` : '—';
+  document.getElementById('closingVehicleCount').textContent = rows.length ? `${rows.length}대` : '—';
+  document.getElementById('closingRentAmount').textContent = rows.length ? won(totals[0]) : '—';
+  document.getElementById('closingOtherAmount').textContent = rows.length ? won(totals.slice(1).reduce((a,b)=>a+b,0)) : '—';
+  document.getElementById('closingTotal').textContent = rows.length ? won(totals.reduce((a,b)=>a+b,0)) : '—';
   document.getElementById('closingRows').innerHTML = rows.length ? rows.map(row=>`<tr>${['본부','부','팀','차량번호'].map(key=>`<td>${escapeHtml(row[key] || '미매칭')}</td>`).join('')}${costKeys.map(key=>`<td>${won(row[key])}</td>`).join('')}</tr>`).join('') : '<tr><td colspan="8" class="empty-table">선택월의 자료를 업로드하거나 보관파일을 불러오세요.</td></tr>';
   document.getElementById('closingArchiveRows').innerHTML = Object.keys(closingArchive).sort().reverse().map(key=>{const item=closingArchive[key], totals=closingTotals(item.rows), revisions=item.revisions||[];return `<tr><td>${escapeHtml(key)}</td><td>${item.rows.length}대</td><td>${won(totals[0])}</td><td>${won(totals.reduce((a,b)=>a+b,0))}</td><td>${escapeHtml(item.confirmedAt)}</td><td>${revisions.length ? `${revisions.length}회` : '없음'}</td><td><button class="row-edit" data-closing-month="${escapeHtml(key)}">조회</button></td></tr>`;}).join('') || '<tr><td colspan="7" class="empty-table">확정된 비용마감자료가 없습니다.</td></tr>';
 }

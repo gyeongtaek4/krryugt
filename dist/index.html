@@ -55,23 +55,32 @@
         </div>
       </header>
       <div class="content view" id="closingView">
-        <div class="page-heading"><div><h1>월별 비용마감자료</h1><p>현재 차량정보와 분리하여, 선택한 월의 확정 비용을 보관합니다.</p></div></div>
-        <section class="panel" style="margin-bottom:24px">
-          <div class="panel-header"><div class="month-control"><label for="closingMonth">마감월도</label><input class="month-picker" id="closingMonth" type="month" value="2026-09"></div><strong id="closingStatus">미마감</strong></div>
-          <div style="padding:0 24px 24px"><p>① 월도 선택 → ② 비용자료 업로드 → ③ 확인 → ④ 마감 확정 및 보관파일 저장</p>
-            <p>Excel 첫 행: 차량번호, 렌탈료, 주유비, 통행료, 주차비. 금액 단위는 원이며, 차량별 한 행으로 작성하세요. 렌탈료는 필수이고 나머지 비용은 생략하면 0원입니다.</p>
-            <button class="button" id="downloadClosingTemplate">양식 내려받기</button>
-            <label class="button">비용자료 업로드 <input id="closingUpload" type="file" accept=".xlsx,.xls,.csv" style="max-width:220px"></label>
-            <button class="button primary" id="closingConfirm">마감 확정 · 보관파일 저장</button>
-            <button class="button" id="closingAdminEdit" style="display:none">관리자 마감 수정</button>
-            <input class="form-input" id="closingCorrectionReason" placeholder="정정 사유를 입력하세요 (필수)" style="display:none;max-width:260px">
-            <button class="button" id="closingDownload">전체 보관파일 다운로드</button>
-            <label class="button">보관파일 불러오기 <input id="closingRestore" type="file" accept=".json" style="max-width:220px"></label>
-            <p id="closingMessage" role="status">Supabase 연결 전에는 파일 보관 방식입니다. 새로고침 후 보관파일을 불러오세요. 원본 Excel도 함께 보관하세요.</p>
+        <div class="page-heading"><div><p class="eyebrow">월별 비용 · 확정자료 보관</p><h1>월별 비용마감자료</h1><p class="heading-copy">월별 비용을 검토하고 확정한 자료를 따로 보관합니다.</p></div></div>
+        <section class="panel closing-workspace">
+          <div class="panel-header"><div class="month-control"><label for="closingMonth">마감월도</label><input class="month-picker" id="closingMonth" type="month" value="2026-09"></div><strong class="closing-status" id="closingStatus">미마감</strong></div>
+          <div class="closing-setup">
+            <ol class="closing-steps"><li><span>1</span> 월도 선택</li><li><span>2</span> 자료 업로드·검토</li><li><span>3</span> 마감 확정·보관</li></ol>
+            <div class="closing-upload-row"><div><h2 class="panel-title">비용자료 준비</h2><p class="closing-help">차량별 한 행 · 금액은 원 단위, 부가세 포함</p></div><div class="closing-actions"><button class="button" id="downloadClosingTemplate">양식 내려받기</button><label class="button primary closing-file-button">비용자료 업로드<input id="closingUpload" type="file" accept=".xlsx,.xls,.csv"></label></div></div>
+            <p class="closing-help">필수 항목: 차량번호, 렌탈료 / 선택 항목: 주유비, 통행료, 주차비 (생략 시 0원)</p>
+            <p class="closing-feedback" id="closingMessage" role="status">월별 비용의 서버 저장은 아직 연결되지 않았습니다. 확정 후 내려받은 JSON 보관파일과 원본 Excel을 보관하고, 재접속 시 보관파일을 불러오세요.</p>
           </div>
         </section>
-        <section class="panel" style="margin-bottom:24px"><div class="panel-header"><h2 class="panel-title">선택월 비용자료</h2><strong id="closingTotal">—</strong></div><div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량번호</th><th>렌탈료</th><th>주유비</th><th>통행료</th><th>주차비</th></tr></thead><tbody id="closingRows"></tbody></table></div></section>
-        <section class="panel"><div class="panel-header"><h2 class="panel-title">확정 마감자료 목록</h2></div><div class="table-wrap"><table class="vehicle-table"><thead><tr><th>마감월도</th><th>차량수</th><th>렌트비용</th><th>총 비용</th><th>확정일</th><th>정정 이력</th><th>조회</th></tr></thead><tbody id="closingArchiveRows"></tbody></table></div></section>
+        <div class="closing-summary">
+          <article><span>대상 차량</span><strong id="closingVehicleCount">—</strong></article>
+          <article><span>렌트비용</span><strong id="closingRentAmount">—</strong></article>
+          <article><span>주유·통행·주차비</span><strong id="closingOtherAmount">—</strong></article>
+          <article class="closing-summary-total"><span>선택월 총 비용 · 부가세 포함</span><strong id="closingTotal">—</strong></article>
+        </div>
+        <section class="panel closing-detail">
+          <div class="panel-header"><div><h2 class="panel-title">선택월 비용자료</h2><p class="closing-help">차량별 비용과 연결된 조직정보를 확인하세요.</p></div><div class="closing-actions"><button class="button" id="closingAdminEdit" style="display:none">관리자 마감 수정</button><button class="button primary" id="closingConfirm">마감 확정 · 보관파일 저장</button></div></div>
+          <div class="closing-correction"><input class="form-input" id="closingCorrectionReason" aria-label="정정 사유" placeholder="정정 사유를 입력하세요 (필수)" style="display:none"></div>
+          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량번호</th><th>렌탈료</th><th>주유비</th><th>통행료</th><th>주차비</th></tr></thead><tbody id="closingRows"></tbody></table></div>
+        </section>
+        <section class="panel closing-archive">
+          <div class="panel-header"><div><h2 class="panel-title">확정 마감자료 보관함</h2><p class="closing-help">지난 월의 확정자료는 조회 버튼으로 다시 확인합니다.</p></div></div>
+          <div class="closing-backup"><div><strong>보관파일 관리</strong><p class="closing-help">전체 확정월을 하나의 JSON 파일로 내려받거나 복원합니다.</p></div><div class="closing-actions"><button class="button" id="closingDownload">전체 보관파일 다운로드</button><label class="button closing-file-button">보관파일 불러오기<input id="closingRestore" type="file" accept=".json"></label></div></div>
+          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>마감월도</th><th>차량수</th><th>렌트비용</th><th>총 비용</th><th>확정일</th><th>정정 이력</th><th>조회</th></tr></thead><tbody id="closingArchiveRows"></tbody></table></div>
+        </section>
       </div>
       <div class="content view active" id="dashboardView">
         <section class="page-heading">
