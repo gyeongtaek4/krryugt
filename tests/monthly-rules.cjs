@@ -13,3 +13,16 @@ context.drivingArchive['2026-08']={};assert.equal(vm.runInContext('mergeDrivingR
 assert(source.includes('const averages = months.map(() => average)'));
 assert(source.includes("format:'fleet-driving-monthly-v2'"));assert(source.includes("data.format==='fleet-driving-archive-v1'"));
 console.log('PASS: monthly mileage, two months, duplicate/conflict, confirmed lock, fixed average, archive format guard');
+vm.runInContext(fn('latestConfirmedDrivingMonth')+'\n'+fn('confirmedDrivingSummary'),context);
+assert.equal(vm.runInContext('latestConfirmedDrivingMonth()',context),'2026-08');
+context.drivingArchive={
+  '2026-08':{confirmedAt:'2026-09-17T10:00:00Z',rows:[{...row('2026-08',1000),_organization:{'본부':'익명본부'}}]},
+  '2026-09':{confirmedAt:'2026-09-17T09:00:00Z',rows:[row('2026-09',500)]}
+};
+assert.equal(vm.runInContext('latestConfirmedDrivingMonth()',context),'2026-08');
+assert.equal(vm.runInContext('confirmedDrivingSummary().distance',context),1000);
+context.drivingData.push(row('2026-10',9999));
+assert.equal(vm.runInContext('confirmedDrivingSummary().distance',context),1000);
+context.drivingArchive={};
+assert.equal(vm.runInContext('confirmedDrivingSummary().month',context),'');
+console.log('PASS: latest confirmation time, draft exclusion and empty confirmed summary.');

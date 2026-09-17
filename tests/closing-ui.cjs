@@ -2,6 +2,10 @@ const fs = require('node:fs'), vm = require('node:vm'), assert = require('node:a
 const source = fs.readFileSync('dist/js/app.js', 'utf8');
 const html = fs.readFileSync('dist/index.html', 'utf8');
 const elements = {};
+let templateHeaders;
+const templateContext = vm.createContext({downloadTemplate: headers => {templateHeaders = Array.from(headers);}});
+vm.runInContext(fn('downloadClosingTemplate') + '\ndownloadClosingTemplate();', templateContext);
+assert.deepEqual(templateHeaders, ['본부','부','팀','차량번호','렌탈료','주유비','통행료','주차비']);
 for (const match of html.matchAll(/id="([^"]+)"/g)) {
   assert(!elements[match[1]], 'duplicate ID: ' + match[1]);
   elements[match[1]] = {value: '2026-09', style: {}};
