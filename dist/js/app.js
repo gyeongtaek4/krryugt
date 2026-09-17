@@ -118,14 +118,17 @@ function showView(page) {
   const isContracts = page === '차량계약정보';
   const isDriving = page === '운행기록데이터';
   const isClosing = page === '월별 비용마감자료';
+  const isHandover = page === '차량인수인계';
+  document.getElementById('handoverView').classList.toggle('active', isHandover);
   document.getElementById('closingView').classList.toggle('active', isClosing);
-  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing);
+  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover);
   document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
   document.getElementById('contractsView').classList.toggle('active', isContracts);
   document.getElementById('drivingView').classList.toggle('active', isDriving);
   document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : isDriving ? '운행기록데이터' : '대시보드';
   document.querySelectorAll('.nav-button').forEach(item => item.classList.toggle('active', item.dataset.page === page));
   if (isClosing) { document.getElementById('breadcrumbCurrent').textContent = page; renderClosing(); }
+  if (isHandover) { document.getElementById('breadcrumbCurrent').textContent = page; refreshHandoverVehicles(); }
   if (isDriving) {
     const latest = latestConfirmedDrivingMonth();
     if (latest) document.getElementById('usageMonth').value = latest;

@@ -19,6 +19,7 @@
 - `docs/data-rules.md`: 자료 귀속월, 계산, 마감·정정 업무 규칙.
 - `docs/data-model.md`: 현재 저장 방식과 향후 데이터 구조 초안.
 - `docs/excel-format.md`: 카테고리별 업로드 열 제목과 입력 형식.
+- `docs/handover.md`: 차량인수인계·외관 사진·보관 방식과 후속 서버 연결 범위.
 - `docs/errors.md`: 오류 재현·원인·조치·검증 상태.
 - `docs/test-checklist.md`: 작업별 검증 항목과 결과 기록 방법.
 - `docs/roadmap.md`: 현재 단계, 다음 작업, 결정 필요 항목.

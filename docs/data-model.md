@@ -1,5 +1,7 @@
 # 데이터 구조 초안
 
+- 인수인계는 브라우저 메모리 목록과 사진 포함 fleet-handover-v1 JSON으로 보관한다. 차량·조직 스냅샷을 저장하며 DB/Storage는 미연결이다. handover.md 참고.
+
 ## 구현된 Supabase 연결 (2026-09-17)
 
 - 로그인·RLS와 vehicles 조회·추가·수정·Excel 저장·삭제 연결.
