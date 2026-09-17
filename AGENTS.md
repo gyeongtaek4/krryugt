@@ -73,6 +73,7 @@
 - 한 작업의 목표·변경 범위·완료 기준을 정하고 관련 파일부터 확인한다. 변경과 무관한 사용자 파일을 보존한다.
 - 기능별 코드와 공통 업로드·내려받기 처리를 정리해 관련 부분만 수정할 수 있게 한다.
 - HTML에 대량의 CSS·JavaScript를 다시 넣지 않는다. 팝업을 구성한 후 기능 코드를 실행하는 순서를 유지한다. 배포는 `dist/` 전체를 포함한다.
+- Supabase 공개 연결정보는 `dist/js/supabase-config.js`, 브라우저 연결 객체는 `dist/js/supabase-client.js`에 둔다. Publishable key만 허용하며 Secret key·service_role key는 코드·문서·Git에 넣지 않는다.
 - 로컬 미리보기: `node scripts/preview.cjs`. JavaScript 문법 확인: `node --check dist/js/app.js`, `node --check dist/js/dialogs.js`. 문법 확인과 실제 기능 확인을 구분한다.
 - 월 이동거리 회귀검증: `node tests/monthly-rules.cjs`. 운행 v1 보관파일을 v2 월자료로 자동 해석하지 않는다.
 - 검증 도구는 실제 설치된 것만 사용한다. 존재하지 않는 테스트 명령을 실행 가능한 것처럼 안내하지 않는다.
