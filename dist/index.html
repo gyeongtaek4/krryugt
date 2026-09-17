@@ -1502,6 +1502,17 @@
       showToast(`${fileName} 파일을 내려받았습니다.`);
     }
 
+    function downloadTemplate(columns, sheetName, fileName) {
+      if (!window.XLSX) { showToast('Excel 기능을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet([columns]);
+      worksheet['!cols'] = columns.map(column => ({ wch: Math.max(12, String(column).length * 2 + 4) }));
+      worksheet['!autofilter'] = { ref: XLSX.utils.encode_range({ s:{ c:0, r:0 }, e:{ c:columns.length - 1, r:0 } }) };
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      XLSX.writeFile(workbook, fileName);
+      showToast(`${fileName} 입력 양식을 내려받았습니다.`);
+    }
+
     function exportVehicleData() {
       downloadExcel(vehicleData.map(row => Object.fromEntries(requiredColumns.map(column => [column, row[column] || '']))), '차량현황', '차량현황.xlsx');
     }
@@ -1535,19 +1546,19 @@
     }
 
     function downloadVehicleTemplate() {
-      downloadExcel([{ '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'홍길동', '담당자(부)':'김보조', '차량번호':'12가 3456', '차종':'그랜저', '지역':'서울', '주차장':'본사 지하주차장' }], '차량현황 양식', '차량현황_업로드양식.xlsx');
+      downloadTemplate(requiredColumns, '차량현황 양식', '차량현황_업로드양식.xlsx');
     }
 
     function downloadContractTemplate() {
-      downloadExcel([{ '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'홍길동', '담당자(부)':'김보조', '차종':'그랜저', '차량번호':'12가 3456', '렌탈료':1150000, '계약시작':'2026-01', '계약종료':'2029-12' }], '차량계약정보 양식', '차량계약정보_업로드양식.xlsx');
+      downloadTemplate(contractColumns, '차량계약정보 양식', '차량계약정보_업로드양식.xlsx');
     }
 
     function downloadDrivingTemplate() {
-      downloadExcel([{ '차량번호':'12가 3456', '키로수':35000, '운행년월일':'2026-09-01' }], '운행기록 양식', '운행기록데이터_업로드양식.xlsx');
+      downloadTemplate(drivingColumns, '운행기록 양식', '운행기록데이터_업로드양식.xlsx');
     }
 
     function downloadClosingTemplate() {
-      downloadExcel([{ '차량번호':'12가 3456', '렌탈료':1150000, '주유비':120000, '통행료':15000, '주차비':30000, '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀' }], '월별 비용마감 양식', '월별비용마감_업로드양식.xlsx');
+      downloadTemplate(['차량번호', '렌탈료', '주유비', '통행료', '주차비', '본부', '부', '팀'], '월별 비용마감 양식', '월별비용마감_업로드양식.xlsx');
     }
 
     function showUploadError(message) {
