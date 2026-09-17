@@ -430,3 +430,7 @@ td strong { font-size: .8rem; }
   #printReport tr { break-inside: avoid; }
   #printReport svg { display: block; width: 100%; height: 230px; }
 }
+#authGate { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: rgba(246, 251, 249, .96); }
+#authGate.hidden { display: none; }
+.auth-card { width: min(390px, calc(100vw - 40px)); padding: 38px; background: #fff; border: 1px solid #e6f4f0; border-radius: 22px; box-shadow: 0 20px 60px rgba(0, 90, 70, .12); }
+.auth-card h1 { margin: 4px 0 8px; }.auth-card > p:not(.eyebrow):not(.auth-error) { color: #777; margin: 0 0 24px; }.auth-mark { width: 46px; height: 46px; display: grid; place-items: center; color: #fff; background: #01916d; border-radius: 14px; font-weight: 700; }.auth-submit { width: 100%; justify-content: center; margin-top: 8px; }.auth-error { min-height: 20px; color: #c94b4b; margin: 8px 0 0; font-size: 13px; }.auth-logout { padding: 7px 10px; font-size: 12px; }

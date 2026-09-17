@@ -9,6 +9,7 @@ dist/
   js/dialogs.js   업로드·직접 입력 팝업의 정적 HTML 구성
   js/supabase-config.js  Supabase Project URL·Publishable key 공개 연결 설정
   js/supabase-client.js  Supabase 브라우저 연결 객체
+  js/supabase-auth.js    이메일 로그인·로그아웃과 프로필 역할 표시
   js/app.js       기존 데이터·계산·업로드·조회·마감 처리
 scripts/
   preview.cjs     Node.js 로컬 미리보기 서버
@@ -36,7 +37,7 @@ supabase-client.js, dialogs.js와 app.js에 임의로 async를 추가하지 않�
 - 화면 내용과 기능 코드를 압축하거나 삭제하지 않았다. HTML의 빈 간격 줄만 정리했다.
 - 기존 계산, 데이터 보관 방식, 메뉴, 입력 기능은 변경하지 않았다.
 - app.js는 기존 코드를 유지하는 첫 단계다. 차량·계약·운행·마감별 모듈화는 이번 범위에 포함하지 않았다.
-- Supabase Project URL·Publishable key를 전용 파일로 추가하고 브라우저 연결 객체를 생성했다. 아직 DB 읽기·쓰기 코드는 연결하지 않았다. RLS 정책 전에는 데이터를 읽거나 쓸 수 없는 것이 정상이다.
+- Supabase Project URL·Publishable key를 전용 파일로 추가하고 브라우저 연결 객체를 생성했다. 로그인 후 `vehicles` 조회도 연결했다. 차량 추가·수정 저장, 비용·운행 표 연결은 후속 작업이다.
 
 ## 검증 결과
 
