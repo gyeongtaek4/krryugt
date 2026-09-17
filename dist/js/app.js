@@ -318,6 +318,33 @@ async function deleteVehicleIndices(indices) {
   }
 }
 
+async function deleteAllVehicles() {
+  const button = document.getElementById('deleteAllVehicles');
+  if (button.disabled) return;
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) { showToast('로그인 후 이용해 주세요.'); return; }
+  button.disabled = true;
+  try {
+    const client = window.fleetSupabaseClient;
+    const { data: role, error: roleError } = await client.rpc('current_user_role');
+    if (roleError) throw roleError;
+    if (role !== 'admin') { showToast('전체 삭제는 관리자만 가능합니다.'); return; }
+    const { count, error: countError } = await client.from('vehicles').select('id', { count: 'exact', head: true });
+    if (countError) throw countError;
+    if (!count) { showToast('삭제할 차량이 없습니다.'); return; }
+    const answer = window.prompt(`검색·필터와 관계없이 등록된 차량 ${count}건을 모두 삭제합니다. 복구할 수 없으므로 필요하면 자료를 먼저 내려받으세요. 계속하려면 '전체삭제'를 입력하세요.`);
+    if (answer !== '전체삭제') return;
+    const { count: deletedCount, error } = await client.from('vehicles').delete({ count: 'exact' }).not('id', 'is', null);
+    if (error) throw error;
+    await refreshVehiclesFromSupabase();
+    showToast(`차량 ${deletedCount ?? count}건을 전체 삭제했습니다.`);
+  } catch (error) {
+    console.error('차량 전체 삭제 오류', error);
+    showToast(error.code === '23503' ? '계약·운행자료에 연결된 차량이 있어 전체 삭제가 차단되었습니다.' : '전체 삭제하지 못했습니다. 권한과 연결 상태를 확인해 주세요.');
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function parseYearMonth(value) {
   const match = String(value || '').trim().match(/(\d{4})\D*(\d{1,2})/);
   if (!match) return null;
@@ -824,6 +851,7 @@ document.getElementById('closeDrivingUpload').addEventListener('click', () => to
 document.getElementById('cancelDrivingUpload').addEventListener('click', () => toggleDrivingUploadModal(false));
 drivingUploadModal.addEventListener('click', event => { if (event.target === drivingUploadModal) toggleDrivingUploadModal(false); });
 document.getElementById('addVehicleButton').addEventListener('click', () => openVehicleForm());
+document.getElementById('deleteAllVehicles').addEventListener('click', deleteAllVehicles);
 document.getElementById('addContractButton').addEventListener('click', () => openContractForm());
 document.getElementById('addDrivingButton').addEventListener('click', () => openDrivingForm());
 document.getElementById('exportVehiclesButton').addEventListener('click', exportVehicleData);
