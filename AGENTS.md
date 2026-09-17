@@ -14,10 +14,21 @@
 - 현재 구조: `dist/index.html`은 화면 골격, `dist/css/app.css`는 스타일, `dist/js/dialogs.js`는 팝업 구성, `dist/js/app.js`는 데이터·기능 코드다.
 - `docs/code-structure.md`: 파일 역할, 실행 순서, 미리보기 방법과 리팩터링 검증 결과. 구조를 변경할 때 갱신한다.
 - GitHub 저장소는 `gyeongtaek4/krryugt`, 배포 서비스는 Vercel이다.
-- 추후 상세 업무 규칙은 `docs/requirements.md`, 저장 구조는 `docs/data-model.md`, 진행 상태는 `docs/roadmap.md`에 관리한다. 파일이 실제로 존재할 때 참고한다.
+- `docs/requirements.md`: 확정 요구사항과 미결정 항목.
+- `docs/design.md`: 화면·색상·표·그래프 디자인 기준.
+- `docs/data-rules.md`: 자료 귀속월, 계산, 마감·정정 업무 규칙.
+- `docs/data-model.md`: 현재 저장 방식과 향후 데이터 구조 초안.
+- `docs/excel-format.md`: 카테고리별 업로드 열 제목과 입력 형식.
+- `docs/errors.md`: 오류 재현·원인·조치·검증 상태.
+- `docs/test-checklist.md`: 작업별 검증 항목과 결과 기록 방법.
+- `docs/roadmap.md`: 현재 단계, 다음 작업, 결정 필요 항목.
+- `CHANGELOG.md`: 실제 반영한 변경 이력. 계획은 기록하지 않는다.
 
 ## 문서 생성과 갱신
 
+- 개발 작업 시 관련 문서를 함께 갱신한다. 사용자의 별도 문서 작성 요청을 기다리지 않는다.
+- 디자인 변경은 design, 기능 요구 변경은 requirements, 계산·마감 변경은 data-rules, 저장 구조 변경은 data-model, 엑셀 변경은 excel-format에 기록한다. 오류 조사·수정은 errors, 실제 반영 변경은 CHANGELOG, 검증 결과·남은 일은 test-checklist 또는 roadmap에 기록한다.
+- 파일이 스스로 변경을 감지하는 것은 아니다. 개발자가 해당 작업에서 필요한 문서만 갱신하며, 업무자료 업로드마다 MD에 원본 데이터를 기록하지 않는다.
 - 계속 참고해야 할 요구사항, 계산 기준, 데이터 구분, 설계 결정, 운영 방법, 진행 상태가 생기면 같은 작업에서 MD 문서로 기록한다. 별도 문서 작성 요청을 기다리지 않는다.
 - 같은 주제의 문서가 있으면 먼저 갱신한다. 새로운 주제는 역할이 명확한 이름으로 `docs/`에 생성한다. 단발성 대화마다 파일을 만들지 않는다.
 - 확정사항, 제안사항, 미결정사항, 구현 여부, 실제 검증 여부를 구분한다. 사용자 승인 전 제안을 확정된 규칙으로 기록하지 않는다.

@@ -9,6 +9,7 @@
 - `dist/js/dialogs.js`: 업로드·직접 입력 팝업.
 - `dist/js/app.js`: 데이터, 계산, 업로드, 조회, 마감 기능.
 - 개발 원칙: `AGENTS.md`. 상세 구조와 검증 기록: `docs/code-structure.md`.
+- 문서 안내: 요구사항 `docs/requirements.md`, 디자인 `docs/design.md`, 업무 규칙 `docs/data-rules.md`, 저장 구조 `docs/data-model.md`, 엑셀 형식 `docs/excel-format.md`, 오류 `docs/errors.md`, 검증 `docs/test-checklist.md`, 진행 `docs/roadmap.md`, 변경 이력 `CHANGELOG.md`.
 
 프로젝트 폴더에서 `node scripts/preview.cjs`를 실행하고 `http://127.0.0.1:4173/`에 접속합니다.
 종료는 터미널에서 Ctrl+C를 누릅니다. 별도 npm 설치는 필요하지 않습니다.
