@@ -555,6 +555,11 @@
           </article>
         </section>
 
+        <section class="panel" style="margin-bottom:24px">
+          <div class="panel-header"><div><h2 class="panel-title">확정 운행자료 · 부서별 이용 현황</h2><p class="panel-subtitle" id="dashboardUsageStatus">확정된 월별 자료를 기준으로 집계합니다.</p></div><div class="month-control"><label for="dashboardUsageMonth">보고월</label><input class="month-picker" id="dashboardUsageMonth" type="month" value="2026-09"></div></div>
+          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>운행 차량</th><th>월 주행거리</th><th>운행일수</th><th>차량당 평균</th></tr></thead><tbody id="dashboardUsageRows"></tbody></table></div>
+          <p class="usage-note">주행거리는 차량별 월 첫 기록과 마지막 기록의 누적 키로수 차이입니다. 운행일수는 부서 내 기록이 있는 서로 다른 날짜 수입니다.</p>
+        </section>
         <section class="grid-bottom">
           <article class="panel">
             <div class="panel-header">
@@ -708,6 +713,12 @@
         </section>
 
         <div class="analysis-stack">
+          <section class="panel">
+            <div class="panel-header"><div><h2 class="panel-title">월별 운행자료 보관</h2><p class="panel-subtitle" id="drivingArchiveStatus">미확정</p></div><button class="button primary" id="confirmDrivingMonth">조회월 마감 확정 · 보관파일 저장</button></div>
+            <div style="padding:0 24px 20px;display:flex;flex-wrap:wrap;gap:12px"><button class="button" id="downloadDrivingArchive">전체 확정자료 보관파일</button><label class="button">보관파일 불러오기 <input id="restoreDrivingArchive" type="file" accept=".json" style="max-width:210px"></label><button class="button" id="exportDrivingReport">조회월 부서별 보고자료 Excel</button></div>
+            <p class="usage-note">업로드 날짜와 관계없이 운행년월일의 월도로 분류합니다. 확정자료는 수정·덮어쓰기할 수 없으며 당시 부서정보를 고정합니다. Supabase 연결 전에는 다운로드한 JSON 파일을 직접 보관하고, 새로고침 후 불러오세요. 원본 Excel도 함께 보관하세요.</p>
+            <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>월도</th><th>기록수</th><th>상태</th><th>확정일</th><th>조회</th></tr></thead><tbody id="drivingArchiveList"></tbody></table></div>
+          </section>
           <section class="panel vehicle-panel">
             <div class="analysis-toolbar">
               <div><h2>부서별 월간 운행 분석</h2><p>같은 차량의 선택 월 첫 기록과 마지막 기록의 키로수 차이를 합산합니다.</p></div>
@@ -893,27 +904,8 @@
     const drivingFileInput = document.getElementById('drivingFileInput');
     const drivingUploadError = document.getElementById('drivingUploadError');
     const drivingColumns = ['차량번호', '키로수', '운행년월일'];
-    let drivingData = [
-      { '차량번호':'12가 3456', '키로수':'35120', '운행년월일':'2026-09-02' },
-      { '차량번호':'12가 3456', '키로수':'35640', '운행년월일':'2026-09-12' },
-      { '차량번호':'12가 3456', '키로수':'36210', '운행년월일':'2026-09-25' },
-      { '차량번호':'34나 7890', '키로수':'22800', '운행년월일':'2026-09-01' },
-      { '차량번호':'34나 7890', '키로수':'23310', '운행년월일':'2026-09-15' },
-      { '차량번호':'34나 7890', '키로수':'23950', '운행년월일':'2026-09-29' },
-      { '차량번호':'45다 2211', '키로수':'18500', '운행년월일':'2026-09-03' },
-      { '차량번호':'45다 2211', '키로수':'18940', '운행년월일':'2026-09-18' },
-      { '차량번호':'45다 2211', '키로수':'19200', '운행년월일':'2026-09-28' },
-      { '차량번호':'56다 1122', '키로수':'41200', '운행년월일':'2026-09-02' },
-      { '차량번호':'56다 1122', '키로수':'41630', '운행년월일':'2026-09-10' },
-      { '차량번호':'56다 1122', '키로수':'42110', '운행년월일':'2026-09-24' },
-      { '차량번호':'67마 4589', '키로수':'56800', '운행년월일':'2026-09-05' },
-      { '차량번호':'67마 4589', '키로수':'57600', '운행년월일':'2026-09-19' },
-      { '차량번호':'31도 8265', '키로수':'30750', '운행년월일':'2026-09-04' },
-      { '차량번호':'31도 8265', '키로수':'31240', '운행년월일':'2026-09-21' },
-      { '차량번호':'99미 9999', '키로수':'10420', '운행년월일':'2026-09-08' },
-      { '차량번호':'12가 3456', '키로수':'34200', '운행년월일':'2026-08-03' },
-      { '차량번호':'12가 3456', '키로수':'34980', '운행년월일':'2026-08-27' }
-    ];
+    let drivingData = [];
+    const drivingArchive = {};
     const vehicleFormModal = document.getElementById('vehicleFormModal');
     const contractFormModal = document.getElementById('contractFormModal');
     let editingVehicleIndex = null;
@@ -1262,10 +1254,56 @@
       return readings.length > 1 ? Math.max(...readings) - Math.min(...readings) : 0;
     }
 
+    function drivingRowMonth(row) { return normalizeDrivingDate(row['운행년월일']).slice(0,7); }
+    function drivingOrganization(row) { return drivingArchive[drivingRowMonth(row)] ? row._organization : vehicleForPlate(row['차량번호']); }
+    function mergeDrivingRows(incoming) {
+      const next=drivingData.slice(), keys=new Map(next.map((row,index)=>[normalizePlate(row['차량번호'])+'|'+normalizeDrivingDate(row['운행년월일']),index]));
+      let added=0, duplicate=0, locked=0;
+      for(const row of incoming){
+        if(drivingArchive[drivingRowMonth(row)]){locked++;continue;}
+        const key=normalizePlate(row['차량번호'])+'|'+normalizeDrivingDate(row['운행년월일']);
+        if(keys.has(key)){if(mileageNumber(next[keys.get(key)]['키로수'])!==mileageNumber(row['키로수']))throw Error(`${row['차량번호']} ${row['운행년월일']}: 기존 기록과 키로수가 다릅니다. 미확정 기록의 수정 기능으로 확인하세요.`);duplicate++;continue;}
+        keys.set(key,next.length);next.push(row);added++;
+      }
+      drivingData=next;return {added,duplicate,locked};
+    }
+    function drivingReportForMonth(month) {
+      const groups=new Map();
+      drivingData.filter(row=>drivingRowMonth(row)===month).forEach(row=>{
+        const org=drivingOrganization(row);if(!org)return;
+        const key=JSON.stringify([org['본부'],org['부'],org['팀']]);
+        if(!groups.has(key))groups.set(key,{org,vehicles:new Map(),days:new Set()});
+        const group=groups.get(key),plate=normalizePlate(row['차량번호']);
+        if(!group.vehicles.has(plate))group.vehicles.set(plate,[]);
+        group.vehicles.get(plate).push({row});group.days.add(normalizeDrivingDate(row['운행년월일']));
+      });
+      return [...groups.values()].map(group=>{const distance=[...group.vehicles.values()].reduce((sum,items)=>sum+distanceForItems(items),0);return {'본부':group.org['본부'],'부':group.org['부'],'팀':group.org['팀'],'운행 차량':group.vehicles.size,'월 주행거리(km)':distance,'운행일수':group.days.size,'차량당 평균(km)':Math.round(distance/group.vehicles.size)};}).sort((a,b)=>b['월 주행거리(km)']-a['월 주행거리(km)']);
+    }
+    function drivingReportMarkup(rows) { return rows.map(row=>`<tr>${['본부','부','팀'].map(key=>`<td>${escapeHtml(row[key])}</td>`).join('')}<td>${row['운행 차량']}대</td><td>${row['월 주행거리(km)'].toLocaleString('ko-KR')}km</td><td>${row['운행일수']}일</td><td>${row['차량당 평균(km)'].toLocaleString('ko-KR')}km</td></tr>`).join(''); }
+    function renderDashboardUsage() {
+      const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];
+      document.getElementById('dashboardUsageStatus').textContent=item ? `${month} · 확정자료 ${item.rows.length}건 · 확정 당시 부서 기준` : `${month || '보고월 선택 필요'} · 확정된 운행자료 없음`;
+      document.getElementById('dashboardUsageRows').innerHTML=item ? drivingReportMarkup(drivingReportForMonth(month)) : '<tr><td colspan="7" class="empty-table">운행기록데이터에서 해당 월을 확정하거나 보관파일을 불러오세요.</td></tr>';
+    }
+    function renderDrivingArchive() {
+      const month=document.getElementById('usageMonth').value,saved=drivingArchive[month],rows=drivingData.filter(row=>drivingRowMonth(row)===month);
+      document.getElementById('drivingArchiveStatus').textContent=saved ? `${month} · 마감 확정 · 수정 잠금` : `${month || '조회월 선택 필요'} · 미확정`;
+      document.getElementById('confirmDrivingMonth').disabled=!!saved||!rows.length;
+      document.getElementById('drivingSourceFileName').textContent=saved ? '확정 보관자료' : rows.length ? '미확정 운행자료' : '자료 없음';
+      document.getElementById('drivingSourceUpdated').textContent=saved ? `확정일 ${saved.confirmedAt}` : '월별 보관 · 확정 전';
+      const months=[...new Set(drivingData.map(drivingRowMonth))].sort().reverse();
+      document.getElementById('drivingArchiveList').innerHTML=months.map(key=>`<tr><td>${escapeHtml(key)}</td><td>${drivingData.filter(row=>drivingRowMonth(row)===key).length}건</td><td>${drivingArchive[key]?'확정':'미확정'}</td><td>${escapeHtml(drivingArchive[key]?.confirmedAt || '—')}</td><td><button class="row-edit" data-driving-month="${escapeHtml(key)}">조회</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty-table">운행자료를 업로드하면 월도별로 표시됩니다.</td></tr>';
+      renderDashboardUsage();
+    }
+    function downloadDrivingArchiveFile() {
+      if(!Object.keys(drivingArchive).length){showToast('확정된 운행자료가 없습니다.');return;}
+      const url=URL.createObjectURL(new Blob([JSON.stringify({format:'fleet-driving-archive-v1',months:drivingArchive},null,2)],{type:'application/json'}));
+      const link=document.createElement('a');link.href=url;link.download=`운행확정보관자료_${new Date().toISOString().slice(0,10)}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
     function renderDriving() {
       const month = document.getElementById('usageMonth').value;
       const keyword = document.getElementById('drivingSearch').value.trim().toLowerCase();
-      const monthlyItems = drivingData.map((row, index) => ({ row, index, vehicle: vehicleForPlate(row['차량번호']) }))
+      const monthlyItems = drivingData.map((row, index) => ({ row, index, vehicle: drivingOrganization(row) }))
         .filter(item => normalizeDrivingDate(item.row['운행년월일']).slice(0, 7) === month);
       const matchedItems = monthlyItems.filter(item => item.vehicle);
       const unmatchedItems = monthlyItems.filter(item => !item.vehicle);
@@ -1322,10 +1360,11 @@
         return `<tr class="${vehicle ? '' : 'unmatched-row'}">
           <td>${escapeHtml(date)}</td><td>${escapeHtml(vehicle ? vehicle['본부'] : '미매칭')}</td><td>${escapeHtml(vehicle ? vehicle['부'] : '-')}</td><td>${escapeHtml(vehicle ? vehicle['팀'] : '-')}</td>
           <td class="plate">${escapeHtml(item.row['차량번호'])}</td><td>${escapeHtml(vehicle ? vehicle['차종'] : '-')}</td><td class="distance-value">${mileageNumber(item.row['키로수']).toLocaleString('ko-KR')}km</td>
-          <td><span class="match-pill ${vehicle ? '' : 'unmatched'}">${vehicle ? '연결 완료' : '차량현황 확인'}</span></td><td><button class="row-edit" data-driving-edit="${item.index}">수정</button></td>
+          <td><span class="match-pill ${vehicle ? '' : 'unmatched'}">${vehicle ? '연결 완료' : '차량현황 확인'}</span></td><td>${drivingArchive[month] ? '확정 · 잠금' : `<button class="row-edit" data-driving-edit="${item.index}">수정</button>`}</td>
         </tr>`;
       }).join('') : '<tr><td class="empty-table" colspan="9">조건에 맞는 운행기록이 없습니다.</td></tr>';
       document.getElementById('drivingRecordCount').textContent = `${filtered.length}건`;
+      renderDrivingArchive();
     }
 
     function showContractUploadError(message) {
@@ -1479,15 +1518,16 @@
     }
 
     function exportDrivingData() {
-      const rows = drivingData.map(row => {
-        const vehicle = vehicleForPlate(row['차량번호']);
+      const month=document.getElementById('usageMonth').value;
+      const rows = drivingData.filter(row=>drivingRowMonth(row)===month).map(row => {
+        const vehicle = drivingOrganization(row);
         return {
           '운행년월일': normalizeDrivingDate(row['운행년월일']), '차량번호': row['차량번호'], '키로수': mileageNumber(row['키로수']),
           '본부': vehicle ? vehicle['본부'] : '', '부': vehicle ? vehicle['부'] : '', '팀': vehicle ? vehicle['팀'] : '',
           '차종': vehicle ? vehicle['차종'] : '', '매칭상태': vehicle ? '연결 완료' : '미매칭'
         };
       });
-      downloadExcel(rows, '운행기록데이터', '운행기록데이터.xlsx');
+      downloadExcel(rows, '운행기록데이터', `운행기록데이터_${month}.xlsx`);
     }
 
     function showUploadError(message) {
@@ -1668,6 +1708,8 @@
         return;
       }
       const row = { '차량번호': plate, '키로수': String(mileage), '운행년월일': date };
+      if(drivingArchive[date.slice(0,7)] || (editingDrivingIndex!==null && drivingArchive[drivingRowMonth(drivingData[editingDrivingIndex])])){error.textContent='확정된 월의 기록은 추가하거나 수정할 수 없습니다.';error.classList.add('show');return;}
+      if(drivingData.some((item,index)=>index!==editingDrivingIndex && normalizePlate(item['차량번호'])===normalizePlate(plate) && normalizeDrivingDate(item['운행년월일'])===date)){error.textContent='같은 차량과 날짜의 기록이 이미 있습니다.';error.classList.add('show');return;}
       if (editingDrivingIndex === null) drivingData.push(row); else drivingData[editingDrivingIndex] = row;
       document.getElementById('usageMonth').value = date.slice(0, 7);
       renderDriving(); closeDrivingForm();
@@ -1756,17 +1798,15 @@
       button.disabled = true;
       button.textContent = '자료 확인 중...';
       try {
-        drivingData = await readDrivingFile(file);
+        const incoming = await readDrivingFile(file);
+        const result = mergeDrivingRows(incoming);
         document.getElementById('drivingSearch').value = '';
-        const newestDate = drivingData.reduce((latest, row) => normalizeDrivingDate(row['운행년월일']) > latest ? normalizeDrivingDate(row['운행년월일']) : latest, '');
+        const newestDate = incoming.reduce((latest, row) => normalizeDrivingDate(row['운행년월일']) > latest ? normalizeDrivingDate(row['운행년월일']) : latest, '');
         if (newestDate) document.getElementById('usageMonth').value = newestDate.slice(0, 7);
         renderDriving();
-        document.getElementById('drivingSourceFileName').textContent = file.name;
-        document.getElementById('drivingSourceUpdated').textContent = `${new Date().toLocaleString('ko-KR')} 반영`;
         toggleDrivingUploadModal(false);
         showView('운행기록데이터');
-        const unmatchedCount = drivingData.filter(row => !vehicleForPlate(row['차량번호'])).length;
-        showToast(`${drivingData.length}건을 불러왔습니다. 차량현황 미매칭 ${unmatchedCount}건`);
+        showToast(`새 기록 ${result.added}건 · 동일 중복 ${result.duplicate}건 · 확정월 제외 ${result.locked}건`);
       } catch (error) {
         showDrivingUploadError(error.message || '파일을 읽는 중 문제가 발생했습니다.');
       } finally {
@@ -1874,6 +1914,59 @@
       refreshContractFilters(); renderContracts();
     });
 
+    document.getElementById('confirmDrivingMonth').addEventListener('click',()=>{
+      const month=document.getElementById('usageMonth').value;
+      if(drivingArchive[month])return;
+      const rows=drivingData.filter(row=>drivingRowMonth(row)===month);
+      if(!rows.length){showToast('선택월에 운행자료가 없습니다.');return;}
+      const vehicles=new Map();
+      for(const row of rows){
+        const org=vehicleForPlate(row['차량번호']);
+        if(!org || ['본부','부','팀'].some(key=>!org[key])){showToast('미매칭 차량의 부서정보를 먼저 차량현황에서 확인하세요.');return;}
+        const plate=normalizePlate(row['차량번호']);if(!vehicles.has(plate))vehicles.set(plate,[]);vehicles.get(plate).push(row);
+      }
+      for(const items of vehicles.values()){
+        const ordered=items.slice().sort((a,b)=>normalizeDrivingDate(a['운행년월일']).localeCompare(normalizeDrivingDate(b['운행년월일'])));
+        if(ordered.some((row,index)=>index>0 && mileageNumber(row['키로수'])<mileageNumber(ordered[index-1]['키로수']))){showToast('누적 키로수가 이전 날짜보다 감소한 기록을 먼저 수정하세요.');return;}
+      }
+      if(!confirm(`${month} 운행자료 ${rows.length}건을 확정할까요? 부서정보를 고정하고 수정 잠금 후 전체 확정자료 보관파일을 다운로드합니다.`))return;
+      const snapshots=rows.map(row=>({...row,_organization:Object.fromEntries(['본부','부','팀','차종'].map(key=>[key,String(vehicleForPlate(row['차량번호'])[key] || '')]))}));
+      drivingArchive[month]={rows:snapshots,confirmedAt:new Date().toISOString()};
+      drivingData=drivingData.filter(row=>drivingRowMonth(row)!==month).concat(snapshots);
+      document.getElementById('dashboardUsageMonth').value=month;
+      renderDriving();downloadDrivingArchiveFile();showToast('월별 운행자료를 확정했습니다. 다운로드한 파일을 보관하세요.');
+    });
+    document.getElementById('downloadDrivingArchive').addEventListener('click',downloadDrivingArchiveFile);
+    document.getElementById('dashboardUsageMonth').addEventListener('change',renderDashboardUsage);
+    document.getElementById('drivingArchiveList').addEventListener('click',event=>{const button=event.target.closest('[data-driving-month]');if(button){document.getElementById('usageMonth').value=button.dataset.drivingMonth;renderDriving();}});
+    document.getElementById('exportDrivingReport').addEventListener('click',()=>{const month=document.getElementById('usageMonth').value;if(!drivingArchive[month]){showToast('보고자료는 마감 확정 후 내려받을 수 있습니다.');return;}downloadExcel(drivingReportForMonth(month).map(row=>({'보고월':month,...row})),'부서별 운행보고',`부서별운행보고_${month}.xlsx`);});
+    document.getElementById('restoreDrivingArchive').addEventListener('change',async event=>{
+      const file=event.target.files[0];if(!file)return;
+      try{
+        if(file.size>20*1024*1024)throw Error('보관파일은 20MB 이하여야 합니다.');
+        const data=JSON.parse(await file.text());
+        if(data.format!=='fleet-driving-archive-v1'||!data.months||typeof data.months!=='object'||Array.isArray(data.months))throw Error('운행확정보관자료 JSON 파일을 선택하세요.');
+        const entries=Object.entries(data.months);if(!entries.length)throw Error('확정자료가 비어 있습니다.');
+        for(const [month,item] of entries){
+          if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)||!item||!Array.isArray(item.rows)||!item.rows.length||typeof item.confirmedAt!=='string'||!Number.isFinite(Date.parse(item.confirmedAt)))throw Error('보관자료 형식이 올바르지 않습니다.');
+          const seen=new Set(),byPlate=new Map();
+          for(const row of item.rows){
+            if(!row||typeof row['차량번호']!=='string'||!normalizePlate(row['차량번호'])||!normalizeDrivingDate(row['운행년월일'])||drivingRowMonth(row)!==month||String(row['키로수']??'').trim()===''||!Number.isFinite(Number(row['키로수']))||Number(row['키로수'])<0||!row._organization||['본부','부','팀'].some(key=>typeof row._organization[key]!=='string'||!row._organization[key]))throw Error('운행기록 또는 확정 부서정보를 확인할 수 없습니다.');
+            const plate=normalizePlate(row['차량번호']),key=plate+'|'+normalizeDrivingDate(row['운행년월일']);if(seen.has(key))throw Error('보관파일에 차량·날짜 중복이 있습니다.');seen.add(key);
+            if(!byPlate.has(plate))byPlate.set(plate,[]);byPlate.get(plate).push(row);
+          }
+          for(const rows of byPlate.values()){const ordered=rows.slice().sort((a,b)=>normalizeDrivingDate(a['운행년월일']).localeCompare(normalizeDrivingDate(b['운행년월일'])));if(ordered.some((row,index)=>index>0&&Number(row['키로수'])<Number(ordered[index-1]['키로수'])))throw Error('누적 키로수가 감소한 보관자료는 불러올 수 없습니다.');}
+          if(drivingArchive[month]&&JSON.stringify(drivingArchive[month])!==JSON.stringify(item))throw Error(`${month}의 기존 확정자료와 달라 불러오기를 취소했습니다. 기존 자료는 유지됩니다.`);
+        }
+        const restoredMonths=new Set(entries.map(([month])=>month));
+        const draftCount=drivingData.filter(row=>restoredMonths.has(drivingRowMonth(row))&&!drivingArchive[drivingRowMonth(row)]).length;
+        if(draftCount && !confirm(`불러오는 월도에 미확정 기록 ${draftCount}건이 있습니다. 보관파일의 확정자료로 바꿀까요? 다른 월도는 유지됩니다.`))return;
+        const retained=drivingData.filter(row=>!restoredMonths.has(drivingRowMonth(row)));
+        Object.assign(drivingArchive,data.months);drivingData=retained.concat(entries.flatMap(([,item])=>item.rows));
+        const latest=[...restoredMonths].sort().at(-1);document.getElementById('usageMonth').value=latest;document.getElementById('dashboardUsageMonth').value=latest;
+        renderDriving();showToast(`${entries.length}개월의 확정 운행자료를 불러왔습니다.`);
+      }catch(error){showToast(error.message || '보관파일을 읽을 수 없습니다.');}finally{event.target.value='';}
+    });
     document.getElementById('usageMonth').addEventListener('change', renderDriving);
     document.getElementById('drivingSearch').addEventListener('input', renderDriving);
     document.getElementById('rentReferenceMonth').addEventListener('change', renderRentChart);
