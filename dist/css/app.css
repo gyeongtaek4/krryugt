@@ -322,6 +322,10 @@ td strong { font-size: .8rem; }
 .remaining-badge.urgent { color: #bb5555; background: #fff0f0; }
 .row-edit { min-height: 31px; padding: 0 11px; border: 1px solid var(--brand-soft); border-radius: 8px; color: var(--brand-dark); background: var(--white); font-size: .72rem; font-weight: 800; cursor: pointer; }
 .row-edit:hover { background: var(--brand-wash); }
+.row-delete, .button.danger { color: #bd4b4b; border-color: #f0c8c8; }
+.row-delete { min-height: 31px; padding: 0 10px; border: 1px solid #f0c8c8; border-radius: 8px; background: var(--white); font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
+.row-delete:hover, .button.danger:not(:disabled):hover { background: #fff3f3; }
+.button.danger:disabled { opacity: .45; cursor: not-allowed; }
 .form-grid { margin: 22px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
 .form-field { display: grid; gap: 6px; }
 .form-field.full { grid-column: 1 / -1; }

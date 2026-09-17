@@ -290,12 +290,42 @@ function renderVehicles() {
     <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
     <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
     <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
-    <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td>${escapeHtml(row['지역'] || '-')}</td><td>${escapeHtml(row['주차장'] || '-')}</td><td><button class="row-edit" data-vehicle-edit="${item.index}">수정</button></td>
-  </tr>`; }).join('') : '<tr><td class="empty-table" colspan="10">조건에 맞는 차량이 없습니다.</td></tr>';
+    <td><input type="checkbox" data-vehicle-select="${item.index}" aria-label="${escapeHtml(row['차량번호'])} 선택"></td><td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td>${escapeHtml(row['지역'] || '-')}</td><td>${escapeHtml(row['주차장'] || '-')}</td><td><button class="row-edit" data-vehicle-edit="${item.index}">수정</button> <button class="row-delete" data-vehicle-delete="${item.index}">삭제</button></td>
+  </tr>`; }).join('') : '<tr><td class="empty-table" colspan="11">조건에 맞는 차량이 없습니다.</td></tr>';
   document.getElementById('recordCount').textContent = `${filtered.length}건`;
+  updateVehicleBulkControls();
   document.getElementById('totalVehicles').textContent = `${vehicleData.length}대`;
   document.getElementById('totalHeadquarters').textContent = `${uniqueValues('본부').length}개`;
   document.getElementById('totalManagers').textContent = `${uniqueValues('담당자(정)').length}명`;
+}
+
+function updateVehicleBulkControls() {
+  const checks = [...document.querySelectorAll('[data-vehicle-select]')];
+  const selected = checks.filter(check => check.checked);
+  const selectAll = document.getElementById('vehicleSelectAll');
+  const deleteButton = document.getElementById('deleteSelectedVehicles');
+  if (selectAll) { selectAll.checked = checks.length > 0 && selected.length === checks.length; selectAll.indeterminate = selected.length > 0 && selected.length < checks.length; }
+  if (deleteButton) deleteButton.disabled = selected.length === 0;
+}
+
+async function deleteVehicleIndices(indices) {
+  const rows = indices.map(index => vehicleData[index]).filter(Boolean);
+  if (!rows.length || !window.confirm(`선택한 차량 ${rows.length}건을 삭제할까요? 삭제 후 복구할 수 없습니다.`)) return;
+  try {
+    const ids = rows.map(row => row._supabaseId).filter(Boolean);
+    if (ids.length && window.fleetSupabaseClient) {
+      const { error } = await window.fleetSupabaseClient.from('vehicles').delete().in('id', ids);
+      if (error) throw error;
+      await refreshVehiclesFromSupabase();
+    } else {
+      vehicleData = vehicleData.filter((_, index) => !indices.includes(index));
+      refreshFilters(); renderVehicles(); renderDriving();
+    }
+    showToast(`${rows.length}건의 차량을 삭제했습니다.`);
+  } catch (error) {
+    console.error('차량 삭제 오류', error);
+    showToast('차량을 삭제하지 못했습니다. 관리자 권한을 확인해 주세요.');
+  }
 }
 
 function parseYearMonth(value) {
@@ -825,6 +855,17 @@ drivingFormModal.addEventListener('click', event => { if (event.target === drivi
 document.getElementById('vehicleTableBody').addEventListener('click', event => {
   const button = event.target.closest('[data-vehicle-edit]');
   if (button) openVehicleForm(Number(button.dataset.vehicleEdit));
+  const deleteButton = event.target.closest('[data-vehicle-delete]');
+  if (deleteButton) deleteVehicleIndices([Number(deleteButton.dataset.vehicleDelete)]);
+});
+document.getElementById('vehicleTableBody').addEventListener('change', updateVehicleBulkControls);
+document.getElementById('vehicleSelectAll').addEventListener('change', event => {
+  document.querySelectorAll('[data-vehicle-select]').forEach(check => { check.checked = event.target.checked; });
+  updateVehicleBulkControls();
+});
+document.getElementById('deleteSelectedVehicles').addEventListener('click', () => {
+  const indices = [...document.querySelectorAll('[data-vehicle-select]:checked')].map(check => Number(check.dataset.vehicleSelect));
+  deleteVehicleIndices(indices);
 });
 document.getElementById('contractTableBody').addEventListener('click', event => {
   const button = event.target.closest('[data-contract-edit]');
