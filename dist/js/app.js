@@ -586,6 +586,14 @@ async function saveVehicleToSupabase(row, index) {
   return 'inserted';
 }
 
+async function saveVehicleFileToSupabase(rows) {
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) return false;
+  const payload = rows.map(vehicleSupabasePayload);
+  const { error } = await window.fleetSupabaseClient.from('vehicles').upsert(payload, { onConflict: 'vehicle_number_normalized' });
+  if (error) throw error;
+  return true;
+}
+
 function openContractForm(index = null) {
   editingContractIndex = index;
   document.getElementById('contractForm').reset();
@@ -937,7 +945,9 @@ document.getElementById('confirmUpload').addEventListener('click', async () => {
   button.disabled = true;
   button.textContent = '자료 확인 중...';
   try {
-    vehicleData = await readVehicleFile(file);
+    const uploadedRows = await readVehicleFile(file);
+    const savedToSupabase = await saveVehicleFileToSupabase(uploadedRows);
+    vehicleData = savedToSupabase ? (await refreshVehiclesFromSupabase(), vehicleData) : uploadedRows;
     document.getElementById('vehicleSearch').value = '';
     ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => document.getElementById(id).value = '');
     refreshFilters();
@@ -947,7 +957,7 @@ document.getElementById('confirmUpload').addEventListener('click', async () => {
     document.getElementById('sourceUpdated').textContent = `${new Date().toLocaleString('ko-KR')} 반영`;
     toggleModal(false);
     showView('차량 현황');
-    showToast(`${vehicleData.length}건의 차량 담당자 정보를 불러왔습니다.`);
+    showToast(`${uploadedRows.length}건의 차량 담당자 정보를 ${savedToSupabase ? '저장하고 ' : ''}불러왔습니다.`);
   } catch (error) {
     showUploadError(error.message || '파일을 읽는 중 문제가 발생했습니다.');
   } finally {
