@@ -479,6 +479,7 @@
           <div class="panel-header"><div class="month-control"><label for="closingMonth">마감월도</label><input class="month-picker" id="closingMonth" type="month" value="2026-09"></div><strong id="closingStatus">미마감</strong></div>
           <div style="padding:0 24px 24px"><p>① 월도 선택 → ② 비용자료 업로드 → ③ 확인 → ④ 마감 확정 및 보관파일 저장</p>
             <p>Excel 첫 행: 차량번호, 렌탈료, 주유비, 통행료, 주차비. 금액 단위는 원이며, 차량별 한 행으로 작성하세요. 렌탈료는 필수이고 나머지 비용은 생략하면 0원입니다.</p>
+            <button class="button" id="downloadClosingTemplate">양식 내려받기</button>
             <label class="button">비용자료 업로드 <input id="closingUpload" type="file" accept=".xlsx,.xls,.csv" style="max-width:220px"></label>
             <button class="button primary" id="closingConfirm">마감 확정 · 보관파일 저장</button>
             <button class="button" id="closingDownload">전체 보관파일 다운로드</button>
@@ -600,7 +601,8 @@
             <p class="heading-copy">조직별 담당자와 배정 차량 정보를 한눈에 확인합니다.</p>
           </div>
           <div class="heading-actions">
-            <button class="button" id="exportVehiclesButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Excel 내려받기</button>
+            <button class="button" id="downloadVehicleTemplate">양식 내려받기</button>
+            <button class="button" id="exportVehiclesButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>자료 내려받기</button>
             <button class="button" id="addVehicleButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>직접 추가</button>
             <button class="button primary" id="vehicleUploadButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>담당자 Excel 업로드</button>
           </div>
@@ -647,7 +649,8 @@
             <p class="heading-copy">차량별 렌탈료와 계약기간, 남은 계약기간을 확인합니다.</p>
           </div>
           <div class="heading-actions">
-            <button class="button" id="exportContractsButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Excel 내려받기</button>
+            <button class="button" id="downloadContractTemplate">양식 내려받기</button>
+            <button class="button" id="exportContractsButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>자료 내려받기</button>
             <button class="button" id="addContractButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>직접 추가</button>
             <button class="button primary" id="contractUploadButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>계약정보 Excel 업로드</button>
           </div>
@@ -694,7 +697,8 @@
             <p class="heading-copy">차량번호를 기준으로 조직정보를 연결하고 월별 주행거리와 운행일수를 분석합니다.</p>
           </div>
           <div class="heading-actions">
-            <button class="button" id="exportDrivingButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Excel 내려받기</button>
+            <button class="button" id="downloadDrivingTemplate">양식 내려받기</button>
+            <button class="button" id="exportDrivingButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>자료 내려받기</button>
             <button class="button" id="addDrivingButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>직접 추가</button>
             <button class="button primary" id="drivingUploadButton"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>운행기록 Excel 업로드</button>
           </div>
@@ -1530,6 +1534,22 @@
       downloadExcel(rows, '운행기록데이터', `운행기록데이터_${month}.xlsx`);
     }
 
+    function downloadVehicleTemplate() {
+      downloadExcel([{ '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'홍길동', '담당자(부)':'김보조', '차량번호':'12가 3456', '차종':'그랜저', '지역':'서울', '주차장':'본사 지하주차장' }], '차량현황 양식', '차량현황_업로드양식.xlsx');
+    }
+
+    function downloadContractTemplate() {
+      downloadExcel([{ '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'홍길동', '담당자(부)':'김보조', '차종':'그랜저', '차량번호':'12가 3456', '렌탈료':1150000, '계약시작':'2026-01', '계약종료':'2029-12' }], '차량계약정보 양식', '차량계약정보_업로드양식.xlsx');
+    }
+
+    function downloadDrivingTemplate() {
+      downloadExcel([{ '차량번호':'12가 3456', '키로수':35000, '운행년월일':'2026-09-01' }], '운행기록 양식', '운행기록데이터_업로드양식.xlsx');
+    }
+
+    function downloadClosingTemplate() {
+      downloadExcel([{ '차량번호':'12가 3456', '렌탈료':1150000, '주유비':120000, '통행료':15000, '주차비':30000, '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀' }], '월별 비용마감 양식', '월별비용마감_업로드양식.xlsx');
+    }
+
     function showUploadError(message) {
       uploadError.textContent = message;
       uploadError.classList.add('show');
@@ -1628,6 +1648,9 @@
     document.getElementById('exportVehiclesButton').addEventListener('click', exportVehicleData);
     document.getElementById('exportContractsButton').addEventListener('click', exportContractData);
     document.getElementById('exportDrivingButton').addEventListener('click', exportDrivingData);
+    document.getElementById('downloadVehicleTemplate').addEventListener('click', downloadVehicleTemplate);
+    document.getElementById('downloadContractTemplate').addEventListener('click', downloadContractTemplate);
+    document.getElementById('downloadDrivingTemplate').addEventListener('click', downloadDrivingTemplate);
     document.getElementById('closeVehicleForm').addEventListener('click', closeVehicleForm);
     document.getElementById('cancelVehicleForm').addEventListener('click', closeVehicleForm);
     document.getElementById('closeContractForm').addEventListener('click', closeContractForm);
@@ -1866,6 +1889,7 @@
       document.getElementById('closingMessage').textContent='마감 확정 완료. 다운로드된 JSON 보관파일을 안전한 폴더에 저장하세요. 다음 접속 시 불러오면 복원됩니다.';
     });
     document.getElementById('closingDownload').addEventListener('click',downloadClosingArchive);
+    document.getElementById('downloadClosingTemplate').addEventListener('click',downloadClosingTemplate);
     document.getElementById('closingArchiveRows').addEventListener('click',event=>{const button=event.target.closest('[data-closing-month]');if(button){document.getElementById('closingMonth').value=button.dataset.closingMonth;closingDraft=null;renderClosing();}});
     document.getElementById('closingRestore').addEventListener('change',async event=>{
       const file=event.target.files[0];if(!file)return;
