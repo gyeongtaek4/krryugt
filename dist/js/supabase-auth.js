@@ -21,7 +21,8 @@
       ]);
       if (profileError) console.warn('프로필 조회 오류', profileError);
       if (roleError) console.warn('역할 조회 오류', roleError);
-      const role = roleValue || profile?.role;
+      // 프로필 표의 실제 역할을 우선 사용하고, 프로필 조회가 제한될 때만 RPC 결과를 사용합니다.
+      const role = profile?.role || roleValue;
       userName.textContent = profile?.display_name || session.user.email || '로그인 사용자';
       userRole.textContent = role === 'admin' ? '관리자' : role === 'editor' ? '입력자' : '조회자';
       if (window.refreshVehiclesFromSupabase) await window.refreshVehiclesFromSupabase();
