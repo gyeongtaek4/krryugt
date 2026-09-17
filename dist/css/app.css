@@ -300,6 +300,11 @@ td strong { font-size: .8rem; }
 .column-filter { display: block; width: 100%; min-width: 76px; max-width: 190px; border: 1px solid transparent; border-radius: 5px; padding: 7px 18px 7px 2px; color: var(--ink-soft); background-color: transparent; font: inherit; font-weight: 700; cursor: pointer; }
 .column-filter:hover { background-color: var(--brand-wash); color: var(--brand-dark); }
 .column-filter:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.column-filter-control { position: relative; display: block; border-radius: 6px; padding: 7px 6px; white-space: nowrap; }
+.column-filter-control .column-filter { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; min-width: 0; padding: 0; opacity: 0; cursor: pointer; }
+.column-filter-control:hover { background: #e6f4f0; }
+.column-filter-control.is-filtered { color: #01916d; background: #e6f4f0; }
+.column-filter-control:focus-within { outline: 2px solid #99d3c5; outline-offset: 2px; }
 .table-header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 #vehiclesView .vehicle-toolbar, #contractsView .vehicle-toolbar { flex-wrap: wrap; gap: 14px; }
 .reset-filter { margin-left: auto; border: 0; color: var(--brand-dark); background: transparent; font-size: .76rem; font-weight: 750; cursor: pointer; }

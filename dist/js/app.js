@@ -316,11 +316,12 @@ function refreshFieldFilters(viewId, keys, rows, render) {
   const orgIds = viewId === 'vehiclesView' ? ['headquartersFilter', 'divisionFilter', 'teamFilter'] : ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'];
   orgIds.forEach((id, index) => {
     const select = document.getElementById(id);
-    if (select.parentElement !== headers[index]) {
+    if (!headers[index].contains(select)) {
       headers[index].textContent = '';
       headers[index].appendChild(select);
     }
     select.className = 'column-filter';
+    decorateColumnFilter(select, ['본부', '부', '팀'][index]);
   });
   const oldRow = document.querySelector(`#${viewId} .filter-row`);
   if (oldRow) {
@@ -342,11 +343,33 @@ function refreshFieldFilters(viewId, keys, rows, render) {
       const header = headers[viewId === 'vehiclesView' ? requiredColumns.indexOf(key) : contractIndices[key]];
       if (!header.querySelector('select')) header.textContent = '';
       header.appendChild(select);
+      decorateColumnFilter(select, key);
     }
     const values = [...new Set(rows.map(row => fieldFilterValue(row, key)))].sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
     const current = select.value;
-    select.innerHTML = `<option value="">${escapeHtml(key)}</option>` + values.map(value => `<option value="${escapeHtml(value || '__EMPTY__')}">${escapeHtml(value || '(미입력)')}</option>`).join('');
+    select.innerHTML = `<option value="">전체</option>` + values.map(value => `<option value="${escapeHtml(value || '__EMPTY__')}">${escapeHtml(value || '(미입력)')}</option>`).join('');
     if (values.includes(current) || (current === '__EMPTY__' && values.includes(''))) select.value = current;
+  });
+}
+
+function decorateColumnFilter(select, label) {
+  if (!select.parentElement.classList.contains('column-filter-control')) {
+    const wrapper = document.createElement('span');
+    wrapper.className = 'column-filter-control';
+    const title = document.createElement('span');
+    title.className = 'column-filter-title';
+    title.textContent = `${label} ▾`;
+    title.setAttribute('aria-hidden', 'true');
+    select.parentElement.insertBefore(wrapper, select);
+    wrapper.append(title, select);
+  }
+}
+
+function paintColumnFilters(viewId) {
+  document.querySelectorAll(`#${viewId} .column-filter`).forEach(select => {
+    const wrapper = select.parentElement;
+    wrapper.classList.toggle('is-filtered', Boolean(select.value));
+    wrapper.title = select.value ? `선택: ${select.options[select.selectedIndex]?.textContent || select.value}` : '전체';
   });
 }
 
@@ -360,7 +383,7 @@ function resetFieldFilters(viewId) {
 
 function setSelectOptions(select, label, values) {
   const current = select.value;
-  select.innerHTML = `<option value="">${label}</option>` + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+  select.innerHTML = `<option value="">전체</option>` + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
   if (values.includes(current)) select.value = current;
 }
 
@@ -377,6 +400,7 @@ function refreshFilters() {
 }
 
 function renderVehicles() {
+  paintColumnFilters('vehiclesView');
   const keyword = document.getElementById('vehicleSearch').value.trim().toLowerCase();
   const headquarters = document.getElementById('headquartersFilter').value;
   const division = document.getElementById('divisionFilter').value;
@@ -527,6 +551,7 @@ function refreshContractFilters() {
 }
 
 function renderContracts() {
+  paintColumnFilters('contractsView');
   const keyword = document.getElementById('contractSearch').value.trim().toLowerCase();
   const headquarters = document.getElementById('contractHeadquartersFilter').value;
   const division = document.getElementById('contractDivisionFilter').value;
