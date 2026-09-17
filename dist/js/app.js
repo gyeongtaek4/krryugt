@@ -947,7 +947,8 @@ document.getElementById('confirmUpload').addEventListener('click', async () => {
   try {
     const uploadedRows = await readVehicleFile(file);
     const savedToSupabase = await saveVehicleFileToSupabase(uploadedRows);
-    vehicleData = savedToSupabase ? (await refreshVehiclesFromSupabase(), vehicleData) : uploadedRows;
+    if (savedToSupabase) await refreshVehiclesFromSupabase();
+    else vehicleData = uploadedRows;
     document.getElementById('vehicleSearch').value = '';
     ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => document.getElementById(id).value = '');
     refreshFilters();
