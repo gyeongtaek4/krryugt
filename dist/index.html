@@ -694,9 +694,9 @@
       <div class="content view" id="drivingView">
         <section class="page-heading">
           <div>
-            <p class="eyebrow">부서별 차량 이용 분석</p>
+            <p class="eyebrow">차량별 운행기록 관리</p>
             <h1>운행기록데이터</h1>
-            <p class="heading-copy">차량번호를 기준으로 조직정보를 연결하고 월별 주행거리와 운행일수를 분석합니다.</p>
+            <p class="heading-copy">차량번호를 기준으로 조직정보를 연결하고 차량별 운행기록을 확인합니다.</p>
           </div>
           <div class="heading-actions">
             <button class="button" id="downloadDrivingTemplate">양식 내려받기</button>
@@ -709,7 +709,6 @@
         <section class="usage-summary" aria-label="월간 운행 요약">
           <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>운행 차량</span><strong id="usageVehicleCount">0대</strong></div></article>
           <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 18a7 7 0 1 1 14 0M12 11l3-3M4 18h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>월 총 주행거리</span><strong id="usageTotalDistance">0km</strong></div></article>
-          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14v12H5V8Zm3-4v6m8-6v6M5 12h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>운행일수</span><strong id="usageDayCount">0일</strong></div></article>
           <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-10v6m0-10h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>차량현황 미매칭</span><strong id="usageUnmatchedCount">0건</strong></div></article>
         </section>
 
@@ -726,23 +725,9 @@
             <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>월도</th><th>기록수</th><th>상태</th><th>확정일</th><th>조회</th></tr></thead><tbody id="drivingArchiveList"></tbody></table></div>
           </section>
           <section class="panel vehicle-panel">
-            <div class="analysis-toolbar">
-              <div><h2>부서별 월간 운행 분석</h2><p>같은 차량의 선택 월 첫 기록과 마지막 기록의 키로수 차이를 합산합니다.</p></div>
-              <div class="month-control"><label for="usageMonth">조회월</label><input class="month-picker" id="usageMonth" type="month" value="2026-09"></div>
-            </div>
-            <div class="table-wrap">
-              <table class="vehicle-table">
-                <thead><tr><th>본부</th><th>부</th><th>팀</th><th>운행 차량</th><th>월 주행거리</th><th>운행일수</th><th>차량당 평균</th></tr></thead>
-                <tbody id="usageAnalysisBody"></tbody>
-              </table>
-            </div>
-            <div class="usage-note"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-10v6m0-10h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>운행일수는 해당 부서 차량의 운행기록이 존재하는 서로 다른 날짜 수입니다. 차량번호가 차량현황에 없으면 분석에서 제외됩니다.</span></div>
-          </section>
-
-          <section class="panel vehicle-panel">
             <div class="vehicle-toolbar">
-              <div class="vehicle-title-wrap"><h2>운행기록 상세</h2><span class="record-count" id="drivingRecordCount">0건</span></div>
-              <label class="search-box"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="drivingSearch" placeholder="차량번호, 부서, 차종 검색" aria-label="운행기록 검색"></label>
+              <div class="vehicle-title-wrap"><h2>차량별 운행기록</h2><span class="record-count" id="drivingRecordCount">0건</span></div>
+              <label class="search-box"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input type="search" id="drivingSearch" placeholder="차량번호, 차종 검색" aria-label="운행기록 검색"></label>
             </div>
             <div class="table-wrap">
               <table class="vehicle-table">
@@ -1326,39 +1311,9 @@
         byVehicle.get(key).push(item);
       });
       const totalDistance = [...byVehicle.values()].reduce((sum, items) => sum + distanceForItems(items), 0);
-      const totalDays = new Set(matchedItems.map(item => normalizeDrivingDate(item.row['운행년월일']))).size;
       document.getElementById('usageVehicleCount').textContent = `${byVehicle.size}대`;
       document.getElementById('usageTotalDistance').textContent = `${totalDistance.toLocaleString('ko-KR')}km`;
-      document.getElementById('usageDayCount').textContent = `${totalDays}일`;
       document.getElementById('usageUnmatchedCount').textContent = `${unmatchedItems.length}건`;
-
-      const byOrganization = new Map();
-      matchedItems.forEach(item => {
-        const vehicle = item.vehicle;
-        const key = [vehicle['본부'], vehicle['부'], vehicle['팀']].join('|');
-        if (!byOrganization.has(key)) byOrganization.set(key, { vehicle, items: [] });
-        byOrganization.get(key).items.push(item);
-      });
-      const analysisRows = [...byOrganization.values()].map(group => {
-        const vehicleGroups = new Map();
-        group.items.forEach(item => {
-          const key = normalizePlate(item.row['차량번호']);
-          if (!vehicleGroups.has(key)) vehicleGroups.set(key, []);
-          vehicleGroups.get(key).push(item);
-        });
-        const distance = [...vehicleGroups.values()].reduce((sum, items) => sum + distanceForItems(items), 0);
-        return {
-          vehicle: group.vehicle,
-          vehicleCount: vehicleGroups.size,
-          distance,
-          days: new Set(group.items.map(item => normalizeDrivingDate(item.row['운행년월일']))).size
-        };
-      }).sort((a, b) => b.distance - a.distance);
-      document.getElementById('usageAnalysisBody').innerHTML = analysisRows.length ? analysisRows.map(item => `<tr>
-        <td>${escapeHtml(item.vehicle['본부'])}</td><td>${escapeHtml(item.vehicle['부'])}</td><td>${escapeHtml(item.vehicle['팀'])}</td>
-        <td>${item.vehicleCount}대</td><td class="distance-value">${item.distance.toLocaleString('ko-KR')}km</td><td>${item.days}일</td>
-        <td>${Math.round(item.distance / item.vehicleCount).toLocaleString('ko-KR')}km</td>
-      </tr>`).join('') : '<tr><td class="empty-table" colspan="7">선택한 월에 분석할 운행기록이 없습니다.</td></tr>';
 
       const filtered = monthlyItems.filter(item => {
         const vehicle = item.vehicle || {};
