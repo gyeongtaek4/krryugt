@@ -65,8 +65,55 @@ async function refreshVehiclesFromSupabase() {
     '지역': row.region || '', '주차장': row.parking_lot || '', _supabaseId: row.id
   }));
   refreshFilters(); renderVehicles(); renderDriving();
+  await refreshContractsFromSupabase();
 }
 window.refreshVehiclesFromSupabase = refreshVehiclesFromSupabase;
+
+async function refreshContractsFromSupabase() {
+  const { data, error } = await window.fleetSupabaseClient.from('contracts').select('*').order('contract_start_month');
+  if (error) { showToast('계약정보를 불러오지 못했습니다. 권한 정책을 확인해 주세요.'); throw error; }
+  contractData = (data || []).map(record => {
+    const vehicle = vehicleData.find(row => row._supabaseId === record.vehicle_id) || {};
+    return { ...vehicle, _supabaseId: record.id, _vehicleId: record.vehicle_id,
+      _rentalCompany: record.rental_company, _isActive: record.is_active,
+      '렌탈료': String(record.monthly_rental_fee), '계약시작': record.contract_start_month.slice(0, 7),
+      '계약종료': record.contract_end_month.slice(0, 7) };
+  });
+  refreshContractFilters(); renderContracts();
+  document.getElementById('contractSourceFileName').textContent = 'Supabase 저장 계약정보';
+  document.getElementById('contractSourceUpdated').textContent = '현재 차량현황의 조직·담당자 기준';
+}
+
+function contractSupabasePayload(row) {
+  const vehicle = vehicleForPlate(row['차량번호']);
+  if (!vehicle?._supabaseId) throw Error(`차량현황에 등록되지 않은 차량번호입니다: ${row['차량번호']}`);
+  const start = normalizeYearMonth(row['계약시작']), end = normalizeYearMonth(row['계약종료']);
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(start) || !/^\d{4}-(0[1-9]|1[0-2])$/.test(end) || end < start) throw Error('계약 시작월과 종료월을 확인해 주세요.');
+  const feeText = String(row['렌탈료'] ?? '').replace(/[ ,원]/g, '');
+  const fee = Number(feeText);
+  if (!feeText || !Number.isSafeInteger(fee) || fee < 0) throw Error('월 렌탈료는 부가세 포함 원 단위의 0 이상 정수로 입력해 주세요.');
+  return { vehicle_id: vehicle._supabaseId, monthly_rental_fee: fee, contract_start_month: `${start}-01`, contract_end_month: `${end}-01` };
+}
+
+async function saveContractRows(rows, editingId = null) {
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) throw Error('로그인 후 이용해 주세요.');
+  const seen = new Set();
+  const payload = rows.map(row => {
+    const record = contractSupabasePayload(row);
+    const key = `${record.vehicle_id}/${record.contract_start_month}/${record.contract_end_month}`;
+    if (seen.has(key)) throw Error(`파일 안에 동일 차량·계약기간이 중복됩니다: ${row['차량번호']}`);
+    seen.add(key);
+    const matches = contractData.filter(item => item._vehicleId === record.vehicle_id && item['계약시작'] === record.contract_start_month.slice(0, 7) && item['계약종료'] === record.contract_end_month.slice(0, 7) && item._supabaseId !== editingId);
+    if (editingId && matches.length) throw Error('같은 차량·계약기간이 이미 등록되어 있습니다.');
+    if (matches.length > 1) throw Error('저장된 동일 차량·계약기간이 중복됩니다. 계약자료를 확인해 주세요.');
+    const id = editingId || matches[0]?._supabaseId;
+    const existing = contractData.find(item => item._supabaseId === id);
+    return id ? { ...record, id, rental_company: existing?._rentalCompany || '', is_active: existing?._isActive ?? true } : record;
+  });
+  const { error } = await window.fleetSupabaseClient.from('contracts').upsert(payload, { onConflict: 'id' });
+  if (error) throw error;
+  await refreshContractsFromSupabase();
+}
 
 function showToast(message) {
   toastMessage.textContent = message;
@@ -660,6 +707,7 @@ function openContractForm(index = null) {
     document.getElementById('cfEnd').value = normalizeYearMonth(row['계약종료']);
   }
   contractFormModal.classList.add('open');
+  fillContractVehicleFields();
   document.body.style.overflow = 'hidden';
   setTimeout(() => document.getElementById('cfHeadquarters').focus(), 0);
 }
@@ -667,6 +715,18 @@ function openContractForm(index = null) {
 function closeContractForm() {
   contractFormModal.classList.remove('open');
   document.body.style.overflow = '';
+}
+
+function fillContractVehicleFields() {
+  const vehicle = vehicleForPlate(document.getElementById('cfPlate').value);
+  const fields = { cfHeadquarters: '본부', cfDivision: '부', cfTeam: '팀', cfPrimary: '담당자(정)', cfSecondary: '담당자(부)', cfModel: '차종' };
+  Object.entries(fields).forEach(([id, key]) => {
+    const field = document.getElementById(id);
+    field.value = vehicle?.[key] || '';
+    field.readOnly = true;
+    field.required = false;
+    field.placeholder = '차량번호 입력 시 자동 연결';
+  });
 }
 
 function openDrivingForm(index = null) {
@@ -853,6 +913,7 @@ drivingUploadModal.addEventListener('click', event => { if (event.target === dri
 document.getElementById('addVehicleButton').addEventListener('click', () => openVehicleForm());
 document.getElementById('deleteAllVehicles').addEventListener('click', deleteAllVehicles);
 document.getElementById('addContractButton').addEventListener('click', () => openContractForm());
+document.getElementById('cfPlate').addEventListener('input', fillContractVehicleFields);
 document.getElementById('addDrivingButton').addEventListener('click', () => openDrivingForm());
 document.getElementById('exportVehiclesButton').addEventListener('click', exportVehicleData);
 document.getElementById('exportContractsButton').addEventListener('click', exportContractData);
@@ -917,8 +978,11 @@ document.getElementById('vehicleForm').addEventListener('submit', async event =>
   }
 });
 
-document.getElementById('contractForm').addEventListener('submit', event => {
+document.getElementById('contractForm').addEventListener('submit', async event => {
   event.preventDefault();
+  const submitButton = event.target.querySelector('[type="submit"]');
+  if (submitButton.disabled) return;
+  document.getElementById('contractFormError').classList.remove('show');
   const start = document.getElementById('cfStart').value;
   const end = document.getElementById('cfEnd').value;
   if (!monthSpan(start, end)) {
@@ -939,9 +1003,17 @@ document.getElementById('contractForm').addEventListener('submit', event => {
     '계약시작': start,
     '계약종료': end
   };
-  if (editingContractIndex === null) contractData.push(row); else contractData[editingContractIndex] = row;
-  refreshContractFilters(); renderContracts(); closeContractForm();
-  showToast(editingContractIndex === null ? '차량계약정보를 추가했습니다.' : '차량계약정보를 수정했습니다.');
+  submitButton.disabled = true;
+  try {
+    const editingId = editingContractIndex === null ? null : contractData[editingContractIndex]._supabaseId;
+    await saveContractRows([row], editingId);
+    closeContractForm();
+    showToast('차량계약정보를 저장했습니다.');
+  } catch (error) {
+    const field = document.getElementById('contractFormError');
+    field.textContent = error.message || '계약 저장에 실패했습니다.';
+    field.classList.add('show');
+  } finally { submitButton.disabled = false; }
 });
 
 document.getElementById('drivingForm').addEventListener('submit', event => {
@@ -1024,7 +1096,8 @@ document.getElementById('confirmContractUpload').addEventListener('click', async
   button.disabled = true;
   button.textContent = '자료 확인 중...';
   try {
-    contractData = await readContractFile(file);
+    const rows = await readContractFile(file);
+    await saveContractRows(rows);
     document.getElementById('contractSearch').value = '';
     ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'].forEach(id => document.getElementById(id).value = '');
     refreshContractFilters();

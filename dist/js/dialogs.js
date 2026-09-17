@@ -56,7 +56,7 @@
 
   <div class="modal-backdrop" id="contractFormModal" role="dialog" aria-modal="true" aria-labelledby="contractFormTitle">
     <div class="modal">
-      <div class="modal-header"><div><h2 id="contractFormTitle">차량계약정보 직접 추가</h2><p>계약에 필요한 정보를 입력해 주세요.</p></div><button class="close-button" id="closeContractForm" aria-label="닫기">✕</button></div>
+      <div class="modal-header"><div><h2 id="contractFormTitle">차량계약정보 직접 추가</h2><p>차량현황에 등록된 차량번호를 입력하세요. 조직·담당자는 자동 연결됩니다. 렌탈료는 부가세 포함입니다.</p></div><button class="close-button" id="closeContractForm" aria-label="닫기">✕</button></div>
       <form id="contractForm">
         <div class="form-grid">
           <div class="form-field"><label for="cfHeadquarters">본부 *</label><input id="cfHeadquarters" required></div>
