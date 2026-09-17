@@ -38,7 +38,7 @@
         <li><button class="nav-button" data-page="환경 설정"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.09a1.7 1.7 0 0 0-1.1-1.58 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.2 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2.4V9.6h.09A1.7 1.7 0 0 0 4.07 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 9.6 2.5V2.4h4v.09a1.7 1.7 0 0 0 1.1 1.58 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.5 9.6h.1v4h-.09A1.7 1.7 0 0 0 19.4 15Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>환경 설정</button></li>
       </ul>
       <div class="sidebar-footer">
-        <div class="help-card"><strong>데이터 기준</strong><p>2026년 9월 렌터카 업체 제공 자료를 기준으로 표시합니다.</p></div>
+        <div class="help-card"><strong>데이터 기준</strong><p>등록한 차량·계약정보와 확정한 월별 자료를 기준으로 표시합니다.</p></div>
       </div>
     </aside>
     <div class="scrim" id="scrim"></div>
@@ -76,7 +76,7 @@
       <div class="content view active" id="dashboardView">
         <section class="page-heading">
           <div>
-            <p class="eyebrow">2026년 9월 현황</p>
+            <p class="eyebrow">현재 저장정보 현황</p>
             <h1>차량 운영 대시보드</h1>
             <p class="heading-copy">렌터카 자료를 기준으로 주요 운영 현황과 비용을 요약했습니다.</p>
           </div>
@@ -87,8 +87,8 @@
         <section class="metrics" aria-label="주요 지표">
           <article class="metric-card">
             <div class="metric-top"><span class="metric-label">전체 운영 차량</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-            <p class="metric-value">128대</p>
-            <span class="metric-meta"><span class="change">+4대</span>&nbsp; 전월 대비</span>
+            <p class="metric-value" id="dashboardVehicleCount">0대</p>
+            <span class="metric-meta">현재 등록된 차량현황 기준</span>
           </article>
           <article class="metric-card">
             <div class="metric-top"><span class="metric-label">렌트 계약금액</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span></div>
@@ -99,7 +99,7 @@
         <section class="grid-main">
           <article class="panel">
             <div class="panel-header">
-              <div><h2 class="panel-title">월별 렌트 비용 추이</h2><p class="panel-subtitle" id="rentChartPeriod">기준월까지 최근 12개월 · 예시 데이터</p></div>
+              <div><h2 class="panel-title">월별 렌트 비용 추이</h2><p class="panel-subtitle" id="rentChartPeriod">기준월까지 최근 12개월 · 확정 마감자료</p></div>
               <div class="month-control"><label for="rentReferenceMonth">기준월</label><input class="month-picker" id="rentReferenceMonth" type="month" value="2026-09" required></div>
             </div>
             <div class="chart-summary" aria-live="polite"><strong id="rentAverageAmount">-</strong><span id="rentAverageLabel">조회기간 평균</span></div>
@@ -113,23 +113,23 @@
             <div class="combo-legend" aria-label="그래프 범례"><span><i></i>월 렌트비용</span><span><i class="line"></i>전체 평균</span></div>
           </article>
           <article class="panel cost-panel">
-            <div class="panel-header"><div><h2 class="panel-title">차량 부대비용</h2><p class="panel-subtitle">2026년 9월 · 예시 데이터</p></div></div>
-            <div class="cost-total"><span>월 부대비용 합계</span><strong>3,810만원</strong></div>
+            <div class="panel-header"><div><h2 class="panel-title">차량 부대비용</h2><p class="panel-subtitle">확정 비용자료 없음</p></div></div>
+            <div class="cost-total"><span>월 부대비용 합계</span><strong>—</strong></div>
             <div class="cost-list" aria-label="주유비, 통행료, 주차비 요약">
               <div class="cost-item">
                 <span class="cost-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 21V4h9v17M5 21h11M8 8h5m5 2 2 2v7a2 2 0 0 1-4 0v-6h2v-3Zm0 0-1.5-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-                <div class="cost-copy"><span>주유비</span><small>전체 부대비용의 74.5%</small></div><strong class="cost-value">2,840만원</strong>
-                <div class="cost-progress"><i style="--value:74.5%"></i></div>
+                <div class="cost-copy"><span>주유비</span><small>확정 자료 없음</small></div><strong class="cost-value">—</strong>
+                <div class="cost-progress"><i style="--value:0%"></i></div>
               </div>
               <div class="cost-item">
                 <span class="cost-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16M6 18V9m12 9V9M8 9l4-5 4 5M9 13h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-                <div class="cost-copy"><span>통행료</span><small>전체 부대비용의 16.3%</small></div><strong class="cost-value">620만원</strong>
-                <div class="cost-progress"><i style="--value:16.3%"></i></div>
+                <div class="cost-copy"><span>통행료</span><small>확정 자료 없음</small></div><strong class="cost-value">—</strong>
+                <div class="cost-progress"><i style="--value:0%"></i></div>
               </div>
               <div class="cost-item">
                 <span class="cost-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9m0 0h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-                <div class="cost-copy"><span>주차비</span><small>전체 부대비용의 9.2%</small></div><strong class="cost-value">350만원</strong>
-                <div class="cost-progress"><i style="--value:9.2%"></i></div>
+                <div class="cost-copy"><span>주차비</span><small>확정 자료 없음</small></div><strong class="cost-value">—</strong>
+                <div class="cost-progress"><i style="--value:0%"></i></div>
               </div>
             </div>
             <p class="cost-source-note"><strong>향후 데이터 연동 예정</strong><br>주유비·통행료·주차비 자료를 업로드하면 이 영역의 금액과 비율이 자동으로 바뀌도록 연결할 수 있습니다.</p>
@@ -144,29 +144,19 @@
           <article class="panel">
             <div class="panel-header">
               <div><h2 class="panel-title">3개월 내 계약 만료 예정 차량</h2><p class="panel-subtitle">요약 수치와 대상 차량을 한곳에서 확인합니다.</p></div>
-              <div class="expiry-header-actions"><span class="expiry-stat">대상 차량 <strong>9대</strong></span><span class="expiry-stat urgent">30일 내 <strong>3대</strong></span><button class="button" id="allVehiclesButton">계약정보 보기</button></div>
+              <div class="expiry-header-actions"><span class="expiry-stat">대상 차량 <strong id="dashboardExpiryCount">0대</strong></span><span class="expiry-stat urgent">1개월 내 <strong id="dashboardUrgentCount">0대</strong></span><button class="button" id="allVehiclesButton">계약정보 보기</button></div>
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>차량</th><th>사용 부서</th><th>렌터카 업체</th><th>계약 만료일</th><th>남은 기간</th></tr></thead>
-                <tbody>
-                  <tr><td><div class="vehicle-cell"><span class="vehicle-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Z" stroke="currentColor" stroke-width="1.7"/></svg></span><strong>12가 3456 · 그랜저</strong></div></td><td>경영지원팀</td><td>A렌터카</td><td>2026.10.08</td><td><span class="tag danger">22일</span></td></tr>
-                  <tr><td><div class="vehicle-cell"><span class="vehicle-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Z" stroke="currentColor" stroke-width="1.7"/></svg></span><strong>34나 7890 · 쏘렌토</strong></div></td><td>영업1팀</td><td>B렌터카</td><td>2026.10.25</td><td><span class="tag warning">39일</span></td></tr>
-                  <tr><td><div class="vehicle-cell"><span class="vehicle-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Z" stroke="currentColor" stroke-width="1.7"/></svg></span><strong>56다 1122 · 아반떼</strong></div></td><td>기술지원팀</td><td>A렌터카</td><td>2026.11.17</td><td><span class="tag safe">62일</span></td></tr>
-                </tbody>
+                <thead><tr><th>차량</th><th>사용 부서</th><th>렌터카 업체</th><th>계약 종료월</th><th>남은 기간</th></tr></thead>
+                <tbody id="dashboardExpiryRows"><tr><td colspan="5" class="empty-table">계약 만료 예정 차량이 없습니다.</td></tr></tbody>
               </table>
             </div>
           </article>
           <article class="panel">
             <div class="panel-header"><div><h2 class="panel-title">부서별 차량 현황</h2><p class="panel-subtitle">현재 배정 기준</p></div></div>
-            <div class="department-list">
-              <div class="department-row"><div class="department-meta"><span>영업본부</span><strong>42대</strong></div><div class="bar-track"><div class="bar-fill" style="--value:100%"></div></div></div>
-              <div class="department-row"><div class="department-meta"><span>기술지원본부</span><strong>31대</strong></div><div class="bar-track"><div class="bar-fill" style="--value:74%"></div></div></div>
-              <div class="department-row"><div class="department-meta"><span>경영지원본부</span><strong>24대</strong></div><div class="bar-track"><div class="bar-fill soft" style="--value:57%"></div></div></div>
-              <div class="department-row"><div class="department-meta"><span>물류운영팀</span><strong>19대</strong></div><div class="bar-track"><div class="bar-fill soft" style="--value:45%"></div></div></div>
-              <div class="department-row"><div class="department-meta"><span>기타 부서</span><strong>12대</strong></div><div class="bar-track"><div class="bar-fill soft" style="--value:29%"></div></div></div>
-            </div>
-            <div class="data-note"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-10v6m0-10h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><div><strong>최근 자료 반영 완료</strong><p>렌터카_차량현황_202609.xlsx · 2026.09.16 09:30</p></div></div>
+            <div class="department-list" id="dashboardDepartments"><p class="empty-table">등록된 차량이 없습니다.</p></div>
+            <div class="data-note"><div><strong>현재 차량현황 기준</strong><p>저장된 본부·부·팀별 차량 수를 표시합니다.</p></div></div>
           </article>
         </section>
       </div>
@@ -212,7 +202,7 @@
               <tbody id="vehicleTableBody"></tbody>
             </table>
           </div>
-          <div class="source-strip"><span>표시된 자료: <strong id="sourceFileName">예시 데이터</strong></span><span id="sourceUpdated">Excel 업로드 전 · 화면 확인용</span></div>
+          <div class="source-strip"><span>표시된 자료: <strong id="sourceFileName">저장된 차량정보</strong></span><span id="sourceUpdated">저장정보 조회</span></div>
         </section>
       </div>
       <div class="content view" id="contractsView">
@@ -257,7 +247,7 @@
               <tbody id="contractTableBody"></tbody>
             </table>
           </div>
-          <div class="source-strip"><span>표시된 자료: <strong id="contractSourceFileName">예시 데이터</strong></span><span id="contractSourceUpdated">Excel 업로드 전 · 화면 확인용</span></div>
+          <div class="source-strip"><span>표시된 자료: <strong id="contractSourceFileName">저장된 계약정보</strong></span><span id="contractSourceUpdated">저장정보 조회</span></div>
         </section>
       </div>
       <div class="content view" id="drivingView">
@@ -302,7 +292,7 @@
                 <tbody id="drivingTableBody"></tbody>
               </table>
             </div>
-            <div class="source-strip"><span>표시된 자료: <strong id="drivingSourceFileName">예시 데이터</strong></span><span id="drivingSourceUpdated">Excel 업로드 전 · 화면 확인용</span></div>
+            <div class="source-strip"><span>표시된 자료: <strong id="drivingSourceFileName">입력된 운행자료</strong></span><span id="drivingSourceUpdated">월별 자료 조회</span></div>
           </section>
         </div>
       </div>

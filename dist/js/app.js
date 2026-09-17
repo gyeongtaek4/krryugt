@@ -7,36 +7,12 @@ const uploadError = document.getElementById('uploadError');
 const fileInput = document.getElementById('fileInput');
 const requiredColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차량번호', '차종', '지역', '주차장'];
 let toastTimer;
-let vehicleData = [
-  { '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'김민준', '담당자(부)':'이서연', '차량번호':'12가 3456', '차종':'그랜저', '지역':'서울', '주차장':'본사 지하주차장' },
-  { '본부':'영업본부', '부':'국내영업부', '팀':'영업1팀', '담당자(정)':'김민준', '담당자(부)':'이서연', '차량번호':'34나 7890', '차종':'쏘렌토', '지역':'서울', '주차장':'본사 지하주차장' },
-  { '본부':'영업본부', '부':'국내영업부', '팀':'영업2팀', '담당자(정)':'박지훈', '담당자(부)':'최유진', '차량번호':'45다 2211', '차종':'K5', '지역':'경기', '주차장':'수원사업장 주차장' },
-  { '본부':'영업본부', '부':'해외영업부', '팀':'글로벌영업팀', '담당자(정)':'정하늘', '담당자(부)':'윤서준', '차량번호':'18라 9034', '차종':'투싼', '지역':'서울', '주차장':'본사 외부주차장' },
-  { '본부':'기술지원본부', '부':'고객지원부', '팀':'현장지원1팀', '담당자(정)':'최도윤', '담당자(부)':'김예은', '차량번호':'56다 1122', '차종':'아반떼', '지역':'대전', '주차장':'대전센터 주차장' },
-  { '본부':'기술지원본부', '부':'고객지원부', '팀':'현장지원1팀', '담당자(정)':'최도윤', '담당자(부)':'김예은', '차량번호':'67마 4589', '차종':'카니발', '지역':'대전', '주차장':'대전센터 주차장' },
-  { '본부':'기술지원본부', '부':'품질관리부', '팀':'품질보증팀', '담당자(정)':'장현우', '담당자(부)':'오수빈', '차량번호':'23거 7741', '차종':'스포티지', '지역':'충남', '주차장':'천안공장 주차장' },
-  { '본부':'경영지원본부', '부':'총무부', '팀':'자산관리팀', '담당자(정)':'이준호', '담당자(부)':'한지민', '차량번호':'31도 8265', '차종':'그랜저', '지역':'서울', '주차장':'본사 지하주차장' },
-  { '본부':'경영지원본부', '부':'총무부', '팀':'자산관리팀', '담당자(정)':'이준호', '담당자(부)':'한지민', '차량번호':'72오 3158', '차종':'K8', '지역':'서울', '주차장':'본사 지하주차장' },
-  { '본부':'경영지원본부', '부':'재무부', '팀':'회계팀', '담당자(정)':'신지우', '담당자(부)':'강민서', '차량번호':'89주 6402', '차종':'쏘나타', '지역':'서울', '주차장':'본사 외부주차장' },
-  { '본부':'물류운영본부', '부':'운송관리부', '팀':'수도권운영팀', '담당자(정)':'조성민', '담당자(부)':'배유나', '차량번호':'94하 5127', '차종':'스타리아', '지역':'인천', '주차장':'인천물류센터 주차장' },
-  { '본부':'물류운영본부', '부':'운송관리부', '팀':'지방운영팀', '담당자(정)':'임태호', '담당자(부)':'문가영', '차량번호':'11호 2486', '차종':'봉고3', '지역':'부산', '주차장':'부산물류센터 주차장' }
-];
+let vehicleData = [];
 const contractModal = document.getElementById('contractUploadModal');
 const contractFileInput = document.getElementById('contractFileInput');
 const contractUploadError = document.getElementById('contractUploadError');
 const contractColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차종', '차량번호', '렌탈료', '계약시작', '계약종료'];
-let contractData = [
-  { '본부':'영업본부','부':'국내영업부','팀':'영업1팀','담당자(정)':'김민준','담당자(부)':'이서연','차종':'그랜저','차량번호':'12가 3456','렌탈료':'1150000','계약시작':'2024-01','계약종료':'2027-12' },
-  { '본부':'영업본부','부':'국내영업부','팀':'영업1팀','담당자(정)':'김민준','담당자(부)':'이서연','차종':'쏘렌토','차량번호':'34나 7890','렌탈료':'1080000','계약시작':'2023-11','계약종료':'2026-10' },
-  { '본부':'영업본부','부':'국내영업부','팀':'영업2팀','담당자(정)':'박지훈','담당자(부)':'최유진','차종':'K5','차량번호':'45다 2211','렌탈료':'820000','계약시작':'2025-03','계약종료':'2029-02' },
-  { '본부':'영업본부','부':'해외영업부','팀':'글로벌영업팀','담당자(정)':'정하늘','담당자(부)':'윤서준','차종':'투싼','차량번호':'18라 9034','렌탈료':'930000','계약시작':'2024-07','계약종료':'2027-06' },
-  { '본부':'기술지원본부','부':'고객지원부','팀':'현장지원1팀','담당자(정)':'최도윤','담당자(부)':'김예은','차종':'아반떼','차량번호':'56다 1122','렌탈료':'690000','계약시작':'2024-12','계약종료':'2027-11' },
-  { '본부':'기술지원본부','부':'고객지원부','팀':'현장지원1팀','담당자(정)':'최도윤','담당자(부)':'김예은','차종':'카니발','차량번호':'67마 4589','렌탈료':'1260000','계약시작':'2023-10','계약종료':'2026-09' },
-  { '본부':'기술지원본부','부':'품질관리부','팀':'품질보증팀','담당자(정)':'장현우','담당자(부)':'오수빈','차종':'스포티지','차량번호':'23거 7741','렌탈료':'910000','계약시작':'2025-01','계약종료':'2028-12' },
-  { '본부':'경영지원본부','부':'총무부','팀':'자산관리팀','담당자(정)':'이준호','담당자(부)':'한지민','차종':'그랜저','차량번호':'31도 8265','렌탈료':'1170000','계약시작':'2024-05','계약종료':'2028-04' },
-  { '본부':'경영지원본부','부':'재무부','팀':'회계팀','담당자(정)':'신지우','담당자(부)':'강민서','차종':'쏘나타','차량번호':'89주 6402','렌탈료':'860000','계약시작':'2023-12','계약종료':'2026-11' },
-  { '본부':'물류운영본부','부':'운송관리부','팀':'수도권운영팀','담당자(정)':'조성민','담당자(부)':'배유나','차종':'스타리아','차량번호':'94하 5127','렌탈료':'1210000','계약시작':'2025-06','계약종료':'2029-05' }
-];
+let contractData = [];
 const drivingUploadModal = document.getElementById('drivingUploadModal');
 const drivingFormModal = document.getElementById('drivingFormModal');
 const drivingFileInput = document.getElementById('drivingFileInput');
@@ -254,7 +230,7 @@ function renderRentChart() {
   document.getElementById('rentChartPeriod').textContent = `${months[0].replace('-', '.')}~${reference.replace('-', '.')} · 최근 12개월 · 부가세 포함 · 단위 만원`;
   const known = [...values, ...averages].filter(value => value !== null);
   const low = 0;
-  const high = known.length ? Math.max(low + 1000, Math.ceil(Math.max(...known) / 1000) * 1000) : 12000;
+  const high = known.length ? Math.max(low + 1000, Math.ceil(Math.max(...known) / 1000) * 1000) : 1000;
   const yFor = value => 250 - (value - low) / (high - low) * 220;
   let markup = `<title id="rentChartTitle">${monthLabel} 기준 최근 12개월 렌트비용</title><desc id="rentChartDesc">막대는 월 비용, 선은 조회기간의 확정월 전체 평균입니다. 자료가 없는 달은 미집계로 표시합니다.</desc>`;
   for (let tick = 0; tick <= 6; tick++) {
@@ -400,6 +376,7 @@ function refreshFilters() {
 }
 
 function renderVehicles() {
+  renderDashboardCurrentData();
   paintColumnFilters('vehiclesView');
   const keyword = document.getElementById('vehicleSearch').value.trim().toLowerCase();
   const headquarters = document.getElementById('headquartersFilter').value;
@@ -551,6 +528,7 @@ function refreshContractFilters() {
 }
 
 function renderContracts() {
+  renderDashboardCurrentData();
   paintColumnFilters('contractsView');
   const keyword = document.getElementById('contractSearch').value.trim().toLowerCase();
   const headquarters = document.getElementById('contractHeadquartersFilter').value;
@@ -588,6 +566,23 @@ function renderContracts() {
 
 function normalizePlate(value) {
   return String(value || '').replace(/\s/g, '').toUpperCase();
+}
+
+function renderDashboardCurrentData() {
+  document.getElementById('dashboardVehicleCount').textContent = `${vehicleData.length}대`;
+  const departments = new Map();
+  vehicleData.forEach(row => {
+    const name = ['본부', '부', '팀'].map(key => row[key] || '미입력').join(' / ');
+    departments.set(name, (departments.get(name) || 0) + 1);
+  });
+  const groups = [...departments.entries()].sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...groups.map(([, count]) => count));
+  document.getElementById('dashboardDepartments').innerHTML = groups.length ? groups.map(([name, count]) => `<div class="department-row"><div class="department-meta"><span>${escapeHtml(name)}</span><strong>${count}대</strong></div><div class="bar-track"><div class="bar-fill" style="--value:${count / max * 100}%"></div></div></div>`).join('') : '<p class="empty-table">등록된 차량이 없습니다.</p>';
+  const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 3; });
+  const countVehicles = rows => new Set(rows.map(row => normalizePlate(row['차량번호']))).size;
+  document.getElementById('dashboardExpiryCount').textContent = `${countVehicles(expiring)}대`;
+  document.getElementById('dashboardUrgentCount').textContent = `${countVehicles(expiring.filter(row => remainingMonths(row['계약종료']) <= 1))}대`;
+  document.getElementById('dashboardExpiryRows').innerHTML = expiring.length ? expiring.sort((a, b) => a['계약종료'].localeCompare(b['계약종료'])).map(row => `<tr><td>${escapeHtml(row['차량번호'])} · ${escapeHtml(row['차종'] || '-')}</td><td>${escapeHtml(row['팀'] || row['부'] || row['본부'] || '-')}</td><td>${escapeHtml(row._rentalCompany || '-')}</td><td>${escapeHtml(formatYearMonth(row['계약종료']))}</td><td>${remainingMonths(row['계약종료'])}개월</td></tr>`).join('') : '<tr><td colspan="5" class="empty-table">계약 만료 예정 차량이 없습니다.</td></tr>';
 }
 
 function vehicleForPlate(plate) {
@@ -1436,7 +1431,7 @@ document.getElementById('reportButton').addEventListener('click', () => {
   window.print();
 });
 document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보'));
-document.getElementById('noticeButton').addEventListener('click', () => showToast('확인이 필요한 계약 만료 차량이 3대 있습니다.'));
+document.getElementById('noticeButton').addEventListener('click', () => showToast(`3개월 내 계약 만료 예정 차량: ${document.getElementById('dashboardExpiryCount').textContent}`));
 
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); toggleDrivingUploadModal(false); closeVehicleForm(); closeContractForm(); closeDrivingForm(); toggleSidebar(false); }
