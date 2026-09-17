@@ -565,6 +565,27 @@ function closeVehicleForm() {
   document.body.style.overflow = '';
 }
 
+function vehicleSupabasePayload(row) {
+  return {
+    vehicle_number: row['차량번호'], vehicle_model: row['차종'], region: row['지역'], parking_lot: row['주차장'],
+    headquarters: row['본부'], division: row['부'], team: row['팀'],
+    primary_manager: row['담당자(정)'], secondary_manager: row['담당자(부)']
+  };
+}
+
+async function saveVehicleToSupabase(row, index) {
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) return null;
+  const payload = vehicleSupabasePayload(row);
+  if (index !== null && vehicleData[index]?._supabaseId) {
+    const { error } = await window.fleetSupabaseClient.from('vehicles').update(payload).eq('id', vehicleData[index]._supabaseId);
+    if (error) throw error;
+    return 'updated';
+  }
+  const { error } = await window.fleetSupabaseClient.from('vehicles').insert(payload);
+  if (error) throw error;
+  return 'inserted';
+}
+
 function openContractForm(index = null) {
   editingContractIndex = index;
   document.getElementById('contractForm').reset();
@@ -806,8 +827,10 @@ document.getElementById('drivingTableBody').addEventListener('click', event => {
   if (button) openDrivingForm(Number(button.dataset.drivingEdit));
 });
 
-document.getElementById('vehicleForm').addEventListener('submit', event => {
+document.getElementById('vehicleForm').addEventListener('submit', async event => {
   event.preventDefault();
+  const formError = document.getElementById('vehicleFormError');
+  formError.classList.remove('show');
   const row = {
     '본부': document.getElementById('vfHeadquarters').value.trim(),
     '부': document.getElementById('vfDivision').value.trim(),
@@ -819,9 +842,21 @@ document.getElementById('vehicleForm').addEventListener('submit', event => {
     '지역': document.getElementById('vfRegion').value.trim(),
     '주차장': document.getElementById('vfParking').value.trim()
   };
-  if (editingVehicleIndex === null) vehicleData.push(row); else vehicleData[editingVehicleIndex] = row;
-  refreshFilters(); renderVehicles(); renderDriving(); closeVehicleForm();
-  showToast(editingVehicleIndex === null ? '차량정보를 추가했습니다.' : '차량정보를 수정했습니다.');
+  try {
+    const saved = await saveVehicleToSupabase(row, editingVehicleIndex);
+    if (saved) {
+      await refreshVehiclesFromSupabase();
+    } else {
+      if (editingVehicleIndex === null) vehicleData.push(row); else vehicleData[editingVehicleIndex] = row;
+      refreshFilters(); renderVehicles(); renderDriving();
+    }
+    closeVehicleForm();
+    showToast(editingVehicleIndex === null ? '차량정보를 추가했습니다.' : '차량정보를 수정했습니다.');
+  } catch (error) {
+    console.error('차량정보 저장 오류', error);
+    formError.textContent = error.code === '23505' ? '같은 차량번호가 이미 등록되어 있습니다.' : '저장하지 못했습니다. 관리자 권한과 입력값을 확인해 주세요.';
+    formError.classList.add('show');
+  }
 });
 
 document.getElementById('contractForm').addEventListener('submit', event => {
