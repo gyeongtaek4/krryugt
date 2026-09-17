@@ -33,3 +33,5 @@ Supabase 연결 시 원본은 비공개 Storage, 구조화 자료는 DB, 접근 
 `supabase/001_initial_schema.sql`은 아직 Supabase에서 실행되지 않은 준비 파일이다.
 실행 대상은 profiles, vehicles, contracts, driving_records이며 비용·운행 마감 버전과 원본 파일 Storage는 다음 단계에서 만든다.
 RLS는 활성화하지만 정책은 아직 만들지 않는다. 따라서 SQL 실행 직후 브라우저 홈페이지에서 자료를 읽거나 쓰는 것은 의도적으로 불가능하다. 로그인·권한 정책과 홈페이지 연결을 같은 단계에서 추가한다.
+
+`supabase/002_auth_rls.sql`은 Auth 사용자와 profiles 연결, admin/editor/viewer 역할, 현재 차량·계약·운행 표의 RLS 정책을 만든다. 실행 후 관리자 이메일을 SQL의 안내 문장에 직접 입력해 role을 admin으로 승격한다. 비밀번호는 SQL이나 저장소에 넣지 않는다.

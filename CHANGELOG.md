@@ -8,6 +8,11 @@
 - Supabase Project URL·Publishable key 전용 설정 파일과 브라우저 연결 객체 추가.
 - 차량현황 등 DB 읽기·쓰기, 로그인, RLS 정책은 아직 미연결.
 
+## 2026-09-17 — Auth·RLS 정책 준비
+
+- `supabase/002_auth_rls.sql` 추가: Auth 사용자 프로필 자동 등록, 역할별 vehicles/contracts/driving_records 정책.
+- 관리자 이메일을 SQL에서 직접 승격하도록 안내. 실제 정책 실행과 로그인 UI 연결은 다음 단계.
+
 ## 2026-09-17 — 업무 기준 코드 적용
 
 - 월 이동거리 합산, 동일 차량·월 중복 차단, 이전 누적 형식 불러오기 안내·차단.
