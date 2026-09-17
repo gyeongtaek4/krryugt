@@ -482,13 +482,15 @@
             <button class="button" id="downloadClosingTemplate">양식 내려받기</button>
             <label class="button">비용자료 업로드 <input id="closingUpload" type="file" accept=".xlsx,.xls,.csv" style="max-width:220px"></label>
             <button class="button primary" id="closingConfirm">마감 확정 · 보관파일 저장</button>
+            <button class="button" id="closingAdminEdit" style="display:none">관리자 마감 수정</button>
+            <input class="form-input" id="closingCorrectionReason" placeholder="정정 사유를 입력하세요 (필수)" style="display:none;max-width:260px">
             <button class="button" id="closingDownload">전체 보관파일 다운로드</button>
             <label class="button">보관파일 불러오기 <input id="closingRestore" type="file" accept=".json" style="max-width:220px"></label>
             <p id="closingMessage" role="status">Supabase 연결 전에는 파일 보관 방식입니다. 새로고침 후 보관파일을 불러오세요. 원본 Excel도 함께 보관하세요.</p>
           </div>
         </section>
         <section class="panel" style="margin-bottom:24px"><div class="panel-header"><h2 class="panel-title">선택월 비용자료</h2><strong id="closingTotal">—</strong></div><div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량번호</th><th>렌탈료</th><th>주유비</th><th>통행료</th><th>주차비</th></tr></thead><tbody id="closingRows"></tbody></table></div></section>
-        <section class="panel"><div class="panel-header"><h2 class="panel-title">확정 마감자료 목록</h2></div><div class="table-wrap"><table class="vehicle-table"><thead><tr><th>마감월도</th><th>차량수</th><th>렌트비용</th><th>총 비용</th><th>확정일</th><th>조회</th></tr></thead><tbody id="closingArchiveRows"></tbody></table></div></section>
+        <section class="panel"><div class="panel-header"><h2 class="panel-title">확정 마감자료 목록</h2></div><div class="table-wrap"><table class="vehicle-table"><thead><tr><th>마감월도</th><th>차량수</th><th>렌트비용</th><th>총 비용</th><th>확정일</th><th>정정 이력</th><th>조회</th></tr></thead><tbody id="closingArchiveRows"></tbody></table></div></section>
       </div>
       <div class="content view active" id="dashboardView">
         <section class="page-heading">
@@ -973,20 +975,25 @@
     const rentMonthlyData = {};
     const closingArchive = {};
     let closingDraft = null;
+    let closingEditMonth = null;
     const costKeys = ['렌탈료', '주유비', '통행료', '주차비'];
     const closingMonthValue = () => document.getElementById('closingMonth').value;
     const won = value => `${value.toLocaleString('ko-KR')}원`;
     function closingTotals(rows) { return costKeys.map(key => rows.reduce((sum, row) => sum + row[key], 0)); }
     function renderClosing() {
       const month = closingMonthValue(), saved = closingArchive[month];
-      const rows = saved ? saved.rows : closingDraft && closingDraft.month === month ? closingDraft.rows : [];
-      document.getElementById('closingStatus').textContent = saved ? '마감 확정 · 수정 잠금' : rows.length ? '확정 전 검토' : '미마감';
-      document.getElementById('closingUpload').disabled = !!saved;
-      document.getElementById('closingConfirm').disabled = !!saved || !rows.length;
+      const isEditing = closingEditMonth === month && closingDraft && closingDraft.month === month;
+      const rows = isEditing ? closingDraft.rows : saved ? saved.rows : closingDraft && closingDraft.month === month ? closingDraft.rows : [];
+      document.getElementById('closingStatus').textContent = isEditing ? '관리자 수정 중 · 재확정 필요' : saved ? '마감 확정 · 수정 잠금' : rows.length ? '확정 전 검토' : '미마감';
+      document.getElementById('closingUpload').disabled = !!saved && !isEditing;
+      document.getElementById('closingConfirm').disabled = !rows.length || (!!saved && !isEditing);
+      document.getElementById('closingConfirm').textContent = isEditing ? '수정 마감 확정 · 보관파일 저장' : '마감 확정 · 보관파일 저장';
+      document.getElementById('closingAdminEdit').style.display = saved && !isEditing ? 'inline-flex' : 'none';
+      document.getElementById('closingCorrectionReason').style.display = isEditing ? 'inline-block' : 'none';
       const totals = closingTotals(rows);
       document.getElementById('closingTotal').textContent = rows.length ? `총 비용 ${won(totals.reduce((a,b)=>a+b,0))}` : '—';
       document.getElementById('closingRows').innerHTML = rows.length ? rows.map(row=>`<tr>${['본부','부','팀','차량번호'].map(key=>`<td>${escapeHtml(row[key] || '미매칭')}</td>`).join('')}${costKeys.map(key=>`<td>${won(row[key])}</td>`).join('')}</tr>`).join('') : '<tr><td colspan="8" class="empty-table">선택월의 자료를 업로드하거나 보관파일을 불러오세요.</td></tr>';
-      document.getElementById('closingArchiveRows').innerHTML = Object.keys(closingArchive).sort().reverse().map(key=>{const item=closingArchive[key], totals=closingTotals(item.rows);return `<tr><td>${escapeHtml(key)}</td><td>${item.rows.length}대</td><td>${won(totals[0])}</td><td>${won(totals.reduce((a,b)=>a+b,0))}</td><td>${escapeHtml(item.confirmedAt)}</td><td><button class="row-edit" data-closing-month="${escapeHtml(key)}">조회</button></td></tr>`;}).join('') || '<tr><td colspan="6" class="empty-table">확정된 비용마감자료가 없습니다.</td></tr>';
+      document.getElementById('closingArchiveRows').innerHTML = Object.keys(closingArchive).sort().reverse().map(key=>{const item=closingArchive[key], totals=closingTotals(item.rows), revisions=item.revisions||[];return `<tr><td>${escapeHtml(key)}</td><td>${item.rows.length}대</td><td>${won(totals[0])}</td><td>${won(totals.reduce((a,b)=>a+b,0))}</td><td>${escapeHtml(item.confirmedAt)}</td><td>${revisions.length ? `${revisions.length}회` : '없음'}</td><td><button class="row-edit" data-closing-month="${escapeHtml(key)}">조회</button></td></tr>`;}).join('') || '<tr><td colspan="7" class="empty-table">확정된 비용마감자료가 없습니다.</td></tr>';
     }
     function downloadClosingArchive() {
       if (!Object.keys(closingArchive).length) { showToast('확정된 마감자료가 없습니다.'); return; }
@@ -1860,13 +1867,13 @@
     const closingNav=document.createElement('li');
     closingNav.innerHTML='<button class="nav-button" data-page="월별 비용마감자료"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v17H5V4Zm3 5h8m-8 4h8m-8 4h5" stroke="currentColor" stroke-width="1.7"/></svg>월별 비용마감자료</button>';
     document.querySelector('[data-page="운행기록데이터"]').closest('li').after(closingNav);
-    document.getElementById('closingMonth').addEventListener('change',()=>{closingDraft=null;document.getElementById('closingUpload').value='';renderClosing();});
+    document.getElementById('closingMonth').addEventListener('change',()=>{closingDraft=null;closingEditMonth=null;document.getElementById('closingCorrectionReason').value='';document.getElementById('closingUpload').value='';renderClosing();});
     document.getElementById('closingUpload').addEventListener('change',async event=>{
       const file=event.target.files[0], month=closingMonthValue();
       if(!file)return;
       try {
         if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))throw Error('마감월도를 선택하세요.');
-        if(closingArchive[month])throw Error('이미 확정된 월도는 덮어쓸 수 없습니다.');
+        if(closingArchive[month] && closingEditMonth!==month)throw Error('이미 확정된 월도입니다. 관리자 마감 수정으로 전환한 뒤 수정해 주세요.');
         if(file.size>20*1024*1024)throw Error('파일은 20MB 이하로 올려주세요.');
         if(!window.XLSX)throw Error('Excel 기능을 불러오지 못했습니다. 잠시 후 다시 시도하세요.');
         const workbook=XLSX.read(await file.arrayBuffer(),{type:'array'});
@@ -1892,16 +1899,28 @@
     });
     document.getElementById('closingConfirm').addEventListener('click',()=>{
       const month=closingMonthValue();
-      if(closingArchive[month]||!closingDraft||closingDraft.month!==month)return;
+      const isEditing=closingEditMonth===month;
+      if((closingArchive[month]&&!isEditing)||!closingDraft||closingDraft.month!==month)return;
       if(closingDraft.rows.some(row=>!row['본부']||!row['부']||!row['팀'])){showToast('미매칭 조직정보를 먼저 확인해 주세요.');return;}
-      if(!confirm(`${month} 비용자료를 확정하고 보관파일을 다운로드할까요? 확정된 월도는 수정되지 않습니다.`))return;
-      closingArchive[month]={rows:JSON.parse(JSON.stringify(closingDraft.rows)),source:closingDraft.source,confirmedAt:new Date().toISOString()};
-      closingDraft=null;renderClosing();syncClosingDashboard();downloadClosingArchive();
-      document.getElementById('closingMessage').textContent='마감 확정 완료. 다운로드된 JSON 보관파일을 안전한 폴더에 저장하세요. 다음 접속 시 불러오면 복원됩니다.';
+      const reason=document.getElementById('closingCorrectionReason').value.trim();
+      if(isEditing&&!reason){showToast('정정 사유를 입력해 주세요.');return;}
+      if(!confirm(isEditing ? `${month} 수정자료를 재확정할까요? 이전 확정본은 정정 이력으로 보관됩니다.` : `${month} 비용자료를 확정하고 보관파일을 다운로드할까요? 확정된 월도는 수정되지 않습니다.`))return;
+      const previous=closingArchive[month];
+      const revisions=isEditing ? [...(previous.revisions||[]),{rows:JSON.parse(JSON.stringify(previous.rows)),source:previous.source,confirmedAt:previous.confirmedAt,correctedAt:new Date().toISOString(),reason}] : [];
+      closingArchive[month]={rows:JSON.parse(JSON.stringify(closingDraft.rows)),source:closingDraft.source,confirmedAt:new Date().toISOString(),revisions};
+      closingDraft=null;closingEditMonth=null;document.getElementById('closingCorrectionReason').value='';renderClosing();syncClosingDashboard();downloadClosingArchive();
+      document.getElementById('closingMessage').textContent=isEditing?'수정 마감 확정 완료. 이전 확정본은 정정 이력에 보관되며 최신 보관파일을 다운로드했습니다.':'마감 확정 완료. 다운로드된 JSON 보관파일을 안전한 폴더에 저장하세요. 다음 접속 시 불러오면 복원됩니다.';
     });
     document.getElementById('closingDownload').addEventListener('click',downloadClosingArchive);
     document.getElementById('downloadClosingTemplate').addEventListener('click',downloadClosingTemplate);
-    document.getElementById('closingArchiveRows').addEventListener('click',event=>{const button=event.target.closest('[data-closing-month]');if(button){document.getElementById('closingMonth').value=button.dataset.closingMonth;closingDraft=null;renderClosing();}});
+    document.getElementById('closingAdminEdit').addEventListener('click',()=>{
+      const month=closingMonthValue(), saved=closingArchive[month];
+      if(!saved)return;
+      if(!confirm(`${month} 마감자료를 관리자 수정 모드로 전환할까요? 수정 후에는 정정 사유를 입력하고 다시 확정해야 합니다.`))return;
+      closingDraft={month,rows:JSON.parse(JSON.stringify(saved.rows)),source:saved.source};closingEditMonth=month;document.getElementById('closingCorrectionReason').value='';renderClosing();
+      document.getElementById('closingMessage').textContent='관리자 수정 모드입니다. Excel을 다시 업로드한 뒤 정정 사유를 입력하고 수정 마감 확정을 진행하세요.';
+    });
+    document.getElementById('closingArchiveRows').addEventListener('click',event=>{const button=event.target.closest('[data-closing-month]');if(button){document.getElementById('closingMonth').value=button.dataset.closingMonth;closingDraft=null;closingEditMonth=null;document.getElementById('closingCorrectionReason').value='';renderClosing();}});
     document.getElementById('closingRestore').addEventListener('change',async event=>{
       const file=event.target.files[0];if(!file)return;
       try{
