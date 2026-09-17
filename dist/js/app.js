@@ -52,9 +52,13 @@ let editingDrivingIndex = null;
 
 async function refreshVehiclesFromSupabase() {
   if (!window.fleetCurrentUser || !window.fleetSupabaseClient) return;
-  const { data, error } = await window.fleetSupabaseClient.from('vehicles').select('*').order('vehicle_number_normalized');
-  if (error) { showToast('차량현황을 불러오지 못했습니다. 권한 정책을 확인해 주세요.'); return; }
-  vehicleData = (data || []).map(row => ({
+  const { data, error } = await window.fleetSupabaseClient.from('vehicles').select('*');
+  if (error) {
+    console.error('차량현황 Supabase 조회 오류', error);
+    showToast('차량현황을 불러오지 못했습니다. Supabase 권한 정책을 확인해 주세요.');
+    return;
+  }
+  vehicleData = (data || []).sort((a, b) => String(a.vehicle_number_normalized || a.vehicle_number || '').localeCompare(String(b.vehicle_number_normalized || b.vehicle_number || ''))).map(row => ({
     '본부': row.headquarters || '', '부': row.division || '', '팀': row.team || '',
     '담당자(정)': row.primary_manager || '', '담당자(부)': row.secondary_manager || '',
     '차량번호': row.vehicle_number || '', '차종': row.vehicle_model || '',
