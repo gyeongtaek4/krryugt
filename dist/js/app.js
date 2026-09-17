@@ -311,21 +311,41 @@ function fieldFilterValue(row, key) {
 }
 
 function refreshFieldFilters(viewId, keys, rows, render) {
-  const container = document.querySelector(`#${viewId} .filter-row`);
-  const reset = container.querySelector('.reset-filter');
+  const container = document.querySelector(`#${viewId} .vehicle-panel thead`);
+  const headers = [...container.querySelectorAll('th')];
+  const orgIds = viewId === 'vehiclesView' ? ['headquartersFilter', 'divisionFilter', 'teamFilter'] : ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'];
+  orgIds.forEach((id, index) => {
+    const select = document.getElementById(id);
+    if (select.parentElement !== headers[index]) {
+      headers[index].textContent = '';
+      headers[index].appendChild(select);
+    }
+    select.className = 'column-filter';
+  });
+  const oldRow = document.querySelector(`#${viewId} .filter-row`);
+  if (oldRow) {
+    const actions = document.createElement('div');
+    actions.className = 'table-header-actions';
+    oldRow.querySelectorAll('button').forEach(button => actions.appendChild(button));
+    document.querySelector(`#${viewId} .vehicle-toolbar`).appendChild(actions);
+    oldRow.remove();
+  }
+  const contractIndices = { '담당자(정)': 3, '담당자(부)': 4, '차종': 5, '차량번호': 6, '렌탈료': 7, '계약시작': 8, '계약종료': 8, '총계약기간': 9, '남은계약기간': 9 };
   keys.forEach(key => {
     let select = [...container.querySelectorAll('[data-field-filter]')].find(element => element.dataset.fieldFilter === key);
     if (!select) {
       select = document.createElement('select');
-      select.className = 'filter-select';
+      select.className = 'column-filter';
       select.dataset.fieldFilter = key;
       select.setAttribute('aria-label', `${key} 필터`);
       select.addEventListener('change', render);
-      container.insertBefore(select, reset);
+      const header = headers[viewId === 'vehiclesView' ? requiredColumns.indexOf(key) : contractIndices[key]];
+      if (!header.querySelector('select')) header.textContent = '';
+      header.appendChild(select);
     }
     const values = [...new Set(rows.map(row => fieldFilterValue(row, key)))].sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
     const current = select.value;
-    select.innerHTML = `<option value="">전체 ${escapeHtml(key)}</option>` + values.map(value => `<option value="${escapeHtml(value || '__EMPTY__')}">${escapeHtml(value || '(미입력)')}</option>`).join('');
+    select.innerHTML = `<option value="">${escapeHtml(key)}</option>` + values.map(value => `<option value="${escapeHtml(value || '__EMPTY__')}">${escapeHtml(value || '(미입력)')}</option>`).join('');
     if (values.includes(current) || (current === '__EMPTY__' && values.includes(''))) select.value = current;
   });
 }
@@ -340,7 +360,7 @@ function resetFieldFilters(viewId) {
 
 function setSelectOptions(select, label, values) {
   const current = select.value;
-  select.innerHTML = `<option value="">전체 ${label}</option>` + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+  select.innerHTML = `<option value="">${label}</option>` + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
   if (values.includes(current)) select.value = current;
 }
 

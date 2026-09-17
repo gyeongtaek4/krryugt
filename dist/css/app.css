@@ -297,6 +297,11 @@ td strong { font-size: .8rem; }
 .filter-label { margin-right: 3px; color: var(--ink-soft); font-size: .78rem; font-weight: 750; }
 .filter-select { min-width: 142px; height: 39px; padding: 0 34px 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink-soft); background: var(--white); font-size: .8rem; outline: 0; }
 .filter-select:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .07); }
+.column-filter { display: block; width: 100%; min-width: 76px; max-width: 190px; border: 1px solid transparent; border-radius: 5px; padding: 7px 18px 7px 2px; color: var(--ink-soft); background-color: transparent; font: inherit; font-weight: 700; cursor: pointer; }
+.column-filter:hover { background-color: var(--brand-wash); color: var(--brand-dark); }
+.column-filter:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.table-header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+#vehiclesView .vehicle-toolbar, #contractsView .vehicle-toolbar { flex-wrap: wrap; gap: 14px; }
 .reset-filter { margin-left: auto; border: 0; color: var(--brand-dark); background: transparent; font-size: .76rem; font-weight: 750; cursor: pointer; }
 .reset-filter:hover { text-decoration: underline; }
 
