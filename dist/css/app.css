@@ -455,7 +455,10 @@ td strong { font-size: .8rem; }
 .closing-correction:has(input:not([style*="display: none"]):not([style*="display:none"])) { padding: 0 24px 20px; }
 .closing-backup { padding: 20px 24px; background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 #closingRows td:nth-child(n+5) { text-align: right; font-variant-numeric: tabular-nums; }
-#closingView .vehicle-table th:nth-child(n+5):nth-child(-n+8) { text-align: right; }
+#closingView .vehicle-table th:nth-child(n+5):nth-child(-n+9) { text-align: right; }
+.closing-row-total { color: var(--brand-dark); font-weight: 700; }
+.closing-total-row { background: var(--brand-wash); color: var(--brand-dark); font-weight: 700; }
+.closing-total-row th { padding: 18px 24px; text-align: left; }
 @media (max-width: 1100px) {
   .closing-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .closing-upload-row, .closing-backup, #closingView .panel-header { flex-wrap: wrap; }

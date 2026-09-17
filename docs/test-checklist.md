@@ -39,6 +39,11 @@
 
 ## 작업별 결과 기록
 
+### 2026-09-17 — 비용표 합계·확정월 추출
+
+- closing-ui: 차량별/전체 합계, 두 월 확정본의 JSON 직렬화·복원 후 과거 월 추출, 조직값 유지, 미확정월 추출 차단 검증 (mock DOM).
+- 실제 Excel 다운로드 파일 열기, 업로드·정정·복원 전체 브라우저 흐름, 배포는 미검증.
+
 ### 2026-09-17 — 비용마감 UI 정리
 
 - JavaScript 문법 검사와 monthly-rules, contract-storage, vehicle-delete-all 회귀검증 통과.

@@ -168,8 +168,27 @@ function renderClosing() {
   document.getElementById('closingRentAmount').textContent = rows.length ? won(totals[0]) : '—';
   document.getElementById('closingOtherAmount').textContent = rows.length ? won(totals.slice(1).reduce((a,b)=>a+b,0)) : '—';
   document.getElementById('closingTotal').textContent = rows.length ? won(totals.reduce((a,b)=>a+b,0)) : '—';
-  document.getElementById('closingRows').innerHTML = rows.length ? rows.map(row=>`<tr>${['본부','부','팀','차량번호'].map(key=>`<td>${escapeHtml(row[key] || '미매칭')}</td>`).join('')}${costKeys.map(key=>`<td>${won(row[key])}</td>`).join('')}</tr>`).join('') : '<tr><td colspan="8" class="empty-table">선택월의 자료를 업로드하거나 보관파일을 불러오세요.</td></tr>';
-  document.getElementById('closingArchiveRows').innerHTML = Object.keys(closingArchive).sort().reverse().map(key=>{const item=closingArchive[key], totals=closingTotals(item.rows), revisions=item.revisions||[];return `<tr><td>${escapeHtml(key)}</td><td>${item.rows.length}대</td><td>${won(totals[0])}</td><td>${won(totals.reduce((a,b)=>a+b,0))}</td><td>${escapeHtml(item.confirmedAt)}</td><td>${revisions.length ? `${revisions.length}회` : '없음'}</td><td><button class="row-edit" data-closing-month="${escapeHtml(key)}">조회</button></td></tr>`;}).join('') || '<tr><td colspan="7" class="empty-table">확정된 비용마감자료가 없습니다.</td></tr>';
+  document.getElementById('closingRows').innerHTML = rows.length ? rows.map(row=>`<tr>${['본부','부','팀','차량번호'].map(key=>`<td>${escapeHtml(row[key] || '미매칭')}</td>`).join('')}${costKeys.map(key=>`<td>${won(row[key])}</td>`).join('')}<td class="closing-row-total">${won(costKeys.reduce((sum,key)=>sum+row[key],0))}</td></tr>`).join('') + `<tr class="closing-total-row"><th colspan="4" scope="row">전체 합계</th>${totals.map(value=>`<td>${won(value)}</td>`).join('')}<td>${won(totals.reduce((a,b)=>a+b,0))}</td></tr>` : '<tr><td colspan="9" class="empty-table">선택월의 자료를 업로드하거나 보관파일을 불러오세요.</td></tr>';
+  document.getElementById('closingArchiveRows').innerHTML = Object.keys(closingArchive).sort().reverse().map(key=>{const item=closingArchive[key], totals=closingTotals(item.rows), revisions=item.revisions||[];return `<tr><td>${escapeHtml(key)}</td><td>${item.rows.length}대</td><td>${won(totals[0])}</td><td>${won(totals.reduce((a,b)=>a+b,0))}</td><td>${escapeHtml(item.confirmedAt)}</td><td>${revisions.length ? `${revisions.length}회` : '없음'}</td><td><div class="closing-actions"><button class="row-edit" data-closing-month="${escapeHtml(key)}">조회</button><button class="row-edit" data-closing-export="${escapeHtml(key)}">자료 내려받기</button></div></td></tr>`;}).join('') || '<tr><td colspan="7" class="empty-table">확정된 비용마감자료가 없습니다.</td></tr>';
+}
+function closingExportRows(month) {
+  const saved = closingArchive[month];
+  if (!saved) return [];
+  const rows = saved.rows.map(row => ({
+    '마감월도': month,
+    ...Object.fromEntries(['본부','부','팀','차량번호',...costKeys].map(key => [key, row[key]])),
+    '총금액': costKeys.reduce((sum,key) => sum + row[key], 0)
+  }));
+  const totals = closingTotals(saved.rows);
+  rows.push({'마감월도':month, '본부':'전체 합계', '부':'', '팀':'', '차량번호':'',
+    ...Object.fromEntries(costKeys.map((key,index) => [key,totals[index]])),
+    '총금액':totals.reduce((a,b) => a+b,0)});
+  return rows;
+}
+function exportClosingMonth(month) {
+  const rows = closingExportRows(month);
+  if (!rows.length) { showToast('확정된 마감자료가 없습니다.'); return; }
+  downloadExcel(rows, '확정 비용자료', `비용마감자료_${month}.xlsx`);
 }
 function downloadClosingArchive() {
   if (!Object.keys(closingArchive).length) { showToast('확정된 마감자료가 없습니다.'); return; }
@@ -1309,6 +1328,10 @@ document.getElementById('closingConfirm').addEventListener('click',()=>{
   document.getElementById('closingMessage').textContent=isEditing?'수정 마감 확정 완료. 이전 확정본은 정정 이력에 보관되며 최신 보관파일을 다운로드했습니다.':'마감 확정 완료. 다운로드된 JSON 보관파일을 안전한 폴더에 저장하세요. 다음 접속 시 불러오면 복원됩니다.';
 });
 document.getElementById('closingDownload').addEventListener('click',downloadClosingArchive);
+document.getElementById('closingArchiveRows').addEventListener('click',event=>{
+  const button=event.target.closest('[data-closing-export]');
+  if(button)exportClosingMonth(button.dataset.closingExport);
+});
 document.getElementById('downloadClosingTemplate').addEventListener('click',downloadClosingTemplate);
 document.getElementById('closingAdminEdit').addEventListener('click',()=>{
   const month=closingMonthValue(), saved=closingArchive[month];
