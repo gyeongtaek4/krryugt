@@ -15,9 +15,15 @@
     if (session) {
       userName.textContent = session.user.email || '로그인 사용자';
       userRole.textContent = '인증 확인 중';
-      const { data: profile } = await window.fleetSupabaseClient.from('profiles').select('display_name, role').eq('id', session.user.id).maybeSingle();
+      const [{ data: profile, error: profileError }, { data: roleValue, error: roleError }] = await Promise.all([
+        window.fleetSupabaseClient.from('profiles').select('display_name, role').eq('id', session.user.id).maybeSingle(),
+        window.fleetSupabaseClient.rpc('current_user_role')
+      ]);
+      if (profileError) console.warn('프로필 조회 오류', profileError);
+      if (roleError) console.warn('역할 조회 오류', roleError);
+      const role = roleValue || profile?.role;
       userName.textContent = profile?.display_name || session.user.email || '로그인 사용자';
-      userRole.textContent = profile?.role === 'admin' ? '관리자' : profile?.role === 'editor' ? '입력자' : '조회자';
+      userRole.textContent = role === 'admin' ? '관리자' : role === 'editor' ? '입력자' : '조회자';
       if (window.refreshVehiclesFromSupabase) await window.refreshVehiclesFromSupabase();
     }
   }
