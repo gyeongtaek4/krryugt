@@ -304,6 +304,40 @@ function uniqueValues(key, rows = vehicleData) {
   return [...new Set(rows.map(row => row[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
 }
 
+function fieldFilterValue(row, key) {
+  if (key === '총계약기간') return `${monthSpan(row['계약시작'], row['계약종료'])}개월`;
+  if (key === '남은계약기간') return `${remainingMonths(row['계약종료'])}개월`;
+  return String(row[key] ?? '');
+}
+
+function refreshFieldFilters(viewId, keys, rows, render) {
+  const container = document.querySelector(`#${viewId} .filter-row`);
+  const reset = container.querySelector('.reset-filter');
+  keys.forEach(key => {
+    let select = [...container.querySelectorAll('[data-field-filter]')].find(element => element.dataset.fieldFilter === key);
+    if (!select) {
+      select = document.createElement('select');
+      select.className = 'filter-select';
+      select.dataset.fieldFilter = key;
+      select.setAttribute('aria-label', `${key} 필터`);
+      select.addEventListener('change', render);
+      container.insertBefore(select, reset);
+    }
+    const values = [...new Set(rows.map(row => fieldFilterValue(row, key)))].sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
+    const current = select.value;
+    select.innerHTML = `<option value="">전체 ${escapeHtml(key)}</option>` + values.map(value => `<option value="${escapeHtml(value || '__EMPTY__')}">${escapeHtml(value || '(미입력)')}</option>`).join('');
+    if (values.includes(current) || (current === '__EMPTY__' && values.includes(''))) select.value = current;
+  });
+}
+
+function matchesFieldFilters(viewId, row) {
+  return [...document.querySelectorAll(`#${viewId} [data-field-filter]`)].every(select => !select.value || fieldFilterValue(row, select.dataset.fieldFilter) === (select.value === '__EMPTY__' ? '' : select.value));
+}
+
+function resetFieldFilters(viewId) {
+  document.querySelectorAll(`#${viewId} [data-field-filter]`).forEach(select => { select.value = ''; });
+}
+
 function setSelectOptions(select, label, values) {
   const current = select.value;
   select.innerHTML = `<option value="">전체 ${label}</option>` + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
@@ -311,6 +345,7 @@ function setSelectOptions(select, label, values) {
 }
 
 function refreshFilters() {
+  refreshFieldFilters('vehiclesView', requiredColumns.slice(3), vehicleData, renderVehicles);
   const headquarters = document.getElementById('headquartersFilter');
   const division = document.getElementById('divisionFilter');
   const team = document.getElementById('teamFilter');
@@ -330,7 +365,7 @@ function renderVehicles() {
     const row = item.row;
     const matchesFilter = (!headquarters || row['본부'] === headquarters) && (!division || row['부'] === division) && (!team || row['팀'] === team);
     const searchable = requiredColumns.map(key => row[key]).join(' ').toLowerCase();
-    return matchesFilter && (!keyword || searchable.includes(keyword));
+    return matchesFilter && matchesFieldFilters('vehiclesView', row) && (!keyword || searchable.includes(keyword));
   });
   const body = document.getElementById('vehicleTableBody');
   body.innerHTML = filtered.length ? filtered.map(item => { const row = item.row; return `<tr>
@@ -392,6 +427,36 @@ async function deleteAllVehicles() {
   }
 }
 
+async function deleteContracts(all, index = null) {
+  const button = document.getElementById('deleteAllContracts');
+  if (button.disabled) return;
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) { showToast('로그인 후 이용해 주세요.'); return; }
+  const row = all ? null : contractData[index];
+  if (!all && !row?._supabaseId) { showToast('저장된 계약정보를 먼저 불러와 주세요.'); return; }
+  button.disabled = true;
+  try {
+    const client = window.fleetSupabaseClient;
+    const { data: role, error: roleError } = await client.rpc('current_user_role');
+    if (roleError) throw roleError;
+    if (role !== 'admin') { showToast('계약 삭제는 관리자만 가능합니다.'); return; }
+    if (all) {
+      const { count, error } = await client.from('contracts').select('id', { count: 'exact', head: true });
+      if (error) throw error;
+      if (!count) { showToast('삭제할 계약이 없습니다.'); return; }
+      if (window.prompt(`검색·필터와 관계없이 계약 ${count}건을 모두 삭제합니다. 복구할 수 없습니다. 계속하려면 '전체삭제'를 입력하세요.`) !== '전체삭제') return;
+    } else if (!window.confirm(`${row['차량번호']} (${row['계약시작']} ~ ${row['계약종료']}) 계약을 삭제할까요? 복구할 수 없습니다.`)) return;
+    let query = client.from('contracts').delete({ count: 'exact' });
+    query = all ? query.not('id', 'is', null) : query.eq('id', row._supabaseId);
+    const { count, error } = await query;
+    if (error) throw error;
+    await refreshContractsFromSupabase();
+    showToast(count ? `계약 ${count}건을 삭제했습니다.` : '삭제된 계약이 없습니다. 목록을 다시 확인해 주세요.');
+  } catch (error) {
+    console.error('계약 삭제 오류', error);
+    showToast('계약을 삭제하지 못했습니다. 권한과 연결 상태를 확인해 주세요.');
+  } finally { button.disabled = false; }
+}
+
 function parseYearMonth(value) {
   const match = String(value || '').trim().match(/(\d{4})\D*(\d{1,2})/);
   if (!match) return null;
@@ -430,6 +495,7 @@ function contractUniqueValues(key, rows = contractData) {
 }
 
 function refreshContractFilters() {
+  refreshFieldFilters('contractsView', [...contractColumns.slice(3), '총계약기간', '남은계약기간'], contractData, renderContracts);
   const headquarters = document.getElementById('contractHeadquartersFilter');
   const division = document.getElementById('contractDivisionFilter');
   const team = document.getElementById('contractTeamFilter');
@@ -449,7 +515,7 @@ function renderContracts() {
     const row = item.row;
     const matchesFilter = (!headquarters || row['본부'] === headquarters) && (!division || row['부'] === division) && (!team || row['팀'] === team);
     const searchable = contractColumns.map(key => row[key]).join(' ').toLowerCase();
-    return matchesFilter && (!keyword || searchable.includes(keyword));
+    return matchesFilter && matchesFieldFilters('contractsView', row) && (!keyword || searchable.includes(keyword));
   });
   const body = document.getElementById('contractTableBody');
   body.innerHTML = filtered.length ? filtered.map(item => { const row = item.row;
@@ -463,7 +529,7 @@ function renderContracts() {
       <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
       <td>${escapeHtml(row['차종'])}</td><td class="plate">${escapeHtml(row['차량번호'])}</td><td class="money">${rentalNumber(row['렌탈료']).toLocaleString('ko-KR')}원</td>
       <td><div class="contract-period"><strong>${escapeHtml(formatYearMonth(row['계약시작']))} ~ ${escapeHtml(formatYearMonth(row['계약종료']))}</strong></div></td>
-      <td><div class="contract-period"><strong>총 ${total}개월</strong><span class="remaining-badge ${stateClass}">${remainingText}</span></div></td><td><button class="row-edit" data-contract-edit="${item.index}">수정</button></td>
+      <td><div class="contract-period"><strong>총 ${total}개월</strong><span class="remaining-badge ${stateClass}">${remainingText}</span></div></td><td><button class="row-edit" data-contract-edit="${item.index}">수정</button> <button class="row-delete" data-contract-delete="${item.index}">삭제</button></td>
     </tr>`;
   }).join('') : '<tr><td class="empty-table" colspan="11">조건에 맞는 계약정보가 없습니다.</td></tr>';
   const totalFee = contractData.reduce((sum, row) => sum + rentalNumber(row['렌탈료']), 0);
@@ -913,6 +979,7 @@ drivingUploadModal.addEventListener('click', event => { if (event.target === dri
 document.getElementById('addVehicleButton').addEventListener('click', () => openVehicleForm());
 document.getElementById('deleteAllVehicles').addEventListener('click', deleteAllVehicles);
 document.getElementById('addContractButton').addEventListener('click', () => openContractForm());
+document.getElementById('deleteAllContracts').addEventListener('click', () => deleteContracts(true));
 document.getElementById('cfPlate').addEventListener('input', fillContractVehicleFields);
 document.getElementById('addDrivingButton').addEventListener('click', () => openDrivingForm());
 document.getElementById('exportVehiclesButton').addEventListener('click', exportVehicleData);
@@ -940,6 +1007,8 @@ document.getElementById('vehicleTableBody').addEventListener('click', event => {
 document.getElementById('contractTableBody').addEventListener('click', event => {
   const button = event.target.closest('[data-contract-edit]');
   if (button) openContractForm(Number(button.dataset.contractEdit));
+  const remove = event.target.closest('[data-contract-delete]');
+  if (remove) deleteContracts(false, Number(remove.dataset.contractDelete));
 });
 document.getElementById('drivingTableBody').addEventListener('click', event => {
   const button = event.target.closest('[data-driving-edit]');
@@ -1068,6 +1137,7 @@ document.getElementById('confirmUpload').addEventListener('click', async () => {
   button.textContent = '자료 확인 중...';
   try {
     const uploadedRows = await readVehicleFile(file);
+    resetFieldFilters('vehiclesView');
     const savedToSupabase = await saveVehicleFileToSupabase(uploadedRows);
     if (savedToSupabase) await refreshVehiclesFromSupabase();
     else vehicleData = uploadedRows;
@@ -1097,6 +1167,7 @@ document.getElementById('confirmContractUpload').addEventListener('click', async
   button.textContent = '자료 확인 중...';
   try {
     const rows = await readContractFile(file);
+    resetFieldFilters('contractsView');
     await saveContractRows(rows);
     document.getElementById('contractSearch').value = '';
     ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'].forEach(id => document.getElementById(id).value = '');
@@ -1236,6 +1307,7 @@ document.getElementById('headquartersFilter').addEventListener('change', () => {
 document.getElementById('divisionFilter').addEventListener('change', () => { document.getElementById('teamFilter').value = ''; refreshFilters(); renderVehicles(); });
 document.getElementById('teamFilter').addEventListener('change', renderVehicles);
 document.getElementById('resetFilters').addEventListener('click', () => {
+  resetFieldFilters('vehiclesView');
   document.getElementById('vehicleSearch').value = '';
   ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => document.getElementById(id).value = '');
   refreshFilters(); renderVehicles();
@@ -1246,6 +1318,7 @@ document.getElementById('contractHeadquartersFilter').addEventListener('change',
 document.getElementById('contractDivisionFilter').addEventListener('change', () => { document.getElementById('contractTeamFilter').value = ''; refreshContractFilters(); renderContracts(); });
 document.getElementById('contractTeamFilter').addEventListener('change', renderContracts);
 document.getElementById('resetContractFilters').addEventListener('click', () => {
+  resetFieldFilters('contractsView');
   document.getElementById('contractSearch').value = '';
   ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'].forEach(id => document.getElementById(id).value = '');
   refreshContractFilters(); renderContracts();

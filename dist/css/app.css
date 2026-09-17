@@ -293,7 +293,7 @@ td strong { font-size: .8rem; }
 .search-box svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--grey); }
 .search-box input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: .84rem; }
 .search-box input::placeholder { color: var(--grey); }
-.filter-row { padding: 14px 22px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--line); background: #fbfcfc; }
+.filter-row { padding: 14px 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; border-bottom: 1px solid var(--line); background: #fbfcfc; }
 .filter-label { margin-right: 3px; color: var(--ink-soft); font-size: .78rem; font-weight: 750; }
 .filter-select { min-width: 142px; height: 39px; padding: 0 34px 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink-soft); background: var(--white); font-size: .8rem; outline: 0; }
 .filter-select:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .07); }
