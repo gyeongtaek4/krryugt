@@ -128,18 +128,18 @@
             <p class="metric-value" id="dashboardContractAmount" aria-live="polite">—</p>
             <span class="metric-meta">차량계약정보 전체 월 렌탈료 합계</span>
           </article>
+          <article class="metric-card expiry-overview">
+            <div class="metric-top"><span class="metric-label">6개월 내 계약 만료 예정 차량</span></div>
+            <p class="metric-value" id="dashboardExpiryCount">0대</p>
+            <div class="expiry-header-actions"><span class="expiry-stat urgent">1개월 내 <strong id="dashboardUrgentCount">0대</strong></span><button class="button" id="allVehiclesButton">계약정보 보기</button></div>
+            <span class="metric-meta">현재 월 기준 · 차량번호 중복 제외</span>
+          </article>
         </section>
         <section class="dashboard-overview">
           <article class="panel department-overview">
             <div class="panel-header"><div><h2 class="panel-title">부서별 차량 현황</h2><p class="panel-subtitle">현재 배정 기준</p></div></div>
             <div class="department-list" id="dashboardDepartments"><p class="empty-table">등록된 차량이 없습니다.</p></div>
             <div class="data-note"><div><strong>현재 차량현황 기준</strong><p>저장된 본부·부·팀별 차량 수를 표시합니다.</p></div></div>
-          </article>
-          <article class="panel expiry-overview">
-            <div class="panel-header">
-              <div><h2 class="panel-title">6개월 내 계약 만료 예정 차량</h2><p class="panel-subtitle">현재 월 기준 · 저장된 차량계약정보에서 집계합니다.</p></div>
-              <div class="expiry-header-actions"><span class="expiry-stat">대상 차량 <strong id="dashboardExpiryCount">0대</strong></span><span class="expiry-stat urgent">1개월 내 <strong id="dashboardUrgentCount">0대</strong></span><button class="button" id="allVehiclesButton">계약정보 보기</button></div>
-            </div>
           </article>
         </section>
         <section class="panel" style="margin-bottom:24px">

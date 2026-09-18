@@ -165,7 +165,7 @@ h1 { margin: 0; font-size: clamp(1.65rem, 2.4vw, 2.15rem); line-height: 1.25; le
 .button.primary:hover { background: var(--brand-dark); }
 .button svg { width: 17px; height: 17px; }
 
-.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
 
 .metric-card, .panel {
   background: var(--white);
@@ -257,9 +257,8 @@ td strong { font-size: .8rem; }
 
 .department-list { display: grid; gap: 15px; }
 .department-row { display: grid; gap: 7px; }
-.dashboard-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .45fr); gap: 16px; margin-bottom: 24px; align-items: start; }
-.department-overview .department-list { max-height: 230px; overflow-y: auto; padding-right: 8px; gap: 12px; }
-.expiry-overview .panel-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+.dashboard-overview { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+.department-overview .department-list { gap: 12px; }
 .expiry-overview .expiry-header-actions { justify-content: flex-start; }
 @media (max-width: 900px) { .dashboard-overview { grid-template-columns: 1fr; } }
 .department-meta { display: flex; align-items: center; justify-content: space-between; font-size: .77rem; }
