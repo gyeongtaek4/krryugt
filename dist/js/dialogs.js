@@ -94,11 +94,11 @@
 
   <div class="modal-backdrop" id="drivingFormModal" role="dialog" aria-modal="true" aria-labelledby="drivingFormTitle">
     <div class="modal">
-      <div class="modal-header"><div><h2 id="drivingFormTitle">운행기록 직접 추가</h2><p>차량번호와 월 이동키로수, 운행일자를 입력해 주세요.</p></div><button class="close-button" id="closeDrivingForm" aria-label="닫기">✕</button></div>
+      <div class="modal-header"><div><h2 id="drivingFormTitle">운행기록 직접 추가</h2><p>차량번호와 이번 운행의 이동거리, 운행일자를 입력해 주세요.</p></div><button class="close-button" id="closeDrivingForm" aria-label="닫기">✕</button></div>
       <form id="drivingForm">
         <div class="form-grid">
           <div class="form-field full"><label for="dfPlate">차량번호 *</label><input id="dfPlate" required placeholder="예: 12가 3456"></div>
-          <div class="form-field"><label for="dfMileage">월 이동키로수(km) *</label><input id="dfMileage" type="number" min="0" step="1" required></div>
+          <div class="form-field"><label for="dfMileage">운행 이동거리(km) *</label><input id="dfMileage" type="number" min="0" step="any" required></div>
           <div class="form-field"><label for="dfDate">운행년월일 *</label><input id="dfDate" type="date" required></div>
         </div>
         <p class="form-hint">차량현황에 같은 차량번호가 있으면 본부·부·팀·차종이 자동으로 연결됩니다.</p>

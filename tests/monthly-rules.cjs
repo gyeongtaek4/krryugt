@@ -1,28 +1,45 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const source=fs.readFileSync('dist/js/app.js','utf8');
-function fn(name){const start=source.indexOf('function '+name+'(');assert(start>=0,name);let next=source.indexOf('\nfunction ',start+1);return source.slice(start,next<0?source.length:next);}
-const context=vm.createContext({drivingData:[],drivingArchive:{},normalizePlate:v=>v.replace(/\s/g,''),normalizeDrivingDate:v=>v});
-vm.runInContext(['mileageNumber','distanceForItems','drivingRowMonth','mergeDrivingRows'].map(fn).join('\n'),context);
-const row=(month,km,date='01')=>({'차량번호':'12가 3456','키로수':String(km),'운행년월일':`${month}-${date}`});
-context.incoming=[row('2026-08',1000),row('2026-09',500)];
-assert.equal(vm.runInContext('mergeDrivingRows(incoming).added',context),2);
-assert.equal(vm.runInContext('distanceForItems([{row:drivingData[0]}])',context),1000);
-context.incoming=[row('2026-08',1000,'31')];assert.equal(vm.runInContext('mergeDrivingRows(incoming).duplicate',context),1);
-context.incoming=[row('2026-08',1100)];assert.throws(()=>vm.runInContext('mergeDrivingRows(incoming)',context));assert.equal(context.drivingData.length,2);
-context.drivingArchive['2026-08']={};assert.equal(vm.runInContext('mergeDrivingRows(incoming).locked',context),1);
-assert(source.includes('const averages = months.map(() => average)'));
-assert(source.includes("format:'fleet-driving-monthly-v2'"));assert(source.includes("data.format==='fleet-driving-archive-v1'"));
-console.log('PASS: monthly mileage, two months, duplicate/conflict, confirmed lock, fixed average, archive format guard');
-vm.runInContext(fn('latestConfirmedDrivingMonth')+'\n'+fn('confirmedDrivingSummary'),context);
-assert.equal(vm.runInContext('latestConfirmedDrivingMonth()',context),'2026-08');
-context.drivingArchive={
-  '2026-08':{confirmedAt:'2026-09-17T10:00:00Z',rows:[{...row('2026-08',1000),_organization:{'본부':'익명본부'}}]},
-  '2026-09':{confirmedAt:'2026-09-17T09:00:00Z',rows:[row('2026-09',500)]}
-};
-assert.equal(vm.runInContext('latestConfirmedDrivingMonth()',context),'2026-08');
-assert.equal(vm.runInContext('confirmedDrivingSummary().distance',context),1000);
-context.drivingData.push(row('2026-10',9999));
-assert.equal(vm.runInContext('confirmedDrivingSummary().distance',context),1000);
-context.drivingArchive={};
-assert.equal(vm.runInContext('confirmedDrivingSummary().month',context),'');
-console.log('PASS: latest confirmation time, draft exclusion and empty confirmed summary.');
+const app=fs.readFileSync('dist/js/app.js','utf8'),months=fs.readFileSync('dist/js/driving-months.js','utf8');
+function fn(source,name){
+  const marker=source.indexOf('function '+name+'(');assert(marker>=0);
+  const start=source.slice(marker-6,marker)==='async '?marker-6:marker;
+  const next=source.slice(marker+1).search(/\n(?:async )?function |\nwindow\./);
+  const end=next<0?source.length:marker+1+next;
+  return source.slice(start,end);
+}
+const row=(plate,km,date)=>({'차량번호':plate,'키로수':String(km),'운행년월일':date});
+const org={'본부':'익명본부','부':'익명부','팀':'익명팀','차종':'테스트'};
+const elements={};
+const context=vm.createContext({drivingData:[],drivingArchive:{},drivingPageSize:20,
+  normalizePlate:v=>v.replace(/\s/g,''),normalizeDrivingDate:v=>v,
+  vehicleForPlate:()=>org,confirm:()=>true,
+  document:{getElementById:id=>elements[id]||(elements[id]={})}});
+vm.runInContext(['mileageNumber','distanceForItems','drivingRowMonth'].map(name=>fn(app,name)).join('\n'),context);
+vm.runInContext(fn(months,'drivingMonthlyTotals')+'\n'+fn(months,'drivingPagination'),context);
+context.drivingData=[row('12가 3456',20,'2026-08-01'),row('12가3456',30,'2026-08-01'),row('12가3456',40,'2026-08-02'),row('22가2222',10,'2026-08-01'),row('12가3456',80,'2026-09-01')];
+const result=vm.runInContext("drivingMonthlyTotals('2026-08')",context);
+assert.equal(result.length,2);assert.equal(result[0].distance,90);assert.equal(result[0].days.size,2);
+context.drivingArchive['2026-08']={rows:context.drivingData.slice(0,3).map(row=>({...row,_organization:{...org,'팀':'확정 당시 팀'}})),confirmedAt:'2026-09-02'};
+assert.equal(vm.runInContext("drivingMonthlyTotals('2026-08')[0].org['팀']",context),'확정 당시 팀');
+assert.equal(vm.runInContext("drivingMonthlyTotals('2026-09')[0].distance",context),80);
+vm.runInContext("drivingPagination('pager',21,1)",context);
+assert(elements.pager.innerHTML.includes('1 / 2'));assert(elements.pager.innerHTML.includes('data-page-step="-1" disabled'));
+vm.runInContext("drivingPagination('pager',21,2)",context);assert(elements.pager.innerHTML.includes('data-page-step="1" disabled'));
+context.storeDrivingMonth=async(month,rows)=>{context.drivingData=context.drivingData.filter(row=>row['운행년월일'].slice(0,7)!==month).concat(rows);};
+vm.runInContext(fn(app,'mergeDrivingRows'),context);
+(async()=>{
+  context.incoming=[row('12가3456',90,'2026-09-01')];
+  await vm.runInContext('mergeDrivingRows(incoming)',context);
+  await vm.runInContext('mergeDrivingRows(incoming)',context);
+  assert.equal(vm.runInContext("drivingMonthlyTotals('2026-09')[0].distance",context),90);
+  context.incoming=[row('12가3456',100,'2026-08-01')];
+  await assert.rejects(vm.runInContext('mergeDrivingRows(incoming)',context));
+  context.incoming=[row('12가3456',100,'2026-09-01'),row('12가3456',10,'2026-10-01')];
+  await assert.rejects(vm.runInContext('mergeDrivingRows(incoming)',context));
+  const before=JSON.stringify(context.drivingData);
+  context.storeDrivingMonth=async()=>{throw Error('mock storage failure');};
+  context.incoming=[row('12가3456',123,'2026-09-01')];
+  await assert.rejects(vm.runInContext('mergeDrivingRows(incoming)',context));assert.equal(JSON.stringify(context.drivingData),before);
+  assert(app.includes('const averages = months.map(() => average)'));
+  console.log('PASS: monthly SUM, unique days, snapshot, pagination, reupload, confirmed lock, mixed month, storage failure (mock).');
+})().catch(error=>{console.error(error);process.exitCode=1;});

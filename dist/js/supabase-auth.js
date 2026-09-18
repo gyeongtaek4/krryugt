@@ -26,6 +26,10 @@
       userName.textContent = profile?.display_name || session.user.email || '로그인 사용자';
       userRole.textContent = role === 'admin' ? '관리자' : role === 'editor' ? '입력자' : '조회자';
       if (window.refreshVehiclesFromSupabase) await window.refreshVehiclesFromSupabase();
+      if (window.refreshDrivingFromSupabase) {
+        try { await window.refreshDrivingFromSupabase(); }
+        catch (loadError) { showToast(loadError.message); }
+      }
     }
   }
 

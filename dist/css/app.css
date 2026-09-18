@@ -480,6 +480,8 @@ td strong { font-size: .8rem; }
 .driving-tool-group > .button, .driving-tool-group .closing-actions { margin-top: 14px; }
 @media (max-width: 900px) { .driving-storage-tools { grid-template-columns: 1fr; } }
 #printReport { display: none; }
+.pagination { justify-content: flex-end; padding: 16px 0; color: var(--ink-soft); font-size: 13px; }
+.closing-file-button[hidden] { display: none; }
 .handover-entry { margin: 24px 0; }
 .handover-photo-area { margin-top: 20px; padding: 20px; background: var(--brand-wash); border-radius: 14px; }
 .handover-photo-area > .button { margin-top: 12px; }
