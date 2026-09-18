@@ -1,0 +1,10 @@
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const html = fs.readFileSync('dist/index.html', 'utf8');
+const dashboard = html.split('id="dashboardView"')[1].split('id="vehiclesView"')[0];
+const titles = ['전체 운영 차량', '렌트 계약금액', '부서별 차량 현황', '6개월 내 계약 만료 예정 차량', '확정 운행자료 · 부서별 이용 현황', '월별 렌트 비용 추이', '차량 부대비용'];
+const positions = titles.map(title => dashboard.indexOf(title));
+assert(positions.every((position, index) => position >= 0 && (!index || position > positions[index - 1])));
+assert.equal((dashboard.match(/id="dashboardUsageMonth"/g) || []).length, 1);
+assert.equal((dashboard.match(/id="rentReferenceMonth"/g) || []).length, 1);
+console.log('PASS: dashboard section order and month controls (HTML, no visual browser check).');

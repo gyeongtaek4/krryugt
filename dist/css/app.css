@@ -257,6 +257,11 @@ td strong { font-size: .8rem; }
 
 .department-list { display: grid; gap: 15px; }
 .department-row { display: grid; gap: 7px; }
+.dashboard-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .45fr); gap: 16px; margin-bottom: 24px; align-items: start; }
+.department-overview .department-list { max-height: 230px; overflow-y: auto; padding-right: 8px; gap: 12px; }
+.expiry-overview .panel-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+.expiry-overview .expiry-header-actions { justify-content: flex-start; }
+@media (max-width: 900px) { .dashboard-overview { grid-template-columns: 1fr; } }
 .department-meta { display: flex; align-items: center; justify-content: space-between; font-size: .77rem; }
 .department-meta span { color: var(--ink-soft); }
 .department-meta strong { font-size: .76rem; }

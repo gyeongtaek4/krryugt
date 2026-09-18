@@ -129,6 +129,24 @@
             <span class="metric-meta">차량계약정보 전체 월 렌탈료 합계</span>
           </article>
         </section>
+        <section class="dashboard-overview">
+          <article class="panel department-overview">
+            <div class="panel-header"><div><h2 class="panel-title">부서별 차량 현황</h2><p class="panel-subtitle">현재 배정 기준</p></div></div>
+            <div class="department-list" id="dashboardDepartments"><p class="empty-table">등록된 차량이 없습니다.</p></div>
+            <div class="data-note"><div><strong>현재 차량현황 기준</strong><p>저장된 본부·부·팀별 차량 수를 표시합니다.</p></div></div>
+          </article>
+          <article class="panel expiry-overview">
+            <div class="panel-header">
+              <div><h2 class="panel-title">6개월 내 계약 만료 예정 차량</h2><p class="panel-subtitle">현재 월 기준 · 저장된 차량계약정보에서 집계합니다.</p></div>
+              <div class="expiry-header-actions"><span class="expiry-stat">대상 차량 <strong id="dashboardExpiryCount">0대</strong></span><span class="expiry-stat urgent">1개월 내 <strong id="dashboardUrgentCount">0대</strong></span><button class="button" id="allVehiclesButton">계약정보 보기</button></div>
+            </div>
+          </article>
+        </section>
+        <section class="panel" style="margin-bottom:24px">
+          <div class="panel-header"><div><h2 class="panel-title">확정 운행자료 · 부서별 이용 현황</h2><p class="panel-subtitle" id="dashboardUsageStatus">확정된 월별 자료를 기준으로 집계합니다.</p></div><div class="month-control"><label for="dashboardUsageMonth">보고월</label><input class="month-picker" id="dashboardUsageMonth" type="month" value="2026-09"></div></div>
+          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>운행 차량</th><th>월 주행거리</th><th>운행일수</th><th>차량당 평균</th></tr></thead><tbody id="dashboardUsageRows"></tbody></table></div>
+          <p class="usage-note">운행기록데이터의 확정자료 기준입니다. 거리는 모든 운행을 합산하고, 운행일수는 차량별 이용일수의 합계입니다.</p>
+        </section>
         <section class="grid-main">
           <article class="panel">
             <div class="panel-header">
@@ -166,24 +184,6 @@
               </div>
             </div>
             <p class="cost-source-note"><strong>향후 데이터 연동 예정</strong><br>주유비·통행료·주차비 자료를 업로드하면 이 영역의 금액과 비율이 자동으로 바뀌도록 연결할 수 있습니다.</p>
-          </article>
-        </section>
-        <section class="panel" style="margin-bottom:24px">
-          <div class="panel-header"><div><h2 class="panel-title">확정 운행자료 · 부서별 이용 현황</h2><p class="panel-subtitle" id="dashboardUsageStatus">확정된 월별 자료를 기준으로 집계합니다.</p></div><div class="month-control"><label for="dashboardUsageMonth">보고월</label><input class="month-picker" id="dashboardUsageMonth" type="month" value="2026-09"></div></div>
-          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>운행 차량</th><th>월 주행거리</th><th>운행일수</th><th>차량당 평균</th></tr></thead><tbody id="dashboardUsageRows"></tbody></table></div>
-          <p class="usage-note">운행기록데이터의 확정자료 기준입니다. 거리는 모든 운행을 합산하고, 운행일수는 차량별 이용일수의 합계입니다.</p>
-        </section>
-        <section class="grid-bottom">
-          <article class="panel">
-            <div class="panel-header">
-              <div><h2 class="panel-title">6개월 내 계약 만료 예정 차량</h2><p class="panel-subtitle">현재 월 기준 · 저장된 차량계약정보에서 집계합니다.</p></div>
-              <div class="expiry-header-actions"><span class="expiry-stat">대상 차량 <strong id="dashboardExpiryCount">0대</strong></span><span class="expiry-stat urgent">1개월 내 <strong id="dashboardUrgentCount">0대</strong></span><button class="button" id="allVehiclesButton">계약정보 보기</button></div>
-            </div>
-          </article>
-          <article class="panel">
-            <div class="panel-header"><div><h2 class="panel-title">부서별 차량 현황</h2><p class="panel-subtitle">현재 배정 기준</p></div></div>
-            <div class="department-list" id="dashboardDepartments"><p class="empty-table">등록된 차량이 없습니다.</p></div>
-            <div class="data-note"><div><strong>현재 차량현황 기준</strong><p>저장된 본부·부·팀별 차량 수를 표시합니다.</p></div></div>
           </article>
         </section>
       </div>
