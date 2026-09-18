@@ -522,7 +522,8 @@ function normalizeYearMonth(value) {
 function monthSpan(start, end) {
   const from = parseYearMonth(start), to = parseYearMonth(end);
   if (!from || !to) return 0;
-  return Math.max(0, (to.year - from.year) * 12 + to.month - from.month + 1);
+  return to.year < from.year || (to.year === from.year && to.month < from.month)
+    ? 0 : (to.year - from.year) * 12 + to.month - from.month + 1;
 }
 
 function remainingMonths(end) {
