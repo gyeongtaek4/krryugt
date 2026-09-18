@@ -1,5 +1,17 @@
 # 오류 기록
 
+## 운행 저장 함수 schema cache 오류 (2026-09-18)
+
+- 원인 확인: 003 SQL의 조회 정책에 enum app_role에 없는 executive를 포함해 22P02 발생. 트랜잭션 전체가 실패하여 함수가 생성되지 않았다.
+- 수정: 실제 enum의 admin/editor/viewer만 사용. 함수 권한 검사에서 빈 문자열 enum 변환 오류가 없도록 text로 명시 변환. 성공 후 API 캐시 갱신 알림 추가.
+- 상태: SQL 재실행 검증 완료. 2026-09-18 실제 프로젝트에서 실행 성공, 표·함수 존재 true, 인수 일치 및 authenticated 호출 권한 true 확인. 실제 파일 재업로드는 미검증.
+
+- 접수: 업로드 후 save_driving_month(p_confirm,p_month,p_rows) 함수를 schema cache에서 찾을 수 없다는 오류.
+- 발생 단계: 엑셀 읽기 이후 RPC 호출. 첨부 파일 자체의 전체 적합성을 검증한 것은 아니다.
+- 코드 정의와 호출 인수는 p_month text, p_rows jsonb, p_confirm boolean으로 일치한다.
+- 함수 미생성·다른 프로젝트 실행·API 캐시 미갱신 가능성을 구분하기 위해 004_check_driving_function.sql을 준비했다. 홈페이지 프로젝트는 jmzjttyijccilqefgbzt다.
+- 캐시 재조회 명령 NOTIFY pgrst, 'reload schema' 실행 완료. 함수 존재 확인 완료, 홈페이지 파일 재시도 결과는 미확인.
+
 업무 원본·개인정보는 첨부하지 않는다. 추정 원인은 추정으로 표시한다.
 상태: 접수 / 조사 중 / 수정됨·미검증 / 검증 완료 / 미해결.
 

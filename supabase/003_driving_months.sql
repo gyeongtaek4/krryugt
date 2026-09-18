@@ -10,7 +10,7 @@ create table if not exists public.driving_months (
 alter table public.driving_months enable row level security;
 drop policy if exists driving_months_read on public.driving_months;
 create policy driving_months_read on public.driving_months for select to authenticated
-  using (public.current_user_role() in ('admin','editor','viewer','executive'));
+  using (public.current_user_role() in ('admin','editor','viewer'));
 grant select on public.driving_months to authenticated;
 revoke insert,update,delete on public.driving_months from anon,authenticated;
 create or replace function public.save_driving_month(p_month text,p_rows jsonb,p_confirm boolean default false)
@@ -21,7 +21,7 @@ declare
   item jsonb; v public.vehicles; clean jsonb := '[]'::jsonb;
   saved public.driving_months; day date; km numeric;
 begin
-  if auth.uid() is null or coalesce(public.current_user_role(),'') not in ('admin','editor') then
+  if auth.uid() is null or coalesce(public.current_user_role()::text,'') not in ('admin','editor') then
     raise exception '운행자료 저장 권한이 없습니다.';
   end if;
   if p_month is null or p_month !~ '^\d{4}-(0[1-9]|1[0-2])$' or p_rows is null
@@ -66,4 +66,5 @@ end;
 $$;
 revoke all on function public.save_driving_month(text,jsonb,boolean) from public;
 grant execute on function public.save_driving_month(text,jsonb,boolean) to authenticated;
+NOTIFY pgrst, 'reload schema';
 commit;
