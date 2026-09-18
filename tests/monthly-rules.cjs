@@ -22,6 +22,13 @@ const summaryRows = [1,2,3,4,5].map((n)=>({...row(`테스트${n}`,10,'2026-07-01
 context.drivingArchive['2026-07']={rows:[...summaryRows,{...summaryRows[0],'차량번호':'테스트 1','키로수':'20'}],confirmedAt:'2026-08-01'};
 const summary=vm.runInContext('confirmedDrivingSummary()',context);
 assert.equal(summary.count,5);assert.equal(summary.headquarters,1);assert.equal(summary.divisions,2);assert.equal(summary.teams,4);assert.equal(summary.distance,70);
+vm.runInContext(fn(app,'drivingOrganization')+'\n'+fn(app,'drivingReportForMonth'),context);
+context.drivingData=[row('미확정테스트',999,'2026-07-01')];
+const report=vm.runInContext("drivingReportForMonth('2026-07')",context);
+assert.equal(report.reduce((sum,r)=>sum+r['월 주행거리(km)'],0),70);
+assert.equal(report.reduce((sum,r)=>sum+r['운행 차량'],0),5);
+assert.equal(report.reduce((sum,r)=>sum+r['운행일수'],0),5);
+assert.equal(vm.runInContext("drivingReportForMonth('2026-06').length",context),0);
 context.drivingArchive={};
 context.drivingData=[row('12가 3456',20,'2026-08-01'),row('12가3456',30,'2026-08-01'),row('12가3456',40,'2026-08-02'),row('22가2222',10,'2026-08-01'),row('12가3456',80,'2026-09-01')];
 const result=vm.runInContext("drivingMonthlyTotals('2026-08')",context);

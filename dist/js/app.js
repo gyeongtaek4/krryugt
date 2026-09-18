@@ -608,11 +608,10 @@ function renderDashboardCurrentData() {
   const groups = [...departments.entries()].sort((a, b) => b[1] - a[1]);
   const max = Math.max(1, ...groups.map(([, count]) => count));
   document.getElementById('dashboardDepartments').innerHTML = groups.length ? groups.map(([name, count]) => `<div class="department-row"><div class="department-meta"><span>${escapeHtml(name)}</span><strong>${count}대</strong></div><div class="bar-track"><div class="bar-fill" style="--value:${count / max * 100}%"></div></div></div>`).join('') : '<p class="empty-table">등록된 차량이 없습니다.</p>';
-  const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 3; });
+  const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 6; });
   const countVehicles = rows => new Set(rows.map(row => normalizePlate(row['차량번호']))).size;
   document.getElementById('dashboardExpiryCount').textContent = `${countVehicles(expiring)}대`;
   document.getElementById('dashboardUrgentCount').textContent = `${countVehicles(expiring.filter(row => remainingMonths(row['계약종료']) <= 1))}대`;
-  document.getElementById('dashboardExpiryRows').innerHTML = expiring.length ? expiring.sort((a, b) => a['계약종료'].localeCompare(b['계약종료'])).map(row => `<tr><td>${escapeHtml(row['차량번호'])} · ${escapeHtml(row['차종'] || '-')}</td><td>${escapeHtml(row['팀'] || row['부'] || row['본부'] || '-')}</td><td>${escapeHtml(row._rentalCompany || '-')}</td><td>${escapeHtml(formatYearMonth(row['계약종료']))}</td><td>${remainingMonths(row['계약종료'])}개월</td></tr>`).join('') : '<tr><td colspan="5" class="empty-table">계약 만료 예정 차량이 없습니다.</td></tr>';
 }
 
 function vehicleForPlate(plate) {
@@ -652,7 +651,7 @@ async function mergeDrivingRows(incoming) {
 }
 function drivingReportForMonth(month) {
   const groups=new Map();
-  drivingData.filter(row=>drivingRowMonth(row)===month).forEach(row=>{
+  (drivingArchive[month]?.rows || []).forEach(row=>{
     const org=drivingOrganization(row);if(!org)return;
     const key=JSON.stringify([org['본부'],org['부'],org['팀']]);
     if(!groups.has(key))groups.set(key,{org,vehicles:new Map(),days:new Set()});
@@ -665,8 +664,9 @@ function drivingReportForMonth(month) {
 function drivingReportMarkup(rows) { return rows.map(row=>`<tr>${['본부','부','팀'].map(key=>`<td>${escapeHtml(row[key])}</td>`).join('')}<td>${row['운행 차량']}대</td><td>${row['월 주행거리(km)'].toLocaleString('ko-KR')}km</td><td>${row['운행일수']}</td><td>${row['차량당 평균(km)'].toLocaleString('ko-KR')}km</td></tr>`).join(''); }
 function renderDashboardUsage() {
   const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];
-  document.getElementById('dashboardUsageStatus').textContent=item ? `${month} · 확정자료 ${item.rows.length}건 · 확정 당시 부서 기준` : `${month || '보고월 선택 필요'} · 확정된 운행자료 없음`;
-  document.getElementById('dashboardUsageRows').innerHTML=item ? drivingReportMarkup(drivingReportForMonth(month)) : '<tr><td colspan="7" class="empty-table">운행기록데이터에서 해당 월을 확정하거나 보관파일을 불러오세요.</td></tr>';
+  const report = item ? drivingReportForMonth(month) : [];
+  document.getElementById('dashboardUsageStatus').textContent=item ? `${month} · 운행기록 확정자료 · ${new Set(item.rows.map(row=>normalizePlate(row['차량번호']))).size}대 · 확정 당시 부서 기준` : `${month || '보고월 선택 필요'} · 확정된 운행자료 없음`;
+  document.getElementById('dashboardUsageRows').innerHTML=report.length ? drivingReportMarkup(report) : '<tr><td colspan="7" class="empty-table">운행기록데이터에서 해당 월의 자료를 마감 확정하면 표시됩니다.</td></tr>';
 }
 function renderDrivingArchive() {
   const month=document.getElementById('usageMonth').value,saved=drivingArchive[month],rows=drivingData.filter(row=>drivingRowMonth(row)===month);
@@ -1473,7 +1473,7 @@ document.getElementById('reportButton').addEventListener('click', () => {
   window.print();
 });
 document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보'));
-document.getElementById('noticeButton').addEventListener('click', () => showToast(`3개월 내 계약 만료 예정 차량: ${document.getElementById('dashboardExpiryCount').textContent}`));
+document.getElementById('noticeButton').addEventListener('click', () => showToast(`6개월 내 계약 만료 예정 차량: ${document.getElementById('dashboardExpiryCount').textContent}`));
 
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); toggleDrivingUploadModal(false); closeVehicleForm(); closeContractForm(); closeDrivingForm(); toggleSidebar(false); }
