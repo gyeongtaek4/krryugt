@@ -57,7 +57,9 @@ renderDriving = function() {
   document.getElementById('drivingSummaryBasis').textContent=summary.month?`마지막 확정 저장 기준 · ${summary.month}`:'확정된 자료 없음 · 아래 업로드 자료를 검토하세요.';
   document.getElementById('usageVehicleCount').textContent=summary.month?`${summary.count}대`:'—';
   document.getElementById('usageTotalDistance').textContent=summary.month?`${summary.distance.toLocaleString('ko-KR')}km`:'—';
-  document.getElementById('usageUnmatchedCount').textContent=summary.month?`${summary.unmatched}건`:'—';
+  ['Headquarters','Division','Team'].forEach((key,index)=>{
+    document.getElementById(`usage${key}Count`).textContent=summary.month?`${[summary.headquarters,summary.divisions,summary.teams][index]}개`:'—';
+  });
   const items=drivingMonthlyTotals(month).filter(item=>!keyword || [item.plate,...Object.values(item.org||{})].join(' ').toLowerCase().includes(keyword));
   drivingPage=Math.min(drivingPage,Math.max(1,Math.ceil(items.length/20)));
   document.getElementById('drivingTableBody').innerHTML=items.slice((drivingPage-1)*20,drivingPage*20).map(item=>{

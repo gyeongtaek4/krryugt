@@ -690,7 +690,21 @@ function latestConfirmedDrivingMonth() {
 function confirmedDrivingSummary() {
   const month = latestConfirmedDrivingMonth();
   const rows = month ? drivingArchive[month].rows : [];
+  const vehicles = new Map();
+  rows.forEach(row=>{
+    const plate = normalizePlate(row['차량번호']);
+    if (!vehicles.has(plate)) vehicles.set(plate, row._organization);
+  });
+  const headquarters = new Set(), divisions = new Set(), teams = new Set();
+  vehicles.forEach(org=>{
+    if (!org) return;
+    const h = String(org['본부'] || '').trim(), d = String(org['부'] || '').trim(), t = String(org['팀'] || '').trim();
+    if (h) headquarters.add(h);
+    if (h && d) divisions.add(JSON.stringify([h,d]));
+    if (h && d && t) teams.add(JSON.stringify([h,d,t]));
+  });
   return {month, count:new Set(rows.map(row=>normalizePlate(row['차량번호']))).size,
+    headquarters:headquarters.size, divisions:divisions.size, teams:teams.size,
     distance:rows.reduce((sum,row)=>sum+mileageNumber(row['키로수']),0),
     unmatched:rows.filter(row=>!row._organization).length};
 }
@@ -703,7 +717,9 @@ function renderDriving() {
   document.getElementById('drivingSummaryBasis').textContent = summary.month ? `마지막 확정 저장 기준 · ${summary.month} (아래 조회월·검토자료와 별도)` : '확정된 자료 없음 · 업로드 자료는 아래에서 검토하세요.';
   document.getElementById('usageVehicleCount').textContent = summary.month ? `${summary.count}대` : '—';
   document.getElementById('usageTotalDistance').textContent = summary.month ? `${summary.distance.toLocaleString('ko-KR')}km` : '—';
-  document.getElementById('usageUnmatchedCount').textContent = summary.month ? `${summary.unmatched}건` : '—';
+  ['Headquarters','Division','Team'].forEach((key,index)=>{
+    document.getElementById(`usage${key}Count`).textContent = summary.month ? `${[summary.headquarters,summary.divisions,summary.teams][index]}개` : '—';
+  });
 
   const filtered = monthlyItems.filter(item => {
     const vehicle = item.vehicle || {};

@@ -16,6 +16,13 @@ const context=vm.createContext({drivingData:[],drivingArchive:{},drivingPageSize
   document:{getElementById:id=>elements[id]||(elements[id]={})}});
 vm.runInContext(['mileageNumber','distanceForItems','drivingRowMonth'].map(name=>fn(app,name)).join('\n'),context);
 vm.runInContext(fn(months,'drivingMonthlyTotals')+'\n'+fn(months,'drivingPagination'),context);
+vm.runInContext(fn(app,'latestConfirmedDrivingMonth')+'\n'+fn(app,'confirmedDrivingSummary'),context);
+assert.equal(vm.runInContext('confirmedDrivingSummary().month',context),'');
+const summaryRows = [1,2,3,4,5].map((n)=>({...row(`테스트${n}`,10,'2026-07-01'),_organization:{'본부':'본부A','부':n<4?'부A':'부B','팀':n<3?'팀1':n===3?'팀2':n===4?'팀1':'팀3'}}));
+context.drivingArchive['2026-07']={rows:[...summaryRows,{...summaryRows[0],'차량번호':'테스트 1','키로수':'20'}],confirmedAt:'2026-08-01'};
+const summary=vm.runInContext('confirmedDrivingSummary()',context);
+assert.equal(summary.count,5);assert.equal(summary.headquarters,1);assert.equal(summary.divisions,2);assert.equal(summary.teams,4);assert.equal(summary.distance,70);
+context.drivingArchive={};
 context.drivingData=[row('12가 3456',20,'2026-08-01'),row('12가3456',30,'2026-08-01'),row('12가3456',40,'2026-08-02'),row('22가2222',10,'2026-08-01'),row('12가3456',80,'2026-09-01')];
 const result=vm.runInContext("drivingMonthlyTotals('2026-08')",context);
 assert.equal(result.length,2);assert.equal(result[0].distance,90);assert.equal(result[0].days.size,2);
