@@ -23,11 +23,16 @@
       if (roleError) console.warn('역할 조회 오류', roleError);
       // 프로필 표의 실제 역할을 우선 사용하고, 프로필 조회가 제한될 때만 RPC 결과를 사용합니다.
       const role = profile?.role || roleValue;
+      window.fleetCurrentRole = role || 'viewer';
       userName.textContent = profile?.display_name || session.user.email || '로그인 사용자';
       userRole.textContent = role === 'admin' ? '관리자' : role === 'editor' ? '입력자' : '조회자';
       if (window.refreshVehiclesFromSupabase) await window.refreshVehiclesFromSupabase();
       if (window.refreshDrivingFromSupabase) {
         try { await window.refreshDrivingFromSupabase(); }
+        catch (loadError) { showToast(loadError.message); }
+      }
+      if (window.refreshHandoverFromSupabase) {
+        try { await window.refreshHandoverFromSupabase(); }
         catch (loadError) { showToast(loadError.message); }
       }
     }

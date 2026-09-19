@@ -2,7 +2,7 @@
 
 - 2026-09-18 운행: driving_months 표·권한 검증 RPC로 월 원본과 확정 조직·확정일 저장 코드를 준비했다. 003_driving_months.sql의 실제 실행은 아직 미확인이다. driving-storage.md 참고.
 
-- 인수인계는 브라우저 메모리 목록과 사진 포함 fleet-handover-v1 JSON으로 보관한다. 차량·조직 스냅샷을 저장하며 DB/Storage는 미연결이다. handover.md 참고.
+- 인수인계는 `vehicle_handovers`에 차량 참조·인계 정보·차량/조직 스냅샷·첨부 경로와 MIME 형식을 저장한다. 외관 사진·PDF 1~6개는 비공개 `handover-photos` Storage에 저장하며 로그인 사용자만 서명 URL로 조회한다. 상세 기준은 handover.md 참고.
 
 ## 구현된 Supabase 연결 (2026-09-17)
 

@@ -488,14 +488,16 @@ td strong { font-size: .8rem; }
 .closing-file-button[hidden] { display: none; }
 .handover-entry { margin: 24px 0; }
 .handover-photo-area { margin-top: 20px; padding: 20px; background: var(--brand-wash); border-radius: 14px; }
-.handover-form .form-input { box-sizing: border-box; width: 100%; height: 43px; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--white); font: inherit; font-size: .83rem; outline: 0; }
-.handover-form select.form-input { appearance: auto; }
-.handover-form textarea.form-input { padding-top: 11px; padding-bottom: 11px; resize: vertical; line-height: 1.35; }
-.handover-form .form-input:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
+#handoverForm .form-input { box-sizing: border-box; width: 100%; height: 43px; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background-color: var(--white); font: inherit; font-size: .83rem; outline: 0; }
+#handoverForm select.form-input { appearance: none; padding-right: 42px; background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%), linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%); background-position: calc(100% - 19px) 18px, calc(100% - 14px) 18px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; cursor: pointer; }
+#handoverForm textarea.form-input { padding-top: 11px; padding-bottom: 11px; resize: vertical; line-height: 1.35; }
+#handoverForm .form-input:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
 .handover-photo-area > .button { margin-top: 12px; }
 .handover-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 16px; }
 .handover-gallery figure { margin: 0; min-width: 0; }
 .handover-gallery img { width: 100%; height: 160px; object-fit: contain; background: white; border: 1px solid var(--line); border-radius: 10px; }
+.handover-pdf { display: flex; height: 160px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--brand); background: white; border: 1px solid var(--line); border-radius: 10px; font-weight: 800; font-size: 28px; }
+.handover-pdf small { color: var(--ink-soft); font-size: 12px; font-weight: 600; }
 .handover-gallery figcaption { font-size: 12px; color: var(--ink-soft); overflow-wrap: anywhere; margin-top: 5px; }
 .handover-detail { margin-top: 20px; padding: 20px; border-top: 1px solid var(--line); }
 .handover-notes { white-space: pre-wrap; overflow-wrap: anywhere; }

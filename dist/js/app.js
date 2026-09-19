@@ -128,7 +128,13 @@ function showView(page) {
   document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : isDriving ? '운행기록데이터' : '대시보드';
   document.querySelectorAll('.nav-button').forEach(item => item.classList.toggle('active', item.dataset.page === page));
   if (isClosing) { document.getElementById('breadcrumbCurrent').textContent = page; renderClosing(); }
-  if (isHandover) { document.getElementById('breadcrumbCurrent').textContent = page; refreshHandoverVehicles(); }
+  if (isHandover) {
+    document.getElementById('breadcrumbCurrent').textContent = page;
+    refreshHandoverVehicles();
+    if (window.fleetCurrentUser && window.refreshHandoverFromSupabase) {
+      window.refreshHandoverFromSupabase().catch(error => showToast(error.message));
+    }
+  }
   if (isDriving) {
     const latest = latestConfirmedDrivingMonth();
     if (latest) document.getElementById('usageMonth').value = latest;

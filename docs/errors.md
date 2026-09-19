@@ -1,5 +1,11 @@
 # 오류 기록
 
+## 인수인계 선택·텍스트영역 스타일 미적용 (2026-09-19)
+
+- 원인: CSS가 존재하지 않는 `.handover-form` 클래스를 대상으로 해 실제 `#handoverForm` 내부 요소에 적용되지 않았다.
+- 조치: 실제 form ID를 대상으로 입력·날짜·select·textarea의 높이, 테두리, 모서리, 포커스를 통일하고 select 화살표를 유지했다.
+- 상태: 코드·mock 검증 완료. 실제 브라우저 시각 확인은 미검증.
+
 ## 운행 저장 함수 schema cache 오류 (2026-09-18)
 
 - 원인 확인: 003 SQL의 조회 정책에 enum app_role에 없는 executive를 포함해 22P02 발생. 트랜잭션 전체가 실패하여 함수가 생성되지 않았다.
@@ -50,3 +56,10 @@
 - 수정 내용 / 관련 파일·커밋:
 - 실제 검증 결과 / 미확인 범위:
 - 후속 작업:
+# 2026-09-19 — 인수인계 PDF Storage 저장 실패
+
+- 증상: PDF 선택 후 저장하면 `외관 자료 저장에 실패했습니다.` 표시.
+- 원인: 화면은 PDF를 허용하도록 변경됐지만 실제 `handover-photos` 버킷의 `allowed_mime_types`에는 이미지 형식만 남아 있었다.
+- 확인: Supabase 조회 결과 `image/jpeg`, `image/png`, `image/webp`만 허용됨.
+- 조치: 화면 오류에 Storage 상세 사유를 표시하고, `005_handovers.sql`과 실제 버킷 허용 목록에 `application/pdf`를 추가했다.
+- 검증: 실제 조회 결과 허용 목록에 `application/pdf`가 표시되고 `pdf_allowed=true`임을 확인했다.

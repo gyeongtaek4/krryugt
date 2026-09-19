@@ -4,6 +4,12 @@
 
 - handover.js 문법 검사 및 handover mock 검증 통과. 사진 6장 허용·7장 거부, 형식·개별/전체 크기 제한 확인.
 - dashboard-layout과 closing-ui 회귀검증 통과. 실제 브라우저의 날짜·선택·텍스트영역 시각 정렬 및 사진 선택은 미검증.
+- 후속 오류 수정: 실제 `#handoverForm` CSS 선택자와 select/textarea 스타일 규칙 존재를 mock 검사에 추가.
+- Supabase 표·비공개 Storage·RLS 및 화면의 업로드/저장/서명 URL 호출을 정적 검사한다.
+- 실제 `005_handovers.sql` 실행 성공. 확인 쿼리에서 `vehicle_handovers` 표, 5MB 비공개 `handover-photos` 버킷, 5개 정책이 모두 `true`로 확인됐다.
+- 외관 사진 업로드·재접속 조회, admin/editor 저장 허용과 viewer 저장 차단은 별도 실서버 검증이 필요하다.
+- PDF 허용 MIME, 최대 6개·파일당 5MB·총 20MB 제한과 PDF 상세 링크를 코드·정적 테스트에 반영했다. 실제 버킷 MIME 갱신 후 `pdf_allowed=true`를 확인했으며 PDF 파일 업로드 자체는 추가 확인이 필요하다.
+- 파일 선택을 여러 번 했을 때 기존 첨부와 새 첨부가 합쳐지고 동일 파일은 한 번만 유지되는 누적 로직을 mock 검증했다.
 
 ## 2026-09-17 업무 기준 적용 결과
 

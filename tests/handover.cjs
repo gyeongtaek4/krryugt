@@ -1,14 +1,29 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('dist/js/handover.js','utf8');
+const css=fs.readFileSync('dist/css/app.css','utf8');
 const start=source.indexOf('function validateHandoverPhotos('),end=source.indexOf('\nfunction handoverGallery',start);
 const context=vm.createContext({});
 vm.runInContext(source.slice(start,end),context);
 context.photos=[{name:'anonymous.png',size:3,data:'data:image/png;base64,YWJj'}];
 vm.runInContext('validateHandoverPhotos(photos)',context);
 vm.runInContext('validateHandoverPhotos(Array(6).fill(photos[0]))',context);
+context.pdf=[{name:'anonymous.pdf',size:3,type:'application/pdf',data:'data:application/pdf;base64,YWJj'}];
+vm.runInContext('validateHandoverPhotos(pdf)',context);
+context.first=[{name:'first.png',size:3,lastModified:1,data:'data:image/png;base64,YWJj'}];
+context.second=[{name:'second.pdf',size:3,lastModified:2,data:'data:application/pdf;base64,YWJj'}];
+assert.equal(vm.runInContext('mergeHandoverPhotos(first,second).length',context),2);
+assert.equal(vm.runInContext('mergeHandoverPhotos(first,first).length',context),1);
 for(const photos of [[],Array(7).fill(context.photos[0]),[{...context.photos[0],size:6*1024*1024}],[{...context.photos[0],data:'data:image/svg+xml;base64,YWJj'}]]) {
   context.invalid=photos;assert.throws(()=>vm.runInContext('validateHandoverPhotos(invalid)',context));
 }
 assert(source.includes('Object.fromEntries'));
-assert(source.includes('fleet-handover-v1'));
-console.log('PASS: photo type/count/size constraints and archive format (mock, no image decode or browser upload).');
+assert(source.includes('fleet-handover-server-v2'));
+assert(source.includes("from('vehicle_handovers').insert"));
+assert(source.includes("storage.from('handover-photos').upload"));
+assert(source.includes("'application/pdf'"));
+assert(source.includes('handoverPhotoDraft=merged'));
+assert(source.includes('PDF 허용 설정을 확인하세요'));
+assert(css.includes('#handoverForm .form-input'));
+assert(css.includes('#handoverForm select.form-input'));
+assert(css.includes('#handoverForm textarea.form-input'));
+console.log('PASS: photo constraints, Supabase save calls and metadata archive format (mock, no live upload).');

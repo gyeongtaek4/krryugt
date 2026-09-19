@@ -1,4 +1,4 @@
-/* 인수인계 임시 보관: 서버 연결 전에는 사진 포함 JSON을 별도 보관한다. */
+/* 인수인계 기록은 Supabase 표, 사진은 비공개 Storage에 저장한다. */
 const handoverRecords = [];
 let handoverPhotoDraft = [], handoverPhotoLoading = false;
 const handoverEl = id => document.getElementById(id);
@@ -9,19 +9,71 @@ function refreshHandoverVehicles() {
   select.value = selected;
 }
 function validateHandoverPhotos(photos) {
-  if (!Array.isArray(photos) || !photos.length || photos.length > 6) throw Error('외관 사진을 1~6장 첨부하세요.');
+  if (!Array.isArray(photos) || !photos.length || photos.length > 6) throw Error('외관 사진 또는 PDF를 1~6개 첨부하세요.');
   let bytes = 0;
   for (const photo of photos) {
     if (!photo || typeof photo.name !== 'string' || photo.name.length > 255 ||
       !Number.isSafeInteger(photo.size) || photo.size < 1 || photo.size > 5*1024*1024 ||
-      typeof photo.data !== 'string' || !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(photo.data) ||
-      photo.data.length > 7*1024*1024) throw Error('사진 형식 또는 크기가 올바르지 않습니다.');
+      typeof photo.data !== 'string' || !/^data:(image\/(jpeg|png|webp)|application\/pdf);base64,[A-Za-z0-9+/]+={0,2}$/.test(photo.data) ||
+      photo.data.length > 7*1024*1024) throw Error('첨부파일 형식 또는 크기가 올바르지 않습니다.');
     bytes += Math.max(photo.size, Math.floor(photo.data.split(',')[1].length*3/4));
   }
-  if (bytes > 20*1024*1024) throw Error('사진은 총 20MB 이하로 첨부하세요.');
+  if (bytes > 20*1024*1024) throw Error('첨부파일은 총 20MB 이하로 선택하세요.');
+}
+function mergeHandoverPhotos(current, incoming) {
+  const merged=[...current],keys=new Set(current.map(photo=>`${photo.name}\u0000${photo.size}\u0000${photo.lastModified||0}`));
+  for(const photo of incoming){
+    const key=`${photo.name}\u0000${photo.size}\u0000${photo.lastModified||0}`;
+    if(!keys.has(key)){keys.add(key);merged.push(photo);}
+  }
+  validateHandoverPhotos(merged);
+  return merged;
 }
 function handoverGallery(photos) {
-  return photos.map(photo => `<figure><a href="${photo.data}" download="${escapeHtml(photo.name)}"><img src="${photo.data}" alt="${escapeHtml(photo.name)}"></a><figcaption>${escapeHtml(photo.name)}</figcaption></figure>`).join('');
+  return photos.map(photo => {
+    const url=escapeHtml(photo.data),name=escapeHtml(photo.name),isPdf=photo.type==='application/pdf'||photo.data.startsWith('data:application/pdf')||/\.pdf$/i.test(photo.name);
+    return `<figure><a href="${url}" download="${name}">${isPdf?'<span class="handover-pdf">PDF<small>파일 열기</small></span>':`<img src="${url}" alt="${name}">`}</a><figcaption>${name}</figcaption></figure>`;
+  }).join('');
+}
+async function signedHandoverPhotos(paths) {
+  if (!paths.length) return [];
+  const {data,error}=await window.fleetSupabaseClient.storage.from('handover-photos').createSignedUrls(paths.map(item=>item.path),3600);
+  if(error)throw Error('인수인계 사진을 불러오지 못했습니다.');
+  return paths.map((item,index)=>({name:item.name,size:item.size,type:item.type||'',data:data[index]?.signedUrl || ''}));
+}
+async function refreshHandoverFromSupabase() {
+  if(!window.fleetCurrentUser || !window.fleetSupabaseClient)return;
+  const {data,error}=await window.fleetSupabaseClient.from('vehicle_handovers').select('*').order('created_at',{ascending:false});
+  if(error)throw Error('인수인계 자료를 불러오지 못했습니다. 005_handovers.sql 실행이 필요할 수 있습니다.');
+  const records=await Promise.all((data||[]).map(async row=>({id:row.id,date:row.handover_date,from:row.handed_over_by,to:row.received_by,
+    condition:row.condition,notes:row.notes,vehicle:row.vehicle_snapshot,photos:await signedHandoverPhotos(row.photo_paths),photoPaths:row.photo_paths,createdAt:row.created_at})));
+  handoverRecords.splice(0,handoverRecords.length,...records);renderHandovers();
+}
+window.refreshHandoverFromSupabase=refreshHandoverFromSupabase;
+function handoverFileExtension(data) { return data.startsWith('data:application/pdf')?'pdf':data.startsWith('data:image/png')?'png':data.startsWith('data:image/webp')?'webp':'jpg'; }
+async function storeHandover(record,photos) {
+  if(!window.fleetCurrentUser || !window.fleetSupabaseClient)throw Error('로그인 후 저장하세요.');
+  const uploaded=[];
+  try {
+    for(let index=0;index<photos.length;index++){
+      const photo=photos[index],path=`${window.fleetCurrentUser.id}/${record.id}/${index+1}.${handoverFileExtension(photo.data)}`;
+      const blob=await (await fetch(photo.data)).blob();
+      const {error}=await window.fleetSupabaseClient.storage.from('handover-photos').upload(path,blob,{contentType:blob.type,upsert:false});
+      if(error){
+        const reason=error.message||'알 수 없는 Storage 오류';
+        if(/mime|content.?type/i.test(reason))throw Error('Supabase 저장소가 이 파일 형식을 허용하지 않습니다. PDF 허용 설정을 확인하세요.');
+        throw Error(`외관 자료 저장에 실패했습니다: ${reason}`);
+      }
+      uploaded.push({path,name:photo.name,size:photo.size,type:photo.type||blob.type});
+    }
+    const {error}=await window.fleetSupabaseClient.from('vehicle_handovers').insert({id:record.id,vehicle_id:record.vehicleId,
+      handover_date:record.date,handed_over_by:record.from,received_by:record.to,condition:record.condition,notes:record.notes,
+      vehicle_snapshot:record.vehicle,photo_paths:uploaded,created_by:window.fleetCurrentUser.id});
+    if(error)throw Error(error.message || '인수인계 기록 저장에 실패했습니다.');
+  } catch(error) {
+    if(uploaded.length)await window.fleetSupabaseClient.storage.from('handover-photos').remove(uploaded.map(item=>item.path));
+    throw error;
+  }
 }
 function renderHandovers() {
   handoverEl('handoverRows').innerHTML = handoverRecords.map((item,index) =>
@@ -30,8 +82,9 @@ function renderHandovers() {
 }
 function downloadHandoverArchive() {
   if (!handoverRecords.length) { showToast('저장된 기록이 없습니다.'); return; }
-  const url = URL.createObjectURL(new Blob([JSON.stringify({format:'fleet-handover-v1',records:handoverRecords})],{type:'application/json'}));
-  const link = document.createElement('a'); link.href=url; link.download='차량인수인계_사진포함보관파일.json'; link.click();
+  const records=handoverRecords.map(({photos,photoPaths,...item})=>({...item,photoFiles:(photoPaths||[]).map(({name,size})=>({name,size}))}));
+  const url = URL.createObjectURL(new Blob([JSON.stringify({format:'fleet-handover-server-v2',records})],{type:'application/json'}));
+  const link = document.createElement('a'); link.href=url; link.download='차량인수인계_이력자료.json'; link.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 const handoverNav = document.createElement('li');
@@ -43,20 +96,21 @@ handoverEl('handoverVehicle').addEventListener('change',()=>{
   handoverEl('handoverFrom').value = vehicleForPlate(handoverEl('handoverVehicle').value)?.['담당자(정)'] || '';
 });
 handoverEl('handoverPhotos').addEventListener('change',async event=>{
-  const input=event.target, files=Array.from(input.files); handoverPhotoDraft=[]; handoverEl('handoverPreview').innerHTML='';
+  const input=event.target, files=Array.from(input.files);
   handoverPhotoLoading=true; handoverEl('handoverSave').disabled=true; handoverEl('handoverError').textContent='';
   try {
     if (!files.length) return;
-    if (files.length>6 || files.reduce((sum,file)=>sum+file.size,0)>20*1024*1024) throw Error('최대 6장, 총 20MB까지 첨부할 수 있습니다.');
-    if (files.some(file=>!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size>5*1024*1024)) throw Error('JPG/PNG/WebP, 장당 5MB 이하 사진을 선택하세요.');
+    if (files.some(file=>!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type) || file.size>5*1024*1024)) throw Error('JPG/PNG/WebP/PDF, 파일당 5MB 이하 자료를 선택하세요.');
     const photos=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{
-      const reader=new FileReader(); reader.onload=()=>resolve({name:file.name,size:file.size,data:reader.result}); reader.onerror=()=>reject(Error('사진을 읽지 못했습니다.')); reader.readAsDataURL(file);
+      const reader=new FileReader(); reader.onload=()=>resolve({name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,data:reader.result}); reader.onerror=()=>reject(Error('첨부파일을 읽지 못했습니다.')); reader.readAsDataURL(file);
     })));
-    validateHandoverPhotos(photos); handoverPhotoDraft=photos; handoverEl('handoverPreview').innerHTML=handoverGallery(photos);
-  } catch(error) {handoverEl('handoverError').textContent=error.message;input.value='';}
-  finally {handoverPhotoLoading=false;handoverEl('handoverSave').disabled=false;}
+    const merged=mergeHandoverPhotos(handoverPhotoDraft,photos);
+    if(merged.length===handoverPhotoDraft.length)throw Error('이미 추가된 파일입니다.');
+    handoverPhotoDraft=merged;handoverEl('handoverPreview').innerHTML=handoverGallery(merged);
+  } catch(error) {handoverEl('handoverError').textContent=error.message;}
+  finally {input.value='';handoverPhotoLoading=false;handoverEl('handoverSave').disabled=false;}
 });
-handoverEl('handoverForm').addEventListener('submit',event=>{
+handoverEl('handoverForm').addEventListener('submit',async event=>{
   event.preventDefault(); handoverEl('handoverError').textContent='';
   try {
     if(handoverPhotoLoading)throw Error('사진을 읽는 중입니다.');
@@ -66,19 +120,21 @@ handoverEl('handoverForm').addEventListener('submit',event=>{
     if(!from||!to||from===to)throw Error('서로 다른 인계자와 인수자를 입력하세요.');
     if(condition==='이상 있음'&&!notes)throw Error('이상이 있는 위치와 내용을 입력하세요.');
     validateHandoverPhotos(handoverPhotoDraft);
-    handoverRecords.unshift({id:crypto.randomUUID(),date:handoverEl('handoverDate').value,from,to,condition,notes,
+    const record={id:crypto.randomUUID(),vehicleId:vehicle._supabaseId,date:handoverEl('handoverDate').value,from,to,condition,notes,
       vehicle:Object.fromEntries(['차량번호','차종','본부','부','팀','담당자(정)','담당자(부)'].map(key=>[key,String(vehicle[key]||'')])),
-      photos:handoverPhotoDraft,createdAt:new Date().toISOString()});
-    renderHandovers();downloadHandoverArchive();handoverPhotoDraft=[];handoverEl('handoverPhotos').value='';handoverEl('handoverPreview').innerHTML='';
+      createdAt:new Date().toISOString()};
+    handoverEl('handoverSave').disabled=true;await storeHandover(record,handoverPhotoDraft);await refreshHandoverFromSupabase();
+    handoverPhotoDraft=[];handoverEl('handoverPhotos').value='';handoverEl('handoverPreview').innerHTML='';
     handoverEl('handoverTo').value='';handoverEl('handoverNotes').value='';handoverEl('handoverCondition').value='확인 필요';
-    showToast('임시 기록을 저장했습니다. 내려받은 사진 포함 JSON을 보관하세요.');
+    showToast('인수인계 기록과 외관 자료를 저장했습니다.');
   }catch(error){handoverEl('handoverError').textContent=error.message;}
+  finally{handoverEl('handoverSave').disabled=false;}
 });
 handoverEl('handoverRows').addEventListener('click',event=>{
   const button=event.target.closest('[data-handover-detail]');if(!button)return;
   const item=handoverRecords[Number(button.dataset.handoverDetail)];if(!item)return;
   const detail=handoverEl('handoverDetail');detail.hidden=false;
-  detail.innerHTML=`<h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진을 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
+  detail.innerHTML=`<h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
 });
 handoverEl('handoverDownload').addEventListener('click',downloadHandoverArchive);
 handoverEl('handoverRestore').addEventListener('change',async event=>{
