@@ -488,6 +488,10 @@ td strong { font-size: .8rem; }
 .closing-file-button[hidden] { display: none; }
 .handover-entry { margin: 24px 0; }
 .handover-photo-area { margin-top: 20px; padding: 20px; background: var(--brand-wash); border-radius: 14px; }
+.handover-form .form-input { box-sizing: border-box; width: 100%; height: 43px; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--white); font: inherit; font-size: .83rem; outline: 0; }
+.handover-form select.form-input { appearance: auto; }
+.handover-form textarea.form-input { padding-top: 11px; padding-bottom: 11px; resize: vertical; line-height: 1.35; }
+.handover-form .form-input:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
 .handover-photo-area > .button { margin-top: 12px; }
 .handover-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 16px; }
 .handover-gallery figure { margin: 0; min-width: 0; }

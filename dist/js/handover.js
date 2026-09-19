@@ -9,7 +9,7 @@ function refreshHandoverVehicles() {
   select.value = selected;
 }
 function validateHandoverPhotos(photos) {
-  if (!Array.isArray(photos) || !photos.length || photos.length > 8) throw Error('외관 사진을 1~8장 첨부하세요.');
+  if (!Array.isArray(photos) || !photos.length || photos.length > 6) throw Error('외관 사진을 1~6장 첨부하세요.');
   let bytes = 0;
   for (const photo of photos) {
     if (!photo || typeof photo.name !== 'string' || photo.name.length > 255 ||
@@ -47,7 +47,7 @@ handoverEl('handoverPhotos').addEventListener('change',async event=>{
   handoverPhotoLoading=true; handoverEl('handoverSave').disabled=true; handoverEl('handoverError').textContent='';
   try {
     if (!files.length) return;
-    if (files.length>8 || files.reduce((sum,file)=>sum+file.size,0)>20*1024*1024) throw Error('최대 8장, 총 20MB까지 첨부할 수 있습니다.');
+    if (files.length>6 || files.reduce((sum,file)=>sum+file.size,0)>20*1024*1024) throw Error('최대 6장, 총 20MB까지 첨부할 수 있습니다.');
     if (files.some(file=>!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size>5*1024*1024)) throw Error('JPG/PNG/WebP, 장당 5MB 이하 사진을 선택하세요.');
     const photos=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{
       const reader=new FileReader(); reader.onload=()=>resolve({name:file.name,size:file.size,data:reader.result}); reader.onerror=()=>reject(Error('사진을 읽지 못했습니다.')); reader.readAsDataURL(file);

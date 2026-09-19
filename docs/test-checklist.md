@@ -1,5 +1,10 @@
 # 개발 검증 체크리스트
 
+## 2026-09-19 인수인계 입력 UI·사진 6장 제한
+
+- handover.js 문법 검사 및 handover mock 검증 통과. 사진 6장 허용·7장 거부, 형식·개별/전체 크기 제한 확인.
+- dashboard-layout과 closing-ui 회귀검증 통과. 실제 브라우저의 날짜·선택·텍스트영역 시각 정렬 및 사진 선택은 미검증.
+
 ## 2026-09-17 업무 기준 적용 결과
 
 - node --check 두 JS 파일 및 node tests/monthly-rules.cjs 통과.
