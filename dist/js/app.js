@@ -41,7 +41,8 @@ async function refreshVehiclesFromSupabase() {
     '지역': row.region || '', '주차장': row.parking_lot || '', _supabaseId: row.id
   }));
   refreshFilters(); renderVehicles(); renderDriving();
-  await refreshContractsFromSupabase();
+  if (window.fleetCurrentRole !== 'viewer') await refreshContractsFromSupabase();
+  else { contractData=[]; renderContracts(); }
 }
 window.refreshVehiclesFromSupabase = refreshVehiclesFromSupabase;
 
@@ -119,9 +120,11 @@ function showView(page) {
   const isDriving = page === '운행기록데이터';
   const isClosing = page === '월별 비용마감자료';
   const isHandover = page === '차량인수인계';
+  const isMembers = page === '회원관리';
+  document.getElementById('membersView').classList.toggle('active', isMembers);
   document.getElementById('handoverView').classList.toggle('active', isHandover);
   document.getElementById('closingView').classList.toggle('active', isClosing);
-  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover);
+  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover && !isMembers);
   document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
   document.getElementById('contractsView').classList.toggle('active', isContracts);
   document.getElementById('drivingView').classList.toggle('active', isDriving);
@@ -134,6 +137,10 @@ function showView(page) {
     if (window.fleetCurrentUser && window.refreshHandoverFromSupabase) {
       window.refreshHandoverFromSupabase().catch(error => showToast(error.message));
     }
+  }
+  if (isMembers) {
+    document.getElementById('breadcrumbCurrent').textContent = page;
+    if (window.refreshMembersFromSupabase) window.refreshMembersFromSupabase().catch(error => showToast(error.message));
   }
   if (isDriving) {
     const latest = latestConfirmedDrivingMonth();
@@ -424,11 +431,12 @@ function renderVehicles() {
     return matchesFilter && matchesFieldFilters('vehiclesView', row) && (!keyword || searchable.includes(keyword));
   });
   const body = document.getElementById('vehicleTableBody');
+  const canEdit=['admin','editor'].includes(window.fleetCurrentRole),canDelete=window.fleetCurrentRole==='admin';
   body.innerHTML = filtered.length ? filtered.map(item => { const row = item.row; return `<tr>
     <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
     <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
     <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
-    <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td>${escapeHtml(row['지역'] || '-')}</td><td>${escapeHtml(row['주차장'] || '-')}</td><td><button class="row-edit" data-vehicle-edit="${item.index}">수정</button> <button class="row-delete" data-vehicle-delete="${item.index}">삭제</button></td>
+    <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td>${escapeHtml(row['지역'] || '-')}</td><td>${escapeHtml(row['주차장'] || '-')}</td><td>${canEdit?`<button class="row-edit" data-vehicle-edit="${item.index}">수정</button>${canDelete?` <button class="row-delete" data-vehicle-delete="${item.index}">삭제</button>`:''}`:'<span class="read-only-label">조회 전용</span>'}</td>
   </tr>`; }).join('') : '<tr><td class="empty-table" colspan="10">조건에 맞는 차량이 없습니다.</td></tr>';
   document.getElementById('recordCount').textContent = `${filtered.length}건`;
   document.getElementById('totalVehicles').textContent = `${vehicleData.length}대`;
@@ -1390,7 +1398,7 @@ document.getElementById('closingRestore').addEventListener('change',async event=
 renderClosing();
 document.querySelectorAll('.nav-button').forEach(button => {
   button.addEventListener('click', () => {
-    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료') showView(button.dataset.page);
+    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page);
     else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
     toggleSidebar(false);
   });

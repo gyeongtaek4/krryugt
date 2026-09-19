@@ -516,3 +516,15 @@ td strong { font-size: .8rem; }
 #authGate.hidden { display: none; }
 .auth-card { width: min(390px, calc(100vw - 40px)); padding: 38px; background: #fff; border: 1px solid #e6f4f0; border-radius: 22px; box-shadow: 0 20px 60px rgba(0, 90, 70, .12); }
 .auth-card h1 { margin: 4px 0 8px; }.auth-card > p:not(.eyebrow):not(.auth-error) { color: #777; margin: 0 0 24px; }.auth-mark { width: 46px; height: 46px; display: grid; place-items: center; color: #fff; background: #01916d; border-radius: 14px; font-weight: 700; }.auth-submit { width: 100%; justify-content: center; margin-top: 8px; }.auth-error { min-height: 20px; color: #c94b4b; margin: 8px 0 0; font-size: 13px; }.auth-logout { padding: 7px 10px; font-size: 12px; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; margin: 0 0 20px; border-radius: 12px; background: var(--surface); }
+.auth-tabs button { padding: 9px; border: 0; border-radius: 9px; color: var(--ink-soft); background: transparent; cursor: pointer; font: inherit; font-weight: 700; }
+.auth-tabs button.active { color: var(--brand-dark); background: white; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.auth-signup-field[hidden] { display: none; }
+.auth-error.success { color: var(--brand-dark); }
+.member-panel { margin-top: 24px; }
+.member-summary { padding: 9px 13px; border-radius: 10px; color: var(--brand-dark); background: var(--brand-wash); font-size: 13px; font-weight: 700; }
+.member-table input, .member-table select { box-sizing: border-box; width: 100%; min-width: 105px; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: white; font: inherit; }
+.member-table select:disabled { color: var(--ink-soft); background: var(--surface); }
+.member-self { display: block; margin-top: 5px; color: var(--ink-soft); white-space: nowrap; }
+.read-only-label { color: var(--ink-soft); font-size: 12px; white-space: nowrap; }
+.heading-actions > [hidden], #vehicleUploadGuide[hidden], #memberNavItem[hidden] { display: none !important; }

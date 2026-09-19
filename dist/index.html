@@ -12,10 +12,13 @@
   <div class="auth-gate" id="authGate">
     <form class="auth-card" id="authForm">
       <div class="auth-mark">차량</div><p class="eyebrow">CORPORATE FLEET</p>
-      <h1>법인차량 관리</h1><p>관리자 계정으로 로그인해 주세요.</p>
+      <h1 id="authTitle">법인차량 관리</h1><p id="authCopy">회사 계정으로 로그인해 주세요.</p>
+      <div class="auth-tabs"><button type="button" class="active" id="authModeLogin">로그인</button><button type="button" id="authModeSignup">회원가입</button></div>
+      <label class="form-field auth-signup-field" hidden><span>이름</span><input class="form-input" id="authDisplayName" type="text" maxlength="50" autocomplete="name"></label>
       <label class="form-field"><span>이메일</span><input class="form-input" id="authEmail" type="email" autocomplete="username" required></label>
       <label class="form-field"><span>비밀번호</span><input class="form-input" id="authPassword" type="password" autocomplete="current-password" required></label>
-      <p class="auth-error" id="authError" role="alert"></p><button class="button primary auth-submit" type="submit">로그인</button>
+      <label class="form-field auth-signup-field" hidden><span>비밀번호 확인</span><input class="form-input" id="authPasswordConfirm" type="password" autocomplete="new-password"></label>
+      <p class="auth-error" id="authError" role="alert"></p><button class="button primary auth-submit" id="authSubmit" type="submit">로그인</button>
     </form>
   </div>
   <div class="app-shell">
@@ -35,7 +38,7 @@
       </ul>
       <p class="nav-label" style="margin-top:25px">SYSTEM</p>
       <ul class="nav-list">
-        <li><button class="nav-button" data-page="환경 설정"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.09a1.7 1.7 0 0 0-1.1-1.58 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.2 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2.4V9.6h.09A1.7 1.7 0 0 0 4.07 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 9.6 2.5V2.4h4v.09a1.7 1.7 0 0 0 1.1 1.58 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.5 9.6h.1v4h-.09A1.7 1.7 0 0 0 19.4 15Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>환경 설정</button></li>
+        <li id="memberNavItem" hidden><button class="nav-button" data-page="회원관리"><svg viewBox="0 0 24 24" fill="none"><path d="M8.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7-1a3 3 0 1 0 0-6m-13 16v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2m1-7a4.5 4.5 0 0 1 5 4.5V20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>회원관리</button></li>
       </ul>
       <div class="sidebar-footer">
         <div class="help-card"><strong>데이터 기준</strong><p>등록한 차량·계약정보와 확정한 월별 자료를 기준으로 표시합니다.</p></div>
@@ -54,6 +57,13 @@
           <div class="user-copy"><strong id="userName">로그인 사용자</strong><small id="userRole">인증 확인 중</small></div><button class="button auth-logout" id="logoutButton">로그아웃</button>
         </div>
       </header>
+      <div class="content view" id="membersView">
+        <div class="page-heading"><div><p class="eyebrow">계정 · 접근 권한</p><h1>회원관리</h1><p class="heading-copy">가입한 직원의 승인 상태와 사용 권한을 관리합니다.</p></div></div>
+        <section class="panel member-panel">
+          <div class="panel-header"><div><h2 class="panel-title">가입 회원</h2><p class="closing-help">신규 회원은 승인대기로 등록됩니다. 활성으로 변경해야 업무자료를 볼 수 있습니다.</p></div><div class="member-summary" id="memberSummary">회원 0명</div></div>
+          <div class="table-wrap"><table class="vehicle-table member-table"><thead><tr><th>이름</th><th>이메일</th><th>가입일</th><th>역할</th><th>상태</th><th>관리</th></tr></thead><tbody id="memberRows"></tbody></table></div>
+        </section>
+      </div>
       <div class="content view" id="handoverView">
         <div class="page-heading"><div><p class="eyebrow">담당자 변경 · 차량 상태 기록</p><h1>차량인수인계</h1><p class="heading-copy">누가 어떤 차량을 넘겼는지, 인계 당시 외관 상태를 사진 또는 PDF와 함께 기록합니다.</p></div></div>
         <p class="closing-feedback">인수인계 내용과 당시 차량·조직 정보는 Supabase에 저장하고, 외관 사진·PDF는 비공개 Storage에 보관합니다. 차량현황 담당자는 자동 변경하지 않습니다.</p>
@@ -206,7 +216,7 @@
           <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20h16M6 20V8l6-4 6 4v12M9 11h1m4 0h1m-6 4h1m4 0h1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>운영 본부</span><strong id="totalHeadquarters">4개</strong></div></article>
           <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>주 담당자</span><strong id="totalManagers">9명</strong></div></article>
         </section>
-        <section class="upload-guide">
+        <section class="upload-guide" id="vehicleUploadGuide">
           <div class="upload-guide-copy"><span class="upload-guide-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><strong>Excel 자료를 올리면 차량현황이 자동으로 바뀝니다.</strong><p>첫 번째 행의 열 이름을 본부, 부, 팀, 담당자(정), 담당자(부), 차량번호, 차종, 지역, 주차장으로 작성해 주세요.</p></div></div>
           <button class="button" id="guideUploadButton">파일 선택</button>
         </section>
@@ -343,6 +353,7 @@
   <script src="./js/app.js"></script>
   <script src="./js/handover.js"></script>
   <script src="./js/driving-months.js"></script>
+  <script src="./js/members.js"></script>
   <script src="./js/supabase-auth.js"></script>
 </body>
 </html>
