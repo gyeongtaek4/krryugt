@@ -5,7 +5,7 @@ const members=fs.readFileSync('dist/js/members.js','utf8');
 const app=fs.readFileSync('dist/js/app.js','utf8');
 const sql=fs.readFileSync('supabase/006_members.sql','utf8');
 
-for(const id of ['authModeLogin','authModeSignup','authDisplayName','authPasswordConfirm','memberNavItem','membersView','memberRows'])
+for(const id of ['authModeLogin','authModeSignup','authDisplayName','authPasswordConfirm','memberNavItem','membersView','memberRows','memberSearch'])
   assert(html.includes(`id="${id}"`),`missing HTML id: ${id}`);
 assert(!html.includes('data-page="환경 설정"'));
 assert(html.indexOf('./js/members.js')<html.indexOf('./js/supabase-auth.js'));
@@ -15,17 +15,22 @@ assert(auth.includes("memberNavItem.hidden=role!=='admin'"));
 assert(auth.includes("new Set(['차량 현황','차량인수인계'])"));
 assert(auth.includes("document.getElementById('vehicleUploadGuide').hidden=readOnly"));
 assert(app.includes("page === '회원관리'"));
-assert(app.includes("const canEdit=['admin','editor'].includes(window.fleetCurrentRole)"));
+assert(app.includes("const canEdit=window.fleetCurrentRole==='admin'"));
 assert(members.includes("rpc('admin_update_profile'"));
+assert(members.includes("pending:0,disabled:1,active:2"));
+assert(members.includes("search.addEventListener('input',renderMembers)"));
 for(const text of [
   "status text not null default 'pending'",
   "status='active'",
   'create or replace function public.is_active_user()',
   'create or replace function public.admin_update_profile',
-  "p_role not in ('admin','editor','viewer')",
+  "p_role not in ('admin','viewer')",
   "p_status not in ('pending','active','disabled')",
   'public.is_active_user()'
 ]) assert(sql.includes(text),`missing SQL rule: ${text}`);
-assert(sql.includes("contracts_select_authenticated on public.contracts for select to authenticated using(public.is_active_user() and public.current_user_role() in ('admin','editor'))"));
+assert(sql.includes("contracts_select_authenticated on public.contracts for select to authenticated using(public.is_active_user() and public.current_user_role()='admin')"));
 assert(sql.includes('handovers_insert_editor on public.vehicle_handovers for insert to authenticated with check(created_by=auth.uid() and public.is_active_user())'));
+const removeEditor=fs.readFileSync('supabase/007_remove_editor_role.sql','utf8');
+assert(removeEditor.includes("update public.profiles set role='viewer' where role='editor'"));
+assert(removeEditor.includes("p_role not in ('admin','viewer')"));
 console.log('PASS: signup, admin member view, approval states and active-user RLS wiring (static).');

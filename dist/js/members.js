@@ -1,17 +1,26 @@
 (() => {
-  const rows=document.getElementById('memberRows'),summary=document.getElementById('memberSummary');
-  if(!rows||!summary)return;
-  const roleLabel={admin:'관리자',editor:'입력자',viewer:'일반회원'};
+  const rows=document.getElementById('memberRows'),summary=document.getElementById('memberSummary'),search=document.getElementById('memberSearch');
+  if(!rows||!summary||!search)return;
+  const roleLabel={admin:'관리자',viewer:'일반회원'};
   const statusLabel={pending:'승인대기',active:'활성',disabled:'비활성'};
   let members=[];
 
+  function statusOrder(status){return ({pending:0,disabled:1,active:2})[status]??3;}
+  function visibleMembers(){
+    const keyword=search.value.trim().toLocaleLowerCase('ko-KR');
+    return members.filter(item=>!keyword||[item.display_name,item.email,roleLabel[item.role],statusLabel[item.status]].some(value=>String(value||'').toLocaleLowerCase('ko-KR').includes(keyword)))
+      .sort((a,b)=>statusOrder(a.status)-statusOrder(b.status)||String(b.created_at||'').localeCompare(String(a.created_at||'')));
+  }
+
   function renderMembers(){
     const pending=members.filter(item=>item.status==='pending').length;
-    summary.textContent=`전체 ${members.length}명 · 승인대기 ${pending}명`;
-    rows.innerHTML=members.map(item=>{
+    const disabledCount=members.filter(item=>item.status==='disabled').length;
+    const filtered=visibleMembers();
+    summary.textContent=`전체 ${members.length}명 · 승인대기 ${pending}명 · 비활성 ${disabledCount}명`;
+    rows.innerHTML=filtered.map(item=>{
       const self=item.id===window.fleetCurrentUser?.id,disabled=self?' disabled':'';
-      return `<tr data-member-id="${escapeHtml(item.id)}"><td><input class="member-name" maxlength="50" value="${escapeHtml(item.display_name||'')}"></td><td>${escapeHtml(item.email||'')}</td><td>${escapeHtml(String(item.created_at||'').slice(0,10))}</td><td><select class="member-role"${disabled}>${Object.entries(roleLabel).map(([value,label])=>`<option value="${value}"${item.role===value?' selected':''}>${label}</option>`).join('')}</select></td><td><select class="member-status"${disabled}>${Object.entries(statusLabel).map(([value,label])=>`<option value="${value}"${item.status===value?' selected':''}>${label}</option>`).join('')}</select></td><td><button class="row-edit member-save">저장</button>${self?'<small class="member-self">내 계정</small>':''}</td></tr>`;
-    }).join('')||'<tr><td colspan="6" class="empty-table">가입한 회원이 없습니다.</td></tr>';
+      return `<tr class="member-status-${escapeHtml(item.status||'')}" data-member-id="${escapeHtml(item.id)}"><td><input class="member-name" maxlength="50" value="${escapeHtml(item.display_name||'')}"></td><td>${escapeHtml(item.email||'')}</td><td>${escapeHtml(String(item.created_at||'').slice(0,10))}</td><td><select class="member-role"${disabled}>${Object.entries(roleLabel).map(([value,label])=>`<option value="${value}"${item.role===value?' selected':''}>${label}</option>`).join('')}</select></td><td><select class="member-status"${disabled}>${Object.entries(statusLabel).map(([value,label])=>`<option value="${value}"${item.status===value?' selected':''}>${label}</option>`).join('')}</select></td><td><button class="row-edit member-save">저장</button>${self?'<small class="member-self">내 계정</small>':''}</td></tr>`;
+    }).join('')||`<tr><td colspan="6" class="empty-table">${members.length?'조회 조건에 맞는 회원이 없습니다.':'가입한 회원이 없습니다.'}</td></tr>`;
   }
 
   async function refreshMembersFromSupabase(){
@@ -21,6 +30,7 @@
     members=data||[];renderMembers();
   }
   window.refreshMembersFromSupabase=refreshMembersFromSupabase;
+  search.addEventListener('input',renderMembers);
 
   rows.addEventListener('click',async event=>{
     const button=event.target.closest('.member-save');if(!button)return;

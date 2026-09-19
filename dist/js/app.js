@@ -431,7 +431,7 @@ function renderVehicles() {
     return matchesFilter && matchesFieldFilters('vehiclesView', row) && (!keyword || searchable.includes(keyword));
   });
   const body = document.getElementById('vehicleTableBody');
-  const canEdit=['admin','editor'].includes(window.fleetCurrentRole),canDelete=window.fleetCurrentRole==='admin';
+  const canEdit=window.fleetCurrentRole==='admin',canDelete=window.fleetCurrentRole==='admin';
   body.innerHTML = filtered.length ? filtered.map(item => { const row = item.row; return `<tr>
     <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
     <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
