@@ -104,6 +104,9 @@ function handoverConsentMarkup(item) {
 function canConfirmHandover(item) {
   return item.consentStatus === 'pending' && item.recipientUserId === window.fleetCurrentUser?.id;
 }
+function isHandoverAdmin() {
+  return window.fleetCurrentRole === 'admin';
+}
 function matchingHandovers() {
   const keyword = String(handoverEl('handoverHistorySearch')?.value || '').replace(/\s+/g, '').toUpperCase();
   if (!keyword) return handoverRecords;
@@ -113,7 +116,8 @@ function renderHandovers() {
   const records = matchingHandovers();
   handoverEl('handoverRows').innerHTML = records.map(item => {
     const index = handoverRecords.indexOf(item);
-    return `<tr><td>${escapeHtml(item.date)}</td><td class="plate">${escapeHtml(item.vehicle['차량번호'])}<br>${escapeHtml(item.vehicle['차종'] || '')}</td><td>${escapeHtml(['본부','부','팀'].map(key=>item.vehicle[key] || '').join(' / '))}</td><td>${escapeHtml(item.from)} → ${escapeHtml(item.to)}</td><td>${escapeHtml(item.condition)}</td><td>${handoverConsentMarkup(item)}${canConfirmHandover(item) ? `<button class="row-edit handover-consent-action" data-handover-consent="${index}">인수 동의</button>` : ''}</td><td>${item.photos.length}장</td><td><button class="row-edit" data-handover-detail="${index}">상세 보기</button></td></tr>`;
+    const adminActions = isHandoverAdmin() ? `<button class="row-edit" data-handover-edit="${index}">수정</button><button class="row-delete" data-handover-delete="${index}">삭제</button>` : '';
+    return `<tr><td>${escapeHtml(item.date)}</td><td class="plate">${escapeHtml(item.vehicle['차량번호'])}<br>${escapeHtml(item.vehicle['차종'] || '')}</td><td>${escapeHtml(['본부','부','팀'].map(key=>item.vehicle[key] || '').join(' / '))}</td><td>${escapeHtml(item.from)} → ${escapeHtml(item.to)}</td><td>${escapeHtml(item.condition)}</td><td>${handoverConsentMarkup(item)}${canConfirmHandover(item) ? `<button class="row-edit handover-consent-action" data-handover-consent="${index}">인수 동의</button>` : ''}</td><td>${item.photos.length}장</td><td class="handover-management"><button class="row-edit" data-handover-detail="${index}">상세</button>${adminActions}</td></tr>`;
   }).join('') || `<tr><td colspan="8" class="empty-table">${handoverRecords.length ? '조회한 차량번호의 인수인계 이력이 없습니다.' : '등록된 인수인계 기록이 없습니다.'}</td></tr>`;
 }
 function downloadHandoverArchive() {
@@ -127,6 +131,82 @@ const handoverNav = document.createElement('li');
 handoverNav.innerHTML = '<button class="nav-button" data-page="차량인수인계"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16m0 0-4-4m4 4-4 4M20 17H4m0 0 4-4m-4 4 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>차량인수인계</button>';
 document.querySelector('.nav-list').appendChild(handoverNav);
 handoverNav.querySelector('button').addEventListener('click',()=>{showView('차량인수인계');toggleSidebar(false);});
+document.body.insertAdjacentHTML('beforeend', `
+  <div class="modal-backdrop" id="handoverManageModal" role="dialog" aria-modal="true" aria-labelledby="handoverManageTitle">
+    <div class="modal">
+      <div class="modal-header"><div><h2 id="handoverManageTitle">인수인계 수정</h2><p id="handoverManageCopy"></p></div><button class="close-button" id="closeHandoverManage" aria-label="닫기">✕</button></div>
+      <form id="handoverManageForm">
+        <div class="form-grid">
+          <label class="form-field"><span>인계일</span><input id="handoverManageDate" type="date" required></label>
+          <label class="form-field"><span>인계자</span><input id="handoverManageFrom" maxlength="80" required></label>
+          <label class="form-field"><span>차량 상태</span><select id="handoverManageCondition"><option>확인 필요</option><option>이상 없음</option><option>이상 있음</option></select></label>
+          <label class="form-field"><span>특이사항 · 손상 위치</span><textarea id="handoverManageNotes" maxlength="2000"></textarea></label>
+        </div>
+        <p class="form-hint">차량번호·인수자·외관자료·인수 동의 기록은 수정하지 않습니다.</p>
+        <div class="upload-error" id="handoverManageError"></div>
+        <div class="modal-actions"><button class="button" type="button" id="cancelHandoverManage">취소</button><button class="button primary" type="submit">수정 저장</button></div>
+      </form>
+      <form id="handoverDeleteForm" hidden>
+        <p class="handover-delete-warning" id="handoverDeleteCopy"></p>
+        <label class="form-field"><span>삭제 확인</span><input id="handoverDeleteConfirm" autocomplete="off" placeholder="삭제 입력" required></label>
+        <p class="form-hint">기록과 연결된 외관 사진·PDF도 함께 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</p>
+        <div class="upload-error" id="handoverDeleteError"></div>
+        <div class="modal-actions"><button class="button" type="button" id="cancelHandoverDelete">취소</button><button class="button danger" type="submit">삭제하기</button></div>
+      </form>
+    </div>
+  </div>`);
+const handoverManageModal=handoverEl('handoverManageModal');
+let managedHandoverId='';
+function closeHandoverManage() {
+  handoverManageModal.classList.remove('open');
+  managedHandoverId='';
+  handoverEl('handoverManageError').textContent='';
+  handoverEl('handoverDeleteError').textContent='';
+}
+function managedHandover() {
+  return handoverRecords.find(item=>item.id===managedHandoverId);
+}
+function openHandoverEdit(item) {
+  if (!isHandoverAdmin()) return;
+  managedHandoverId=item.id;
+  handoverEl('handoverManageTitle').textContent='인수인계 수정';
+  handoverEl('handoverManageCopy').textContent=`${item.vehicle['차량번호']} · ${item.to} 인수 기록의 업무 내용을 수정합니다.`;
+  handoverEl('handoverManageDate').value=item.date;
+  handoverEl('handoverManageFrom').value=item.from;
+  handoverEl('handoverManageCondition').value=item.condition;
+  handoverEl('handoverManageNotes').value=item.notes || '';
+  handoverEl('handoverManageForm').hidden=false;
+  handoverEl('handoverDeleteForm').hidden=true;
+  handoverManageModal.classList.add('open');
+  handoverEl('handoverManageDate').focus();
+}
+function openHandoverDelete(item) {
+  if (!isHandoverAdmin()) return;
+  managedHandoverId=item.id;
+  handoverEl('handoverManageTitle').textContent='인수인계 삭제';
+  handoverEl('handoverManageCopy').textContent='';
+  handoverEl('handoverDeleteCopy').textContent=`${item.vehicle['차량번호']} · ${item.date} 인수인계 기록을 삭제합니다.`;
+  handoverEl('handoverDeleteConfirm').value='';
+  handoverEl('handoverManageForm').hidden=true;
+  handoverEl('handoverDeleteForm').hidden=false;
+  handoverManageModal.classList.add('open');
+  handoverEl('handoverDeleteConfirm').focus();
+}
+async function updateHandoverRecord(item, values) {
+  const {error}=await window.fleetSupabaseClient.from('vehicle_handovers').update(values).eq('id',item.id);
+  if(error)throw Error(error.message || '인수인계 수정에 실패했습니다.');
+  await refreshHandoverFromSupabase();
+}
+async function deleteHandoverRecord(item) {
+  const {error}=await window.fleetSupabaseClient.from('vehicle_handovers').delete().eq('id',item.id);
+  if(error)throw Error(error.message || '인수인계 삭제에 실패했습니다.');
+  const paths=(item.photoPaths||[]).map(photo=>photo.path).filter(Boolean);
+  if(paths.length){
+    const {error:photoError}=await window.fleetSupabaseClient.storage.from('handover-photos').remove(paths);
+    if(photoError)showToast('기록은 삭제됐지만 외관 자료 정리에 실패했습니다. 관리자에게 문의하세요.');
+  }
+  await refreshHandoverFromSupabase();
+}
 handoverEl('handoverDate').value = new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 handoverEl('handoverVehicle').addEventListener('change',()=>{
   handoverEl('handoverFrom').value = vehicleForPlate(handoverEl('handoverVehicle').value)?.['담당자(정)'] || '';
@@ -183,6 +263,18 @@ function maskedMemberId(id) {
   return value.length > 12 ? `${value.slice(0,8)}…${value.slice(-4)}` : (value || '—');
 }
 handoverEl('handoverRows').addEventListener('click',async event=>{
+  const editButton=event.target.closest('[data-handover-edit]');
+  if(editButton){
+    const item=handoverRecords[Number(editButton.dataset.handoverEdit)];
+    if(item)openHandoverEdit(item);
+    return;
+  }
+  const deleteButton=event.target.closest('[data-handover-delete]');
+  if(deleteButton){
+    const item=handoverRecords[Number(deleteButton.dataset.handoverDelete)];
+    if(item)openHandoverDelete(item);
+    return;
+  }
   const consentButton=event.target.closest('[data-handover-consent]');
   if(consentButton){
     const item=handoverRecords[Number(consentButton.dataset.handoverConsent)];
@@ -200,6 +292,32 @@ handoverEl('handoverRows').addEventListener('click',async event=>{
       ? `인수 동의 대기 · 지정 인수자만 동의할 수 있습니다.${canConfirmHandover(item) ? ' 이 계정으로 동의할 수 있습니다.' : ''}`
       : '인수자 계정 미지정 · 수신자 이름과 일치하는 활성 회원 계정을 확인한 뒤 동의할 수 있습니다.';
   detail.innerHTML=`<h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(consentInfo)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
+});
+handoverEl('closeHandoverManage').addEventListener('click',closeHandoverManage);
+handoverEl('cancelHandoverManage').addEventListener('click',closeHandoverManage);
+handoverEl('cancelHandoverDelete').addEventListener('click',closeHandoverManage);
+handoverManageModal.addEventListener('click',event=>{if(event.target===handoverManageModal)closeHandoverManage();});
+handoverEl('handoverManageForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+  try {
+    const item=managedHandover();
+    if(!item||!isHandoverAdmin())throw Error('관리자만 인수인계 기록을 수정할 수 있습니다.');
+    const date=handoverEl('handoverManageDate').value,from=handoverEl('handoverManageFrom').value.trim(),condition=handoverEl('handoverManageCondition').value,notes=handoverEl('handoverManageNotes').value.trim();
+    if(!date||!from)throw Error('인계일과 인계자를 입력하세요.');
+    if(condition==='이상 있음'&&!notes)throw Error('이상이 있는 위치와 내용을 입력하세요.');
+    await updateHandoverRecord(item,{handover_date:date,handed_over_by:from,condition,notes});
+    closeHandoverManage();showToast('인수인계 기록을 수정했습니다.');
+  }catch(error){handoverEl('handoverManageError').textContent=error.message;}
+});
+handoverEl('handoverDeleteForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+  try {
+    const item=managedHandover();
+    if(!item||!isHandoverAdmin())throw Error('관리자만 인수인계 기록을 삭제할 수 있습니다.');
+    if(handoverEl('handoverDeleteConfirm').value.trim()!=='삭제')throw Error('삭제 확인란에 삭제를 정확히 입력하세요.');
+    await deleteHandoverRecord(item);
+    closeHandoverManage();showToast('인수인계 기록과 연결된 외관 자료를 삭제했습니다.');
+  }catch(error){handoverEl('handoverDeleteError').textContent=error.message;}
 });
 handoverEl('handoverDownload').addEventListener('click',downloadHandoverArchive);
 handoverEl('handoverRestore').addEventListener('change',async event=>{

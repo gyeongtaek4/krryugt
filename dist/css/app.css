@@ -510,6 +510,12 @@ td strong { font-size: .8rem; }
 .handover-consent.complete { color: var(--brand-dark); background: var(--brand-wash); }
 .handover-consent.legacy { color: #7a7065; background: #f4f1ed; }
 .handover-consent-action { margin-top: 12px; }
+.handover-management { white-space: nowrap; }
+.handover-management .row-edit + .row-delete { margin-left: 5px; }
+#handoverManageModal select, #handoverManageModal textarea { box-sizing: border-box; width: 100%; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--white); font: inherit; font-size: .83rem; outline: 0; }
+#handoverManageModal textarea { min-height: 86px; padding-top: 11px; padding-bottom: 11px; resize: vertical; line-height: 1.35; }
+#handoverManageModal select:focus, #handoverManageModal textarea:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
+.handover-delete-warning { margin: 18px 0; padding: 12px; border-radius: 10px; color: #9e4141; background: #fff3f3; font-size: .84rem; font-weight: 700; }
 #handoverError { color: #b64040; }
 @media (max-width: 900px) { .handover-history-header { align-items: flex-start; } .handover-history-actions { width: 100%; justify-content: flex-start; } .handover-history-search { width: 100%; } }
 @media print {
