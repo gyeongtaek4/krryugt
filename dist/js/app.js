@@ -332,9 +332,15 @@ function vehicleGroupSummary(key, emptyLabel) {
     counts.set(label, (counts.get(label) || 0) + 1);
   });
   return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'))
-    .map(([label, count]) => `${label} ${count}대`)
-    .join(' · ') || '등록 차량이 없습니다.';
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'));
+}
+
+function renderVehicleGroupSummary(elementId, key, emptyLabel) {
+  const element = document.getElementById(elementId);
+  const entries = vehicleGroupSummary(key, emptyLabel);
+  element.innerHTML = entries.length
+    ? entries.map(([label, count]) => `<span class="fleet-summary-pill"><b>${escapeHtml(label)}</b><em>${count}대</em></span>`).join('')
+    : '<span class="fleet-summary-empty">등록 차량이 없습니다.</span>';
 }
 
 function fieldFilterValue(row, key) {
@@ -455,11 +461,9 @@ function renderVehicles() {
   </tr>`; }).join('') : '<tr><td class="empty-table" colspan="10">조건에 맞는 차량이 없습니다.</td></tr>';
   document.getElementById('recordCount').textContent = `${filtered.length}건`;
   document.getElementById('totalVehicles').textContent = `총 ${vehicleData.length}대`;
-  document.getElementById('teamVehicleSummary').textContent = vehicleGroupSummary('팀', '미지정 팀');
-  document.getElementById('totalVehicleModels').textContent = `총 ${vehicleData.length}대`;
-  document.getElementById('modelVehicleSummary').textContent = vehicleGroupSummary('차종', '미입력 차종');
-  document.getElementById('totalVehicleRegions').textContent = `총 ${vehicleData.length}대`;
-  document.getElementById('regionVehicleSummary').textContent = vehicleGroupSummary('지역', '미입력 지역');
+  renderVehicleGroupSummary('teamVehicleSummary', '팀', '미지정 팀');
+  renderVehicleGroupSummary('modelVehicleSummary', '차종', '미입력 차종');
+  renderVehicleGroupSummary('regionVehicleSummary', '지역', '미입력 지역');
 }
 
 async function deleteVehicleIndices(indices) {
@@ -1334,9 +1338,6 @@ document.querySelectorAll('.period-tab').forEach(button => {
   });
 });
 
-const closingNav=document.createElement('li');
-closingNav.innerHTML='<button class="nav-button" data-page="월별 비용마감자료"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v17H5V4Zm3 5h8m-8 4h8m-8 4h5" stroke="currentColor" stroke-width="1.7"/></svg>월별 비용마감자료</button>';
-document.querySelector('[data-page="운행기록데이터"]').closest('li').after(closingNav);
 document.getElementById('closingMonth').addEventListener('change',()=>{closingDraft=null;closingEditMonth=null;document.getElementById('closingCorrectionReason').value='';document.getElementById('closingUpload').value='';renderClosing();});
 document.getElementById('closingUpload').addEventListener('change',async event=>{
   const file=event.target.files[0], month=closingMonthValue();
@@ -1416,7 +1417,7 @@ document.getElementById('closingRestore').addEventListener('change',async event=
 renderClosing();
 document.querySelectorAll('.nav-button').forEach(button => {
   button.addEventListener('click', () => {
-    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page);
+    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '차량인수인계' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page);
     else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
     toggleSidebar(false);
   });

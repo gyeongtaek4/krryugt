@@ -38,6 +38,9 @@
       const visible=!allowed||allowed.has(button.dataset.page);
       button.closest('li').hidden=!visible;
     });
+    document.querySelectorAll('.nav-group').forEach(group=>{
+      group.hidden=!Array.from(group.querySelectorAll('li')).some(item=>!item.hidden);
+    });
     memberNavItem.hidden=role!=='admin';
     const readOnly=role==='viewer';
     ['addVehicleButton','vehicleUploadButton','guideUploadButton','deleteAllVehicles'].forEach(id=>{document.getElementById(id).hidden=readOnly;});

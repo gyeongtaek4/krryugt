@@ -12,17 +12,32 @@ function refreshHandoverVehicles() {
 function handoverRecipientName(member) {
   return String(member?.display_name || member?.email || '');
 }
+function handoverRecipientLabel(member) {
+  const name = handoverRecipientName(member);
+  return member?.email && member.email !== name ? `${name} · ${member.email}` : name;
+}
+function renderHandoverRecipientResults(keyword) {
+  const results = handoverEl('handoverRecipientResults');
+  const search = handoverEl('handoverRecipientSearch');
+  const query = String(keyword || '').trim().toLowerCase();
+  const matches = query ? handoverRecipients.filter(member =>
+    `${handoverRecipientName(member)} ${member.email || ''}`.toLowerCase().includes(query)
+  ).slice(0, 8) : [];
+  results.innerHTML = matches.map(member => `<button type="button" class="handover-recipient-option" role="option" data-handover-recipient="${escapeHtml(member.id)}"><strong>${escapeHtml(handoverRecipientName(member))}</strong><small>${escapeHtml(member.email || '')}</small></button>`).join('') || (query ? '<p class="handover-recipient-empty">일치하는 활성 회원 계정이 없습니다.</p>' : '');
+  const open = Boolean(query);
+  results.classList.toggle('open', open);
+  search.setAttribute('aria-expanded', String(open));
+}
 async function refreshHandoverRecipients() {
   if (!window.fleetCurrentUser || !window.fleetSupabaseClient) return;
-  const select = handoverEl('handoverToUser');
-  const selected = select.value;
+  const selected = handoverEl('handoverToUser').value;
   const { data, error } = await window.fleetSupabaseClient.rpc('active_handover_recipients');
   if (error) throw Error('인수자 목록을 불러오지 못했습니다. 008_handover_recipient_consent.sql 실행이 필요할 수 있습니다.');
   handoverRecipients = data || [];
-  select.innerHTML = '<option value="">인수자 계정 선택</option>' + handoverRecipients.map(member =>
-    `<option value="${escapeHtml(member.id)}">${escapeHtml(handoverRecipientName(member))} · ${escapeHtml(member.email || '')}</option>`
-  ).join('');
-  if (handoverRecipients.some(member => member.id === selected)) select.value = selected;
+  const member = handoverRecipients.find(item => item.id === selected);
+  handoverEl('handoverToUser').value = member ? member.id : '';
+  handoverEl('handoverRecipientSearch').value = member ? handoverRecipientLabel(member) : '';
+  renderHandoverRecipientResults('');
 }
 window.refreshHandoverRecipients = refreshHandoverRecipients;
 function validateHandoverPhotos(photos) {
@@ -127,10 +142,6 @@ function downloadHandoverArchive() {
   const link = document.createElement('a'); link.href=url; link.download='차량인수인계_이력자료.json'; link.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-const handoverNav = document.createElement('li');
-handoverNav.innerHTML = '<button class="nav-button" data-page="차량인수인계"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16m0 0-4-4m4 4-4 4M20 17H4m0 0 4-4m-4 4 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>차량인수인계</button>';
-document.querySelector('.nav-list').appendChild(handoverNav);
-handoverNav.querySelector('button').addEventListener('click',()=>{showView('차량인수인계');toggleSidebar(false);});
 document.body.insertAdjacentHTML('beforeend', `
   <div class="modal-backdrop" id="handoverManageModal" role="dialog" aria-modal="true" aria-labelledby="handoverManageTitle">
     <div class="modal">
@@ -211,6 +222,22 @@ handoverEl('handoverDate').value = new Date(Date.now()-new Date().getTimezoneOff
 handoverEl('handoverVehicle').addEventListener('change',()=>{
   handoverEl('handoverFrom').value = vehicleForPlate(handoverEl('handoverVehicle').value)?.['담당자(정)'] || '';
 });
+handoverEl('handoverRecipientSearch').addEventListener('input', event => {
+  handoverEl('handoverToUser').value = '';
+  renderHandoverRecipientResults(event.target.value);
+});
+handoverEl('handoverRecipientSearch').addEventListener('keydown', event => {
+  if (event.key === 'Escape') renderHandoverRecipientResults('');
+});
+handoverEl('handoverRecipientResults').addEventListener('click', event => {
+  const option = event.target.closest('[data-handover-recipient]');
+  if (!option) return;
+  const member = handoverRecipients.find(item => item.id === option.dataset.handoverRecipient);
+  if (!member) return;
+  handoverEl('handoverToUser').value = member.id;
+  handoverEl('handoverRecipientSearch').value = handoverRecipientLabel(member);
+  renderHandoverRecipientResults('');
+});
 handoverEl('handoverPhotos').addEventListener('change',async event=>{
   const input=event.target, files=Array.from(input.files);
   handoverPhotoLoading=true; handoverEl('handoverSave').disabled=true; handoverEl('handoverError').textContent='';
@@ -241,7 +268,7 @@ handoverEl('handoverForm').addEventListener('submit',async event=>{
       createdAt:new Date().toISOString()};
     handoverEl('handoverSave').disabled=true;await storeHandover(record,handoverPhotoDraft);await refreshHandoverFromSupabase();
     handoverPhotoDraft=[];handoverEl('handoverPhotos').value='';handoverEl('handoverPreview').innerHTML='';
-    handoverEl('handoverToUser').value='';handoverEl('handoverNotes').value='';handoverEl('handoverCondition').value='확인 필요';
+    handoverEl('handoverToUser').value='';handoverEl('handoverRecipientSearch').value='';handoverEl('handoverNotes').value='';handoverEl('handoverCondition').value='확인 필요';
     showToast('인수인계 기록을 저장했습니다. 인수자 동의 후 완료됩니다.');
   }catch(error){handoverEl('handoverError').textContent=error.message;}
   finally{handoverEl('handoverSave').disabled=false;}
