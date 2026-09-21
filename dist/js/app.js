@@ -325,6 +325,18 @@ function uniqueValues(key, rows = vehicleData) {
   return [...new Set(rows.map(row => row[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
 }
 
+function vehicleGroupSummary(key, emptyLabel) {
+  const counts = new Map();
+  vehicleData.forEach(row => {
+    const label = String(row[key] || '').trim() || emptyLabel;
+    counts.set(label, (counts.get(label) || 0) + 1);
+  });
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'))
+    .map(([label, count]) => `${label} ${count}대`)
+    .join(' · ') || '등록 차량이 없습니다.';
+}
+
 function fieldFilterValue(row, key) {
   if (key === '총계약기간') return `${monthSpan(row['계약시작'], row['계약종료'])}개월`;
   if (key === '남은계약기간') return `${remainingMonths(row['계약종료'])}개월`;
@@ -442,9 +454,12 @@ function renderVehicles() {
     <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td>${escapeHtml(row['지역'] || '-')}</td><td>${escapeHtml(row['주차장'] || '-')}</td><td>${canEdit?`<button class="row-edit" data-vehicle-edit="${item.index}">수정</button>${canDelete?` <button class="row-delete" data-vehicle-delete="${item.index}">삭제</button>`:''}`:'<span class="read-only-label">조회 전용</span>'}</td>
   </tr>`; }).join('') : '<tr><td class="empty-table" colspan="10">조건에 맞는 차량이 없습니다.</td></tr>';
   document.getElementById('recordCount').textContent = `${filtered.length}건`;
-  document.getElementById('totalVehicles').textContent = `${vehicleData.length}대`;
-  document.getElementById('totalHeadquarters').textContent = `${uniqueValues('본부').length}개`;
-  document.getElementById('totalManagers').textContent = `${uniqueValues('담당자(정)').length}명`;
+  document.getElementById('totalVehicles').textContent = `총 ${vehicleData.length}대`;
+  document.getElementById('teamVehicleSummary').textContent = vehicleGroupSummary('팀', '미지정 팀');
+  document.getElementById('totalVehicleModels').textContent = `총 ${vehicleData.length}대`;
+  document.getElementById('modelVehicleSummary').textContent = vehicleGroupSummary('차종', '미입력 차종');
+  document.getElementById('totalVehicleRegions').textContent = `총 ${vehicleData.length}대`;
+  document.getElementById('regionVehicleSummary').textContent = vehicleGroupSummary('지역', '미입력 지역');
 }
 
 async function deleteVehicleIndices(indices) {

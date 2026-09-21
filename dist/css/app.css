@@ -280,6 +280,7 @@ td strong { font-size: .8rem; }
 .summary-card .metric-icon { flex: 0 0 auto; width: 42px; height: 42px; }
 .summary-copy span { display: block; color: var(--ink-soft); font-size: .82rem; }
 .summary-copy strong { display: block; margin-top: 2px; font-size: 1.35rem; letter-spacing: -.035em; }
+.summary-copy .summary-breakdown { display: block; margin-top: 7px; color: var(--ink-soft); font-size: .72rem; line-height: 1.55; overflow-wrap: anywhere; }
 
 .upload-guide { margin-bottom: 16px; padding: 19px 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border: 1px solid #cce8e1; border-radius: var(--radius); background: linear-gradient(135deg, var(--brand-wash), #f8fcfb); }
 .upload-guide-copy { display: flex; align-items: center; gap: 14px; }

@@ -74,7 +74,7 @@
               <label class="form-field"><span>차량번호</span><select class="form-input" id="handoverVehicle" required><option value="">차량 선택</option></select></label>
               <label class="form-field"><span>인계일</span><input class="form-input" id="handoverDate" type="date" required></label>
               <label class="form-field"><span>인계자 (넘기는 사람)</span><input class="form-input" id="handoverFrom" maxlength="80" required></label>
-              <label class="form-field"><span>인수자 (받는 사람)</span><select class="form-input" id="handoverToUser" required><option value="">인수자 계정 선택</option></select><small class="handover-field-help">선택한 회원 계정으로 로그인해야 인수 동의를 완료할 수 있습니다.</small></label>
+              <label class="form-field"><span>인수자 (받는 사람)</span><select class="form-input" id="handoverToUser" required><option value="">인수자 계정 선택</option></select></label>
               <label class="form-field"><span>차량 상태</span><select class="form-input" id="handoverCondition"><option>확인 필요</option><option>이상 없음</option><option>이상 있음</option></select></label>
               <label class="form-field"><span>특이사항 · 손상 위치</span><textarea class="form-input" id="handoverNotes" maxlength="2000" placeholder="예: 오른쪽 앞 범퍼 긁힘"></textarea></label>
             </div>
@@ -212,9 +212,9 @@
           </div>
         </section>
         <section class="vehicle-summary" aria-label="차량현황 요약">
-          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>등록 차량</span><strong id="totalVehicles">12대</strong></div></article>
-          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20h16M6 20V8l6-4 6 4v12M9 11h1m4 0h1m-6 4h1m4 0h1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>운영 본부</span><strong id="totalHeadquarters">4개</strong></div></article>
-          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>주 담당자</span><strong id="totalManagers">9명</strong></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>팀별 차량</span><strong id="totalVehicles">총 12대</strong><small class="summary-breakdown" id="teamVehicleSummary">팀별 차량 대수를 불러오는 중입니다.</small></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20h16M6 20V8l6-4 6 4v12M9 11h1m4 0h1m-6 4h1m4 0h1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>차종별 차량</span><strong id="totalVehicleModels">총 12대</strong><small class="summary-breakdown" id="modelVehicleSummary">차종별 차량 대수를 불러오는 중입니다.</small></div></article>
+          <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>지역별 차량</span><strong id="totalVehicleRegions">총 12대</strong><small class="summary-breakdown" id="regionVehicleSummary">지역별 차량 대수를 불러오는 중입니다.</small></div></article>
         </section>
         <section class="upload-guide" id="vehicleUploadGuide">
           <div class="upload-guide-copy"><span class="upload-guide-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><strong>Excel 자료를 올리면 차량현황이 자동으로 바뀝니다.</strong><p>첫 번째 행의 열 이름을 본부, 부, 팀, 담당자(정), 담당자(부), 차량번호, 차종, 지역, 주차장으로 작성해 주세요.</p></div></div>
