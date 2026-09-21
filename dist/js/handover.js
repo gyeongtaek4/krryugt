@@ -1,6 +1,7 @@
 /* 인수인계 기록은 Supabase 표, 사진은 비공개 Storage에 저장한다. */
 const handoverRecords = [];
 let handoverPhotoDraft = [], handoverPhotoLoading = false;
+let handoverRecipients = [];
 const handoverEl = id => document.getElementById(id);
 function refreshHandoverVehicles() {
   const select = handoverEl('handoverVehicle'), selected = select.value;
@@ -8,6 +9,22 @@ function refreshHandoverVehicles() {
     `<option value="${escapeHtml(row['차량번호'])}">${escapeHtml(row['차량번호'])} · ${escapeHtml(row['차종'] || '')}</option>`).join('');
   select.value = selected;
 }
+function handoverRecipientName(member) {
+  return String(member?.display_name || member?.email || '');
+}
+async function refreshHandoverRecipients() {
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) return;
+  const select = handoverEl('handoverToUser');
+  const selected = select.value;
+  const { data, error } = await window.fleetSupabaseClient.rpc('active_handover_recipients');
+  if (error) throw Error('인수자 목록을 불러오지 못했습니다. 008_handover_recipient_consent.sql 실행이 필요할 수 있습니다.');
+  handoverRecipients = data || [];
+  select.innerHTML = '<option value="">인수자 계정 선택</option>' + handoverRecipients.map(member =>
+    `<option value="${escapeHtml(member.id)}">${escapeHtml(handoverRecipientName(member))} · ${escapeHtml(member.email || '')}</option>`
+  ).join('');
+  if (handoverRecipients.some(member => member.id === selected)) select.value = selected;
+}
+window.refreshHandoverRecipients = refreshHandoverRecipients;
 function validateHandoverPhotos(photos) {
   if (!Array.isArray(photos) || !photos.length || photos.length > 6) throw Error('외관 사진 또는 PDF를 1~6개 첨부하세요.');
   let bytes = 0;
@@ -46,6 +63,8 @@ async function refreshHandoverFromSupabase() {
   const {data,error}=await window.fleetSupabaseClient.from('vehicle_handovers').select('*').order('created_at',{ascending:false});
   if(error)throw Error('인수인계 자료를 불러오지 못했습니다. 005_handovers.sql 실행이 필요할 수 있습니다.');
   const records=await Promise.all((data||[]).map(async row=>({id:row.id,date:row.handover_date,from:row.handed_over_by,to:row.received_by,
+    recipientUserId:row.received_by_user_id,consentStatus:row.consent_status || (row.received_by_user_id ? 'pending' : 'legacy'),
+    consentedBy:row.recipient_confirmed_by,consentedAt:row.recipient_confirmed_at,
     condition:row.condition,notes:row.notes,vehicle:row.vehicle_snapshot,photos:await signedHandoverPhotos(row.photo_paths),photoPaths:row.photo_paths,createdAt:row.created_at})));
   handoverRecords.splice(0,handoverRecords.length,...records);renderHandovers();
 }
@@ -68,17 +87,34 @@ async function storeHandover(record,photos) {
     }
     const {error}=await window.fleetSupabaseClient.from('vehicle_handovers').insert({id:record.id,vehicle_id:record.vehicleId,
       handover_date:record.date,handed_over_by:record.from,received_by:record.to,condition:record.condition,notes:record.notes,
-      vehicle_snapshot:record.vehicle,photo_paths:uploaded,created_by:window.fleetCurrentUser.id});
+      vehicle_snapshot:record.vehicle,photo_paths:uploaded,received_by_user_id:record.recipientUserId,
+      consent_status:'pending',created_by:window.fleetCurrentUser.id});
     if(error)throw Error(error.message || '인수인계 기록 저장에 실패했습니다.');
   } catch(error) {
     if(uploaded.length)await window.fleetSupabaseClient.storage.from('handover-photos').remove(uploaded.map(item=>item.path));
     throw error;
   }
 }
+function handoverConsentMarkup(item) {
+  const status = item.consentStatus || 'legacy';
+  if (status === 'completed') return '<span class="handover-consent complete">인수 동의 완료</span>';
+  if (status === 'pending') return '<span class="handover-consent pending">인수 동의 대기</span>';
+  return '<span class="handover-consent legacy">기존 이력</span>';
+}
+function canConfirmHandover(item) {
+  return item.consentStatus === 'pending' && item.recipientUserId === window.fleetCurrentUser?.id;
+}
+function matchingHandovers() {
+  const keyword = String(handoverEl('handoverHistorySearch')?.value || '').replace(/\s+/g, '').toUpperCase();
+  if (!keyword) return handoverRecords;
+  return handoverRecords.filter(item => String(item.vehicle?.['차량번호'] || '').replace(/\s+/g, '').toUpperCase().includes(keyword));
+}
 function renderHandovers() {
-  handoverEl('handoverRows').innerHTML = handoverRecords.map((item,index) =>
-    `<tr><td>${escapeHtml(item.date)}</td><td class="plate">${escapeHtml(item.vehicle['차량번호'])}<br>${escapeHtml(item.vehicle['차종'] || '')}</td><td>${escapeHtml(['본부','부','팀'].map(key=>item.vehicle[key] || '').join(' / '))}</td><td>${escapeHtml(item.from)} → ${escapeHtml(item.to)}</td><td>${escapeHtml(item.condition)}</td><td>${item.photos.length}장</td><td><button class="row-edit" data-handover-detail="${index}">상세 보기</button></td></tr>`).join('') ||
-    '<tr><td colspan="7" class="empty-table">등록된 인수인계 기록이 없습니다.</td></tr>';
+  const records = matchingHandovers();
+  handoverEl('handoverRows').innerHTML = records.map(item => {
+    const index = handoverRecords.indexOf(item);
+    return `<tr><td>${escapeHtml(item.date)}</td><td class="plate">${escapeHtml(item.vehicle['차량번호'])}<br>${escapeHtml(item.vehicle['차종'] || '')}</td><td>${escapeHtml(['본부','부','팀'].map(key=>item.vehicle[key] || '').join(' / '))}</td><td>${escapeHtml(item.from)} → ${escapeHtml(item.to)}</td><td>${escapeHtml(item.condition)}</td><td>${handoverConsentMarkup(item)}${canConfirmHandover(item) ? `<button class="row-edit handover-consent-action" data-handover-consent="${index}">인수 동의</button>` : ''}</td><td>${item.photos.length}장</td><td><button class="row-edit" data-handover-detail="${index}">상세 보기</button></td></tr>`;
+  }).join('') || `<tr><td colspan="8" class="empty-table">${handoverRecords.length ? '조회한 차량번호의 인수인계 이력이 없습니다.' : '등록된 인수인계 기록이 없습니다.'}</td></tr>`;
 }
 function downloadHandoverArchive() {
   if (!handoverRecords.length) { showToast('저장된 기록이 없습니다.'); return; }
@@ -116,25 +152,54 @@ handoverEl('handoverForm').addEventListener('submit',async event=>{
     if(handoverPhotoLoading)throw Error('사진을 읽는 중입니다.');
     const vehicle=vehicleForPlate(handoverEl('handoverVehicle').value);
     if(!vehicle)throw Error('등록된 차량을 선택하세요.');
-    const from=handoverEl('handoverFrom').value.trim(),to=handoverEl('handoverTo').value.trim(),condition=handoverEl('handoverCondition').value,notes=handoverEl('handoverNotes').value.trim();
-    if(!from||!to||from===to)throw Error('서로 다른 인계자와 인수자를 입력하세요.');
+    const from=handoverEl('handoverFrom').value.trim(),recipient=handoverRecipients.find(member=>member.id===handoverEl('handoverToUser').value),to=handoverRecipientName(recipient),condition=handoverEl('handoverCondition').value,notes=handoverEl('handoverNotes').value.trim();
+    if(!from||!recipient||!to||from===to)throw Error('서로 다른 인계자와 활성 인수자 계정을 선택하세요.');
     if(condition==='이상 있음'&&!notes)throw Error('이상이 있는 위치와 내용을 입력하세요.');
     validateHandoverPhotos(handoverPhotoDraft);
-    const record={id:crypto.randomUUID(),vehicleId:vehicle._supabaseId,date:handoverEl('handoverDate').value,from,to,condition,notes,
+    const record={id:crypto.randomUUID(),vehicleId:vehicle._supabaseId,recipientUserId:recipient.id,date:handoverEl('handoverDate').value,from,to,condition,notes,
       vehicle:Object.fromEntries(['차량번호','차종','본부','부','팀','담당자(정)','담당자(부)'].map(key=>[key,String(vehicle[key]||'')])),
       createdAt:new Date().toISOString()};
     handoverEl('handoverSave').disabled=true;await storeHandover(record,handoverPhotoDraft);await refreshHandoverFromSupabase();
     handoverPhotoDraft=[];handoverEl('handoverPhotos').value='';handoverEl('handoverPreview').innerHTML='';
-    handoverEl('handoverTo').value='';handoverEl('handoverNotes').value='';handoverEl('handoverCondition').value='확인 필요';
-    showToast('인수인계 기록과 외관 자료를 저장했습니다.');
+    handoverEl('handoverToUser').value='';handoverEl('handoverNotes').value='';handoverEl('handoverCondition').value='확인 필요';
+    showToast('인수인계 기록을 저장했습니다. 인수자 동의 후 완료됩니다.');
   }catch(error){handoverEl('handoverError').textContent=error.message;}
   finally{handoverEl('handoverSave').disabled=false;}
 });
-handoverEl('handoverRows').addEventListener('click',event=>{
+handoverEl('handoverHistorySearch').addEventListener('input',renderHandovers);
+async function confirmHandover(item) {
+  const { error } = await window.fleetSupabaseClient.rpc('confirm_vehicle_handover',{p_handover_id:item.id});
+  if (error) throw Error(error.message || '인수 동의 처리에 실패했습니다.');
+  await refreshHandoverFromSupabase();
+  showToast('인수 동의가 완료되었습니다. 동의자 ID와 시각이 기록되었습니다.');
+}
+function formatConsentDate(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('ko-KR');
+}
+function maskedMemberId(id) {
+  const value = String(id || '');
+  return value.length > 12 ? `${value.slice(0,8)}…${value.slice(-4)}` : (value || '—');
+}
+handoverEl('handoverRows').addEventListener('click',async event=>{
+  const consentButton=event.target.closest('[data-handover-consent]');
+  if(consentButton){
+    const item=handoverRecords[Number(consentButton.dataset.handoverConsent)];
+    if(!item)return;
+    try { consentButton.disabled=true; await confirmHandover(item); }
+    catch(error){ showToast(error.message); consentButton.disabled=false; }
+    return;
+  }
   const button=event.target.closest('[data-handover-detail]');if(!button)return;
   const item=handoverRecords[Number(button.dataset.handoverDetail)];if(!item)return;
   const detail=handoverEl('handoverDetail');detail.hidden=false;
-  detail.innerHTML=`<h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
+  const consentInfo = item.consentStatus === 'completed'
+    ? `인수 동의 완료 · ${formatConsentDate(item.consentedAt)} · 동의 ID ${maskedMemberId(item.consentedBy)}`
+    : item.consentStatus === 'pending'
+      ? `인수 동의 대기 · 지정 인수자만 동의할 수 있습니다.${canConfirmHandover(item) ? ' 이 계정으로 동의할 수 있습니다.' : ''}`
+      : '기존 이력 · 수신자 회원 계정이 지정되지 않아 동의 절차가 적용되지 않습니다.';
+  detail.innerHTML=`<h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(consentInfo)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
 });
 handoverEl('handoverDownload').addEventListener('click',downloadHandoverArchive);
 handoverEl('handoverRestore').addEventListener('change',async event=>{

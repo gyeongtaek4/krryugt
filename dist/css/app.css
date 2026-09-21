@@ -487,6 +487,7 @@ td strong { font-size: .8rem; }
 .pagination { justify-content: flex-end; padding: 16px 0; color: var(--ink-soft); font-size: 13px; }
 .closing-file-button[hidden] { display: none; }
 .handover-entry { margin: 24px 0; }
+.handover-field-help { display: block; margin-top: 6px; color: var(--ink-soft); font-size: .72rem; line-height: 1.4; }
 .handover-photo-area { margin-top: 20px; padding: 20px; background: var(--brand-wash); border-radius: 14px; }
 #handoverForm .form-input { box-sizing: border-box; width: 100%; height: 43px; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background-color: var(--white); font: inherit; font-size: .83rem; outline: 0; }
 #handoverForm select.form-input { appearance: none; padding-right: 42px; background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%), linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%); background-position: calc(100% - 19px) 18px, calc(100% - 14px) 18px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; cursor: pointer; }
@@ -501,7 +502,16 @@ td strong { font-size: .8rem; }
 .handover-gallery figcaption { font-size: 12px; color: var(--ink-soft); overflow-wrap: anywhere; margin-top: 5px; }
 .handover-detail { margin-top: 20px; padding: 20px; border-top: 1px solid var(--line); }
 .handover-notes { white-space: pre-wrap; overflow-wrap: anywhere; }
+.handover-history-header { align-items: center; }
+.handover-history-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+.handover-history-search { width: min(280px, 100%); }
+.handover-consent { display: inline-flex; align-items: center; min-height: 27px; padding: 0 9px; border-radius: 999px; color: var(--ink-soft); background: var(--surface); font-size: .7rem; font-weight: 750; white-space: nowrap; }
+.handover-consent.pending { color: #b64040; background: #fff0f0; }
+.handover-consent.complete { color: var(--brand-dark); background: var(--brand-wash); }
+.handover-consent.legacy { color: #7a7065; background: #f4f1ed; }
+.handover-consent-action { margin-top: 12px; }
 #handoverError { color: #b64040; }
+@media (max-width: 900px) { .handover-history-header { align-items: flex-start; } .handover-history-actions { width: 100%; justify-content: flex-start; } .handover-history-search { width: 100%; } }
 @media print {
   @page { size: A4 landscape; margin: 12mm; }
   body > * { display: none !important; }

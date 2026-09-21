@@ -74,7 +74,7 @@
               <label class="form-field"><span>차량번호</span><select class="form-input" id="handoverVehicle" required><option value="">차량 선택</option></select></label>
               <label class="form-field"><span>인계일</span><input class="form-input" id="handoverDate" type="date" required></label>
               <label class="form-field"><span>인계자 (넘기는 사람)</span><input class="form-input" id="handoverFrom" maxlength="80" required></label>
-              <label class="form-field"><span>인수자 (받는 사람)</span><input class="form-input" id="handoverTo" maxlength="80" required></label>
+              <label class="form-field"><span>인수자 (받는 사람)</span><select class="form-input" id="handoverToUser" required><option value="">인수자 계정 선택</option></select><small class="handover-field-help">선택한 회원 계정으로 로그인해야 인수 동의를 완료할 수 있습니다.</small></label>
               <label class="form-field"><span>차량 상태</span><select class="form-input" id="handoverCondition"><option>확인 필요</option><option>이상 없음</option><option>이상 있음</option></select></label>
               <label class="form-field"><span>특이사항 · 손상 위치</span><textarea class="form-input" id="handoverNotes" maxlength="2000" placeholder="예: 오른쪽 앞 범퍼 긁힘"></textarea></label>
             </div>
@@ -83,8 +83,8 @@
           </form>
         </section>
         <section class="panel">
-          <div class="panel-header"><div><h2 class="panel-title">인수인계 이력</h2><p class="closing-help">기록 당시 차량·조직 정보와 비공개 사진·PDF를 Supabase에 보관합니다.</p></div><div class="closing-actions"><button class="button" id="handoverDownload">이력 자료 내려받기</button><label class="button closing-file-button" hidden>이전 보관파일 불러오기<input id="handoverRestore" type="file" accept=".json"></label></div></div>
-          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>인계일</th><th>차량번호 / 차종</th><th>조직</th><th>인계자 → 인수자</th><th>상태</th><th>첨부</th><th>조회</th></tr></thead><tbody id="handoverRows"></tbody></table></div>
+          <div class="panel-header handover-history-header"><div><h2 class="panel-title">인수인계 이력</h2><p class="closing-help">기록 당시 차량·조직 정보와 비공개 사진·PDF를 Supabase에 보관합니다.</p></div><div class="handover-history-actions"><label class="search-box handover-history-search" for="handoverHistorySearch"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="handoverHistorySearch" type="search" placeholder="차량번호로 과거 이력 조회" autocomplete="off"></label><div class="closing-actions"><button class="button" id="handoverDownload">이력 자료 내려받기</button><label class="button closing-file-button" hidden>이전 보관파일 불러오기<input id="handoverRestore" type="file" accept=".json"></label></div></div></div>
+          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>인계일</th><th>차량번호 / 차종</th><th>조직</th><th>인계자 → 인수자</th><th>차량 상태</th><th>인수 동의</th><th>첨부</th><th>조회</th></tr></thead><tbody id="handoverRows"></tbody></table></div>
           <div id="handoverDetail" class="handover-detail" hidden></div>
         </section>
       </div>

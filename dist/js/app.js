@@ -134,6 +134,9 @@ function showView(page) {
   if (isHandover) {
     document.getElementById('breadcrumbCurrent').textContent = page;
     refreshHandoverVehicles();
+    if (window.fleetCurrentUser && window.refreshHandoverRecipients) {
+      window.refreshHandoverRecipients().catch(error => showToast(error.message));
+    }
     if (window.fleetCurrentUser && window.refreshHandoverFromSupabase) {
       window.refreshHandoverFromSupabase().catch(error => showToast(error.message));
     }
