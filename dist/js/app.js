@@ -114,7 +114,17 @@ function toggleModal(open) {
   }
 }
 
-function showView(page) {
+const pageRoutes = {
+  '대시보드': 'dashboard', '차량 현황': 'vehicles', '차량계약정보': 'contracts',
+  '차량인수인계': 'handover', 'Q&A': 'qna', '운행가이드': 'guide',
+  '운행기록데이터': 'driving', '월별 비용마감자료': 'closing', '회원관리': 'members'
+};
+const routePages = Object.fromEntries(Object.entries(pageRoutes).map(([page, route]) => [route, page]));
+function pageFromLocation() {
+  return routePages[window.location.hash.slice(1)] || '대시보드';
+}
+
+function showView(page, { recordHistory = false, smoothScroll = true } = {}) {
   const isVehicles = page === '차량 현황';
   const isContracts = page === '차량계약정보';
   const isDriving = page === '운행기록데이터';
@@ -154,7 +164,10 @@ function showView(page) {
     if (latest) document.getElementById('usageMonth').value = latest;
     renderDriving();
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (recordHistory && pageRoutes[page] && window.location.hash !== `#${pageRoutes[page]}`) {
+    window.history.pushState({ fleetPage: page }, '', `#${pageRoutes[page]}`);
+  }
+  window.scrollTo({ top: 0, behavior: smoothScroll ? 'smooth' : 'auto' });
 }
 
 function toggleContractModal(open) {
@@ -1421,7 +1434,7 @@ document.getElementById('closingRestore').addEventListener('change',async event=
 renderClosing();
 document.querySelectorAll('.nav-button').forEach(button => {
   button.addEventListener('click', () => {
-    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '차량인수인계' || button.dataset.page === 'Q&A' || button.dataset.page === '운행가이드' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page);
+    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '차량인수인계' || button.dataset.page === 'Q&A' || button.dataset.page === '운행가이드' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page, { recordHistory: true });
     else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
     toggleSidebar(false);
   });
@@ -1509,7 +1522,7 @@ document.getElementById('reportButton').addEventListener('click', () => {
   report.innerHTML=`<h1>법인차량 관리 보고서</h1><p>기준월: ${escapeHtml(month)} · 비용은 부가세 포함</p><p>현재 저장계약 월 렌탈료 합계: ${won(fee)} (과거 확정비용과 별도)</p><h2>월별 확정 비용</h2>${totals ? `<p>확정일: ${escapeHtml(costs.confirmedAt)} · 버전 ${1+(costs.revisions||[]).length}</p><table><tr>${costKeys.map(key=>`<th>${escapeHtml(key)}</th>`).join('')}<th>합계</th></tr><tr>${totals.map(value=>`<td>${won(value)}</td>`).join('')}<td>${won(totals.reduce((a,b)=>a+b,0))}</td></tr></table>` : '<p>비용 미마감 — 금액 없음</p>'}<h2>최근 12개월 렌트비용</h2><p>${escapeHtml(document.getElementById('rentAverageLabel').textContent)}: ${escapeHtml(document.getElementById('rentAverageAmount').textContent)}</p>${document.getElementById('rentChart').outerHTML}<h2>부서별 확정 월 이동거리</h2>${usage ? `<p>확정일: ${escapeHtml(usage.confirmedAt)}</p><table><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량</th><th>월 이동거리</th><th>차량별 이용일수 합계</th><th>차량당 평균</th></tr></thead><tbody>${drivingReportMarkup(drivingReportForMonth(month))}</tbody></table>` : '<p>운행 미마감 — 거리 없음</p>'}<p>이용일수는 차량별 서로 다른 운행 날짜 수입니다. 부서 합계는 각 차량의 이용일수를 더한 값입니다.</p>`;
   window.print();
 });
-document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보'));
+document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보', { recordHistory: true }));
 document.getElementById('noticeButton').addEventListener('click', () => showToast(`6개월 내 계약 만료 예정 차량: ${document.getElementById('dashboardExpiryCount').textContent}`));
 
 document.addEventListener('keydown', event => {
@@ -1522,3 +1535,5 @@ refreshContractFilters();
 renderContracts();
 renderDriving();
 renderRentChart();
+window.addEventListener('popstate', () => showView(pageFromLocation(), { smoothScroll: false }));
+if (window.location.hash) showView(pageFromLocation(), { smoothScroll: false });

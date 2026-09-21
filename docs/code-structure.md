@@ -16,7 +16,7 @@ dist/
   js/supabase-client.js  Supabase 브라우저 연결 객체
   js/supabase-auth.js    이메일 로그인·로그아웃과 프로필 역할 표시
   js/knowledge.js        Q&A·운행가이드 화면 및 서버 저장 호출
-  js/app.js       기존 데이터·계산·업로드·조회·마감 처리
+  js/app.js       기존 데이터·계산·업로드·조회·마감 처리와 메뉴 해시·브라우저 뒤로가기 연동
 scripts/
   preview.cjs     Node.js 로컬 미리보기 서버
 tests/fixtures/
