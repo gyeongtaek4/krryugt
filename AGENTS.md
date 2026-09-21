@@ -20,6 +20,7 @@
 - `docs/data-model.md`: 현재 저장 방식과 향후 데이터 구조 초안.
 - `docs/excel-format.md`: 카테고리별 업로드 열 제목과 입력 형식.
 - `docs/handover.md`: 차량인수인계·외관 사진·보관 방식과 후속 서버 연결 범위.
+- `docs/knowledge-center.md`: Q&A·운행가이드의 권한, PDF 보관 방식, SQL 적용과 운영 점검 기준.
 - `docs/member-management.md`: 직원 회원가입, 관리자 승인, 역할·상태 및 서버 권한 기준.
 - `docs/driving-storage.md`: 운행 SUM·이용일수·페이지 이동·Supabase 활성화 방법.
 - `docs/errors.md`: 오류 재현·원인·조치·검증 상태.

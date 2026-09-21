@@ -39,6 +39,8 @@
           <li><button class="nav-button" data-page="차량 현황"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>차량 현황</button></li>
           <li><button class="nav-button" data-page="차량계약정보"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h4M10 12h5m-5 4h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>차량계약정보</button></li>
           <li><button class="nav-button" data-page="차량인수인계"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16m0 0-4-4m4 4-4 4M20 17H4m0 0 4-4m-4 4 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>차량인수인계</button></li>
+          <li><button class="nav-button" data-page="Q&A"><svg viewBox="0 0 24 24" fill="none"><path d="M5 5h14v10H9l-4 4V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 9h6m-6 3h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Q&amp;A</button></li>
+          <li><button class="nav-button" data-page="운행가이드"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h10l4 4v12H5V4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 4v5h5M9 13h6m-6 3h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>운행가이드</button></li>
         </ul>
       </section>
       <section class="nav-group" id="closingNavGroup">
@@ -75,6 +77,22 @@
           <div class="panel-header member-header"><div><h2 class="panel-title">가입 회원</h2><p class="closing-help">승인대기·비활성 회원을 먼저 확인하고, 활성으로 변경해야 업무자료를 볼 수 있습니다.</p></div><div class="member-tools"><label class="search-box member-search" for="memberSearch"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="memberSearch" type="search" placeholder="이름 또는 이메일 조회" autocomplete="off"></label><div class="member-summary" id="memberSummary">회원 0명</div></div></div>
           <div class="table-wrap"><table class="vehicle-table member-table"><thead><tr><th>이름</th><th>이메일</th><th>가입일</th><th>역할</th><th>상태</th><th>관리</th></tr></thead><tbody id="memberRows"></tbody></table></div>
         </section>
+      </div>
+      <div class="content view" id="qnaView">
+        <div class="page-heading"><div><p class="eyebrow">업무 문의 · 관리자 답변</p><h1>Q&amp;A</h1><p class="heading-copy">법인차량 업무에서 자주 묻는 질문과 관리자 답변을 확인합니다.</p></div></div>
+        <section class="panel knowledge-admin-panel" id="qnaAdminPanel" hidden>
+          <div class="panel-header"><div><h2 class="panel-title" id="qnaFormTitle">Q&amp;A 등록</h2><p class="closing-help">관리자가 질문과 답변을 직접 등록·수정합니다.</p></div></div>
+          <form id="qnaForm" class="knowledge-form"><label class="form-field full"><span>질문 제목</span><input class="form-input" id="qnaTitle" maxlength="160" required placeholder="예: 법인차량 운행 전 확인할 사항은 무엇인가요?"></label><label class="form-field full"><span>질문 내용</span><textarea class="form-input" id="qnaQuestion" maxlength="4000" required placeholder="질문 또는 안내가 필요한 배경을 입력하세요."></textarea></label><label class="form-field full"><span>관리자 답변</span><textarea class="form-input" id="qnaAnswer" maxlength="8000" required placeholder="직원이 참고할 답변을 입력하세요."></textarea></label><p class="form-error" id="qnaError" role="alert"></p><div class="knowledge-form-actions"><button class="button" type="button" id="qnaCancelEdit" hidden>수정 취소</button><button class="button primary" type="submit" id="qnaSave">Q&amp;A 등록</button></div></form>
+        </section>
+        <section class="panel knowledge-list-panel"><div class="panel-header"><div><h2 class="panel-title">등록된 Q&amp;A</h2><p class="closing-help">전 직원이 열람할 수 있습니다.</p></div><label class="search-box knowledge-search" for="qnaSearch"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="qnaSearch" type="search" placeholder="질문 또는 답변 검색" autocomplete="off"></label></div><div class="knowledge-list" id="qnaRows"></div></section>
+      </div>
+      <div class="content view" id="guideView">
+        <div class="page-heading"><div><p class="eyebrow">운행 기준 · PDF 자료</p><h1>운행가이드</h1><p class="heading-copy">관리자가 등록한 운행 안내 PDF를 열람하거나 내려받을 수 있습니다.</p></div></div>
+        <section class="panel knowledge-admin-panel" id="guideAdminPanel" hidden>
+          <div class="panel-header"><div><h2 class="panel-title">운행가이드 등록</h2><p class="closing-help">PDF 파일 1개와 제목을 등록합니다. 파일당 최대 20MB입니다.</p></div></div>
+          <form id="guideForm" class="knowledge-form"><label class="form-field full"><span>가이드 제목</span><input class="form-input" id="guideTitle" maxlength="160" required placeholder="예: 법인차량 운행 안전수칙"></label><label class="form-field full"><span>간단한 설명</span><textarea class="form-input" id="guideDescription" maxlength="2000" placeholder="직원이 열기 전에 알면 좋은 내용을 입력하세요."></textarea></label><label class="form-field full"><span>PDF 파일</span><input class="form-input guide-file-input" id="guideFile" type="file" accept="application/pdf,.pdf" required></label><p class="form-error" id="guideError" role="alert"></p><div class="knowledge-form-actions"><button class="button primary" type="submit" id="guideSave">PDF 등록</button></div></form>
+        </section>
+        <section class="panel knowledge-list-panel"><div class="panel-header"><div><h2 class="panel-title">운행가이드 자료</h2><p class="closing-help">PDF를 열람하거나 파일로 내려받을 수 있습니다.</p></div></div><div class="knowledge-list" id="guideRows"></div></section>
       </div>
       <div class="content view" id="handoverView">
         <div class="page-heading"><div><p class="eyebrow">담당자 변경 · 차량 상태 기록</p><h1>차량인수인계</h1><p class="heading-copy">누가 어떤 차량을 넘겼는지, 인계 당시 외관 상태를 사진 또는 PDF와 함께 기록합니다.</p></div></div>
@@ -367,6 +385,7 @@
   <script src="./js/dialogs.js"></script>
   <script src="./js/app.js"></script>
   <script src="./js/handover.js"></script>
+  <script src="./js/knowledge.js"></script>
   <script src="./js/driving-months.js"></script>
   <script src="./js/members.js"></script>
   <script src="./js/supabase-auth.js"></script>

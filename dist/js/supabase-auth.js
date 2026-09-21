@@ -33,7 +33,7 @@
   signupModeButton.addEventListener('click',()=>setMode('signup'));
 
   function applyRoleNavigation(role){
-    const allowed=role==='viewer'?new Set(['차량 현황','차량인수인계']):null;
+    const allowed=role==='viewer'?new Set(['차량 현황','차량인수인계','Q&A','운행가이드']):null;
     document.querySelectorAll('.nav-button').forEach(button=>{
       const visible=!allowed||allowed.has(button.dataset.page);
       button.closest('li').hidden=!visible;
@@ -79,6 +79,10 @@
       }
       if (window.refreshHandoverFromSupabase) {
         try { await window.refreshHandoverFromSupabase(); }
+        catch (loadError) { showToast(loadError.message); }
+      }
+      if (window.refreshKnowledgeFromSupabase) {
+        try { await window.refreshKnowledgeFromSupabase(); }
         catch (loadError) { showToast(loadError.message); }
       }
       if(role==='admin'&&window.refreshMembersFromSupabase){

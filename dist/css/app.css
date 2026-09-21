@@ -518,6 +518,30 @@ td strong { font-size: .8rem; }
 .handover-recipient-option strong { font-size: .79rem; }
 .handover-recipient-option small, .handover-recipient-empty { color: var(--ink-soft); font-size: .72rem; }
 .handover-recipient-empty { margin: 7px 8px; }
+.knowledge-admin-panel { margin-bottom: 16px; }
+.knowledge-form { display: grid; gap: 16px; }
+.knowledge-form .form-field { display: grid; gap: 7px; }
+.knowledge-form .form-field.full { grid-column: auto; }
+.knowledge-form textarea.form-input { min-height: 96px; padding-top: 11px; padding-bottom: 11px; line-height: 1.45; resize: vertical; }
+.knowledge-form-actions { display: flex; justify-content: flex-end; gap: 9px; }
+.knowledge-list { display: grid; gap: 12px; }
+.knowledge-item { padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+.knowledge-item-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.knowledge-item h3 { margin: 0; font-size: .98rem; letter-spacing: -.02em; }
+.knowledge-item-meta { margin: 5px 0 0; color: var(--grey); font-size: .72rem; }
+.knowledge-question, .knowledge-answer, .knowledge-description { margin: 14px 0 0; white-space: pre-wrap; color: var(--ink-soft); font-size: .82rem; line-height: 1.65; }
+.knowledge-answer { padding: 13px 14px; border-radius: 10px; color: var(--ink); background: var(--brand-wash); }
+.knowledge-answer strong { display: block; margin-bottom: 5px; color: var(--brand-dark); font-size: .75rem; }
+.knowledge-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.knowledge-guide-file { display: inline-flex; align-items: center; gap: 8px; margin-top: 13px; color: var(--brand-dark); font-size: .78rem; font-weight: 700; }
+.knowledge-guide-file::before { content: "PDF"; padding: 4px 6px; border-radius: 5px; color: #b65252; background: #fff1f1; font-size: .65rem; }
+.guide-file-input { padding: 9px 12px !important; }
+.knowledge-empty { padding: 32px 16px; color: var(--grey); text-align: center; font-size: .82rem; }
+@media (max-width: 650px) {
+  .knowledge-item-header { align-items: stretch; flex-direction: column; }
+  .knowledge-actions { justify-content: flex-start; }
+  .knowledge-form-actions .button { flex: 1; }
+}
 .handover-photo-area > .button { margin-top: 12px; }
 .handover-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 16px; }
 .handover-gallery figure { margin: 0; min-width: 0; }

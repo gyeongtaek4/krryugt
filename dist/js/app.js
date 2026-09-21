@@ -120,15 +120,19 @@ function showView(page) {
   const isDriving = page === '운행기록데이터';
   const isClosing = page === '월별 비용마감자료';
   const isHandover = page === '차량인수인계';
+  const isQna = page === 'Q&A';
+  const isGuide = page === '운행가이드';
   const isMembers = page === '회원관리';
   document.getElementById('membersView').classList.toggle('active', isMembers);
+  document.getElementById('qnaView').classList.toggle('active', isQna);
+  document.getElementById('guideView').classList.toggle('active', isGuide);
   document.getElementById('handoverView').classList.toggle('active', isHandover);
   document.getElementById('closingView').classList.toggle('active', isClosing);
-  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover && !isMembers);
+  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover && !isQna && !isGuide && !isMembers);
   document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
   document.getElementById('contractsView').classList.toggle('active', isContracts);
   document.getElementById('drivingView').classList.toggle('active', isDriving);
-  document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : isDriving ? '운행기록데이터' : '대시보드';
+  document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : isDriving ? '운행기록데이터' : isQna ? 'Q&A' : isGuide ? '운행가이드' : '대시보드';
   document.querySelectorAll('.nav-button').forEach(item => item.classList.toggle('active', item.dataset.page === page));
   if (isClosing) { document.getElementById('breadcrumbCurrent').textContent = page; renderClosing(); }
   if (isHandover) {
@@ -1417,7 +1421,7 @@ document.getElementById('closingRestore').addEventListener('change',async event=
 renderClosing();
 document.querySelectorAll('.nav-button').forEach(button => {
   button.addEventListener('click', () => {
-    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '차량인수인계' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page);
+    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '차량인수인계' || button.dataset.page === 'Q&A' || button.dataset.page === '운행가이드' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page);
     else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
     toggleSidebar(false);
   });
