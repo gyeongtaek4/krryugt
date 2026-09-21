@@ -64,7 +64,7 @@ async function refreshHandoverFromSupabase() {
   if(error)throw Error('인수인계 자료를 불러오지 못했습니다. 005_handovers.sql 실행이 필요할 수 있습니다.');
   const records=await Promise.all((data||[]).map(async row=>({id:row.id,date:row.handover_date,from:row.handed_over_by,to:row.received_by,
     recipientUserId:row.received_by_user_id,consentStatus:row.consent_status || (row.received_by_user_id ? 'pending' : 'legacy'),
-    consentedBy:row.recipient_confirmed_by,consentedAt:row.recipient_confirmed_at,
+    consentedBy:row.recipient_confirmed_by,consentedName:row.recipient_confirmed_name,consentedAt:row.recipient_confirmed_at,
     condition:row.condition,notes:row.notes,vehicle:row.vehicle_snapshot,photos:await signedHandoverPhotos(row.photo_paths),photoPaths:row.photo_paths,createdAt:row.created_at})));
   handoverRecords.splice(0,handoverRecords.length,...records);renderHandovers();
 }
@@ -97,9 +97,9 @@ async function storeHandover(record,photos) {
 }
 function handoverConsentMarkup(item) {
   const status = item.consentStatus || 'legacy';
-  if (status === 'completed') return '<span class="handover-consent complete">인수 동의 완료</span>';
+  if (status === 'completed') return `<span class="handover-consent complete">${escapeHtml(item.consentedName || '인수자')} 동의 완료</span>`;
   if (status === 'pending') return '<span class="handover-consent pending">인수 동의 대기</span>';
-  return '<span class="handover-consent legacy">기존 이력</span>';
+  return '<span class="handover-consent legacy">인수자 계정 미지정</span>';
 }
 function canConfirmHandover(item) {
   return item.consentStatus === 'pending' && item.recipientUserId === window.fleetCurrentUser?.id;
@@ -171,7 +171,7 @@ async function confirmHandover(item) {
   const { error } = await window.fleetSupabaseClient.rpc('confirm_vehicle_handover',{p_handover_id:item.id});
   if (error) throw Error(error.message || '인수 동의 처리에 실패했습니다.');
   await refreshHandoverFromSupabase();
-  showToast('인수 동의가 완료되었습니다. 동의자 ID와 시각이 기록되었습니다.');
+  showToast('인수 동의가 완료되었습니다. 동의자 이름·ID·시각이 기록되었습니다.');
 }
 function formatConsentDate(value) {
   if (!value) return '—';
@@ -195,10 +195,10 @@ handoverEl('handoverRows').addEventListener('click',async event=>{
   const item=handoverRecords[Number(button.dataset.handoverDetail)];if(!item)return;
   const detail=handoverEl('handoverDetail');detail.hidden=false;
   const consentInfo = item.consentStatus === 'completed'
-    ? `인수 동의 완료 · ${formatConsentDate(item.consentedAt)} · 동의 ID ${maskedMemberId(item.consentedBy)}`
+    ? `인수 동의 완료 · ${item.consentedName || '인수자'} · ${formatConsentDate(item.consentedAt)} · 동의 ID ${maskedMemberId(item.consentedBy)}`
     : item.consentStatus === 'pending'
       ? `인수 동의 대기 · 지정 인수자만 동의할 수 있습니다.${canConfirmHandover(item) ? ' 이 계정으로 동의할 수 있습니다.' : ''}`
-      : '기존 이력 · 수신자 회원 계정이 지정되지 않아 동의 절차가 적용되지 않습니다.';
+      : '인수자 계정 미지정 · 수신자 이름과 일치하는 활성 회원 계정을 확인한 뒤 동의할 수 있습니다.';
   detail.innerHTML=`<h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(consentInfo)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
 });
 handoverEl('handoverDownload').addEventListener('click',downloadHandoverArchive);

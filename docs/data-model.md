@@ -4,7 +4,7 @@
 
 - 2026-09-18 운행: driving_months 표·권한 검증 RPC로 월 원본과 확정 조직·확정일 저장 코드를 준비했다. 003_driving_months.sql의 실제 실행은 아직 미확인이다. driving-storage.md 참고.
 
-- 인수인계는 `vehicle_handovers`에 차량 참조·인계 정보·차량/조직 스냅샷·첨부 경로와 MIME 형식을 저장한다. `received_by_user_id`는 지정 인수자의 Auth ID, `consent_status`·`recipient_confirmed_at`·`recipient_confirmed_by`는 인수 동의 상태·시각·동의 계정 ID를 보관한다. 외관 사진·PDF 1~6개는 비공개 `handover-photos` Storage에 저장하며 로그인 사용자만 서명 URL로 조회한다. 상세 기준은 handover.md 참고.
+- 인수인계는 `vehicle_handovers`에 차량 참조·인계 정보·차량/조직 스냅샷·첨부 경로와 MIME 형식을 저장한다. `received_by_user_id`는 지정 인수자의 Auth ID, `consent_status`·`recipient_confirmed_at`·`recipient_confirmed_by`·`recipient_confirmed_name`은 인수 동의 상태·시각·동의 계정 ID·당시 표시 이름을 보관한다. 외관 사진·PDF 1~6개는 비공개 `handover-photos` Storage에 저장하며 로그인 사용자만 서명 URL로 조회한다. 상세 기준은 handover.md 참고.
 
 ## 구현된 Supabase 연결 (2026-09-17)
 
