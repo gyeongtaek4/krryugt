@@ -8,7 +8,7 @@ alter table public.vehicle_handovers
 -- 이름이 정확히 한 명의 활성 회원과 일치하는 기존 이력만 자동 연결한다.
 -- 같은 이름의 회원이 둘 이상이거나 일치하는 계정이 없으면 미지정 상태로 보존한다.
 with unique_active_members as (
-  select lower(trim(display_name)) as normalized_name,min(id) as id
+  select lower(trim(display_name)) as normalized_name,min(id::text)::uuid as id
   from public.profiles
   where status='active' and length(trim(display_name)) > 0
   group by lower(trim(display_name))
