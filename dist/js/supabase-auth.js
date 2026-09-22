@@ -73,7 +73,14 @@
       userName.textContent = profile?.display_name || session.user.email || '로그인 사용자';
       userRole.textContent = role === 'admin' ? '관리자' : '일반회원';
       applyRoleNavigation(role);
-      if (window.refreshVehiclesFromSupabase) await window.refreshVehiclesFromSupabase();
+      if (window.refreshVehiclesFromSupabase) {
+        let vehiclesLoaded = await window.refreshVehiclesFromSupabase();
+        if (!vehiclesLoaded) {
+          window.setServerStatus?.('서버 연결을 다시 확인하고 있습니다…', 'warning');
+          await new Promise(resolve => setTimeout(resolve, 700));
+          vehiclesLoaded = await window.refreshVehiclesFromSupabase();
+        }
+      }
       if (role!=='viewer'&&window.refreshDrivingFromSupabase) {
         try { await window.refreshDrivingFromSupabase(); }
         catch (loadError) { showToast(loadError.message); }

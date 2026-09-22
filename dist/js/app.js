@@ -25,14 +25,32 @@ const contractFormModal = document.getElementById('contractFormModal');
 let editingVehicleIndex = null;
 let editingContractIndex = null;
 let editingDrivingIndex = null;
+const serverStatus = document.getElementById('serverStatus');
+
+function setServerStatus(message = '', type = '') {
+  if (!serverStatus) return;
+  serverStatus.hidden = !message;
+  serverStatus.textContent = message;
+  serverStatus.className = `server-status${type ? ` ${type}` : ''}`;
+}
+
+function isLocalFilePreview() {
+  return window.location.protocol === 'file:';
+}
+
+window.setServerStatus = setServerStatus;
 
 async function refreshVehiclesFromSupabase() {
-  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) return;
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) {
+    setServerStatus('서버 자료를 불러오려면 다시 로그인해 주세요.', 'warning');
+    return false;
+  }
   const { data, error } = await window.fleetSupabaseClient.from('vehicles').select('*');
   if (error) {
     console.error('차량현황 Supabase 조회 오류', error);
-    showToast('차량현황을 불러오지 못했습니다. Supabase 권한 정책을 확인해 주세요.');
-    return;
+    setServerStatus(`차량현황을 불러오지 못했습니다. 다시 로그인하거나 배포 홈페이지에서 새로고침해 주세요. (${error.code || '조회 오류'})`, 'error');
+    showToast('차량현황 서버 조회에 실패했습니다. 화면의 빈 목록을 저장 결과로 판단하지 마세요.');
+    return false;
   }
   vehicleData = (data || []).sort((a, b) => String(a.vehicle_number_normalized || a.vehicle_number || '').localeCompare(String(b.vehicle_number_normalized || b.vehicle_number || ''))).map(row => ({
     '본부': row.headquarters || '', '부': row.division || '', '팀': row.team || '',
@@ -41,14 +59,32 @@ async function refreshVehiclesFromSupabase() {
     '지역': row.region || '', '주차장': row.parking_lot || '', _supabaseId: row.id
   }));
   refreshFilters(); renderVehicles(); renderDriving();
-  if (window.fleetCurrentRole !== 'viewer') await refreshContractsFromSupabase();
+  if (window.fleetCurrentRole !== 'viewer') {
+    const contractsLoaded = await refreshContractsFromSupabase();
+    if (!contractsLoaded) return false;
+  }
   else { contractData=[]; renderContracts(); }
+  if (isLocalFilePreview()) {
+    setServerStatus('현재 로컬 파일 미리보기입니다. 저장 자료 확인과 새로고침은 배포 홈페이지에서 진행해 주세요.', 'warning');
+  } else {
+    setServerStatus();
+  }
+  return true;
 }
 window.refreshVehiclesFromSupabase = refreshVehiclesFromSupabase;
 
 async function refreshContractsFromSupabase() {
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) {
+    setServerStatus('서버 자료를 불러오려면 다시 로그인해 주세요.', 'warning');
+    return false;
+  }
   const { data, error } = await window.fleetSupabaseClient.from('contracts').select('*').order('contract_start_month');
-  if (error) { showToast('계약정보를 불러오지 못했습니다. 권한 정책을 확인해 주세요.'); throw error; }
+  if (error) {
+    console.error('차량계약정보 Supabase 조회 오류', error);
+    setServerStatus(`차량계약정보를 불러오지 못했습니다. 다시 로그인하거나 배포 홈페이지에서 새로고침해 주세요. (${error.code || '조회 오류'})`, 'error');
+    showToast('차량계약정보 서버 조회에 실패했습니다.');
+    return false;
+  }
   contractData = (data || []).map(record => {
     const vehicle = vehicleData.find(row => row._supabaseId === record.vehicle_id) || {};
     return { ...vehicle, _supabaseId: record.id, _vehicleId: record.vehicle_id,
@@ -59,6 +95,7 @@ async function refreshContractsFromSupabase() {
   refreshContractFilters(); renderContracts();
   document.getElementById('contractSourceFileName').textContent = 'Supabase 저장 계약정보';
   document.getElementById('contractSourceUpdated').textContent = '현재 차량현황의 조직·담당자 기준';
+  return true;
 }
 
 function contractSupabasePayload(row) {
@@ -874,7 +911,7 @@ function vehicleSupabasePayload(row) {
 }
 
 async function saveVehicleToSupabase(row, index) {
-  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) return null;
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) throw Error('로그인 세션이 확인되지 않았습니다. 서버에 저장하지 않고 화면에만 표시할 수는 없습니다. 다시 로그인해 주세요.');
   const payload = vehicleSupabasePayload(row);
   if (index !== null && vehicleData[index]?._supabaseId) {
     const { error } = await window.fleetSupabaseClient.from('vehicles').update(payload).eq('id', vehicleData[index]._supabaseId);
@@ -887,7 +924,7 @@ async function saveVehicleToSupabase(row, index) {
 }
 
 async function saveVehicleFileToSupabase(rows) {
-  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) return false;
+  if (!window.fleetCurrentUser || !window.fleetSupabaseClient) throw Error('로그인 세션이 확인되지 않았습니다. 서버에 저장하지 않고 화면에만 표시할 수는 없습니다. 다시 로그인해 주세요.');
   const payload = rows.map(vehicleSupabasePayload);
   const { error } = await window.fleetSupabaseClient.from('vehicles').upsert(payload, { onConflict: 'vehicle_number_normalized' });
   if (error) throw error;
@@ -1171,13 +1208,8 @@ document.getElementById('vehicleForm').addEventListener('submit', async event =>
     '주차장': document.getElementById('vfParking').value.trim()
   };
   try {
-    const saved = await saveVehicleToSupabase(row, editingVehicleIndex);
-    if (saved) {
-      await refreshVehiclesFromSupabase();
-    } else {
-      if (editingVehicleIndex === null) vehicleData.push(row); else vehicleData[editingVehicleIndex] = row;
-      refreshFilters(); renderVehicles(); renderDriving();
-    }
+    await saveVehicleToSupabase(row, editingVehicleIndex);
+    await refreshVehiclesFromSupabase();
     closeVehicleForm();
     showToast(editingVehicleIndex === null ? '차량정보를 추가했습니다.' : '차량정보를 수정했습니다.');
   } catch (error) {
@@ -1273,9 +1305,8 @@ document.getElementById('confirmUpload').addEventListener('click', async () => {
   try {
     const uploadedRows = await readVehicleFile(file);
     resetFieldFilters('vehiclesView');
-    const savedToSupabase = await saveVehicleFileToSupabase(uploadedRows);
-    if (savedToSupabase) await refreshVehiclesFromSupabase();
-    else vehicleData = uploadedRows;
+    await saveVehicleFileToSupabase(uploadedRows);
+    await refreshVehiclesFromSupabase();
     document.getElementById('vehicleSearch').value = '';
     ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => document.getElementById(id).value = '');
     refreshFilters();
@@ -1285,7 +1316,7 @@ document.getElementById('confirmUpload').addEventListener('click', async () => {
     document.getElementById('sourceUpdated').textContent = `${new Date().toLocaleString('ko-KR')} 반영`;
     toggleModal(false);
     showView('차량 현황');
-    showToast(`${uploadedRows.length}건의 차량 담당자 정보를 ${savedToSupabase ? '저장하고 ' : ''}불러왔습니다.`);
+    showToast(`${uploadedRows.length}건의 차량 담당자 정보를 서버에 저장하고 불러왔습니다.`);
   } catch (error) {
     showUploadError(error.message || '파일을 읽는 중 문제가 발생했습니다.');
   } finally {
