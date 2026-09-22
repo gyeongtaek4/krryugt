@@ -13,9 +13,10 @@
   }
 
   function renderMembers(){
+    const activeCount=members.filter(item=>item.status==='active').length;
     const disabledCount=members.filter(item=>item.status==='disabled').length;
     const filtered=visibleMembers();
-    summary.textContent=`전체 ${members.length}명 · 비활성 ${disabledCount}명`;
+    summary.textContent=`전체 ${members.length}명 · 활성 ${activeCount}명 · 비활성 ${disabledCount}명`;
     rows.innerHTML=filtered.map(item=>{
       const self=item.id===window.fleetCurrentUser?.id,disabled=self?' disabled':'';
       return `<tr class="member-status-${escapeHtml(item.status||'')}" data-member-id="${escapeHtml(item.id)}"><td><input class="member-name" maxlength="50" value="${escapeHtml(item.display_name||'')}"></td><td>${escapeHtml(item.email||'')}</td><td>${escapeHtml(String(item.created_at||'').slice(0,10))}</td><td><select class="member-role"${disabled}>${Object.entries(roleLabel).map(([value,label])=>`<option value="${value}"${item.role===value?' selected':''}>${label}</option>`).join('')}</select></td><td><select class="member-status"${disabled}>${Object.entries(statusLabel).map(([value,label])=>`<option value="${value}"${item.status===value?' selected':''}>${label}</option>`).join('')}</select></td><td><div class="member-actions"><button class="row-edit member-save">저장</button>${self?'<small class="member-self">내 계정</small>':'<button class="row-edit member-password-reset" type="button">비밀번호 초기화</button>'}</div></td></tr>`;

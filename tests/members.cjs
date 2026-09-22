@@ -23,6 +23,7 @@ assert(members.includes("rpc('admin_reset_member_password'"));
 assert(members.includes('비밀번호 초기화'));
 assert(members.includes("disabled:0,active:1"));
 assert(!members.includes('승인대기'));
+assert(members.includes('활성 ${activeCount}명 · 비활성 ${disabledCount}명'));
 assert(members.includes("search.addEventListener('input',renderMembers)"));
 for(const text of [
   "status text not null default 'disabled'",
