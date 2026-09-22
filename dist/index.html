@@ -194,18 +194,18 @@
         <section class="grid-main">
           <article class="panel">
             <div class="panel-header">
-              <div><h2 class="panel-title">월별 렌트 비용 추이</h2><p class="panel-subtitle" id="rentChartPeriod">기준월까지 최근 12개월 · 확정 마감자료</p></div>
-              <div class="month-control"><label for="rentReferenceMonth">기준월</label><input class="month-picker" id="rentReferenceMonth" type="month" value="2026-09" required></div>
+              <div><h2 class="panel-title">월별 차량 부대비용 추이</h2><p class="panel-subtitle" id="costTrendPeriod">기준월까지 최근 12개월 · 확정 마감자료 · 단위 만원</p></div>
+              <div class="month-control"><label for="costTrendReferenceMonth">기준월</label><input class="month-picker" id="costTrendReferenceMonth" type="month" value="2026-09" required></div>
             </div>
-            <div class="chart-summary" aria-live="polite"><strong id="rentAverageAmount">-</strong><span id="rentAverageLabel">조회기간 평균</span></div>
-            <p class="panel-subtitle" id="rentAverageNote">그래프에 표시된 월 렌트비용의 평균입니다. 미집계 월은 제외합니다.</p>
+            <div class="chart-summary" aria-live="polite"><strong id="costTrendTotal">-</strong><span id="costTrendLabel">기준월 부대비용 합계</span></div>
+            <p class="panel-subtitle" id="costTrendNote">주유비·통행료·주차비를 각각의 선으로 비교합니다. 미마감 월은 표시하지 않습니다.</p>
             <div class="combo-chart-scroll">
-<svg class="combo-chart" id="rentChart" viewBox="0 0 940 315" role="img" aria-labelledby="rentChartTitle rentChartDesc">
-                <title id="rentChartTitle">월별 렌트비용 추이</title>
-                <desc id="rentChartDesc">선택한 기준월까지 최근 12개월의 월 비용과 전체 평균입니다.</desc>
+<svg class="combo-chart" id="costTrendChart" viewBox="0 0 940 315" role="img" aria-labelledby="costTrendChartTitle costTrendChartDesc">
+                <title id="costTrendChartTitle">월별 차량 부대비용 추이</title>
+                <desc id="costTrendChartDesc">선택한 기준월까지 최근 12개월의 주유비, 통행료, 주차비입니다.</desc>
               </svg>
             </div>
-            <div class="combo-legend" aria-label="그래프 범례"><span><i></i>월 렌트비용</span><span><i class="line"></i>전체 평균</span></div>
+            <div class="combo-legend cost-trend-legend" aria-label="그래프 범례"><span><i class="fuel-line"></i>주유비</span><span><i class="toll-line"></i>통행료</span><span><i class="parking-line"></i>주차비</span></div>
           </article>
           <article class="panel cost-panel">
             <div class="panel-header"><div><h2 class="panel-title">차량 부대비용</h2><p class="panel-subtitle">확정 비용자료 없음</p></div></div>

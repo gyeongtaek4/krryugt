@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const html = fs.readFileSync('dist/index.html', 'utf8');
 const dashboard = html.split('id="dashboardView"')[1].split('id="vehiclesView"')[0];
-const titles = ['전체 운영 차량', '렌트 계약금액', '6개월 내 계약 만료 예정 차량', '부서별 차량 현황', '확정 운행자료 · 차량별 이용 순위', '월별 렌트 비용 추이', '차량 부대비용'];
+const titles = ['전체 운영 차량', '렌트 계약금액', '6개월 내 계약 만료 예정 차량', '부서별 차량 현황', '확정 운행자료 · 차량별 이용 순위', '월별 차량 부대비용 추이', '차량 부대비용'];
 const metrics = dashboard.split('class="metrics"')[1].split('</section>')[0];
 assert(metrics.includes('id="dashboardExpiryCount"'));
 const css = fs.readFileSync('dist/css/app.css', 'utf8');
@@ -10,7 +10,7 @@ assert(!/\.department-overview \.department-list\s*\{[^}]*(max-height|overflow-y
 const positions = titles.map(title => dashboard.indexOf(title));
 assert(positions.every((position, index) => position >= 0 && (!index || position > positions[index - 1])));
 assert.equal((dashboard.match(/id="dashboardUsageMonth"/g) || []).length, 1);
-assert.equal((dashboard.match(/id="rentReferenceMonth"/g) || []).length, 1);
+assert.equal((dashboard.match(/id="costTrendReferenceMonth"/g) || []).length, 1);
 assert(dashboard.includes('id="dashboardUsageDaysHigh"'));
 assert(dashboard.includes('id="dashboardUsageDaysLow"'));
 assert(dashboard.includes('id="dashboardUsageDistanceHigh"'));

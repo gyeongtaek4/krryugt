@@ -221,8 +221,8 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 }
 
-  // 확정 마감자료에서 계산하는 월별 렌트비용입니다. 단위: 만원.
-const rentMonthlyData = {};
+// 확정 마감자료에서 계산하는 월별 부대비용입니다. 단위: 만원.
+const monthlyAdditionalCostData = {};
 const closingArchive = {};
 let closingDraft = null;
 let closingEditMonth = null;
@@ -273,9 +273,12 @@ function downloadClosingArchive() {
   const link=document.createElement('a');link.href=url;link.download=`차량비용마감자료_${new Date().toISOString().slice(0,10)}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function syncClosingDashboard() {
-  Object.keys(rentMonthlyData).forEach(key=>delete rentMonthlyData[key]);
-  Object.entries(closingArchive).forEach(([month,item])=>rentMonthlyData[month]=closingTotals(item.rows)[0]/10000);
-  renderRentChart();
+  Object.keys(monthlyAdditionalCostData).forEach(key=>delete monthlyAdditionalCostData[key]);
+  Object.entries(closingArchive).forEach(([month,item])=>{
+    const totals=closingTotals(item.rows);
+    monthlyAdditionalCostData[month]={ fuel:totals[1]/10000, toll:totals[2]/10000, parking:totals[3]/10000 };
+  });
+  renderAdditionalCostTrend();
 }
 
 function shiftRentMonth(month, offset) {
@@ -284,7 +287,7 @@ function shiftRentMonth(month, offset) {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-function formatRentAmount(value) {
+function formatCostAmount(value) {
   if (value === null || !Number.isFinite(value)) return '—';
   const amount = Math.round(value);
   const hundredMillion = Math.floor(amount / 10000);
@@ -292,8 +295,8 @@ function formatRentAmount(value) {
   return hundredMillion ? `${hundredMillion}억${remainder ? ` ${remainder.toLocaleString('ko-KR')}만원` : '원'}` : `${amount.toLocaleString('ko-KR')}만원`;
 }
 
-function renderRentChart() {
-  const reference = document.getElementById('rentReferenceMonth').value;
+function renderAdditionalCostTrend() {
+  const reference = document.getElementById('costTrendReferenceMonth').value;
   const selectedClosing=closingArchive[reference];
   const selectedCosts=selectedClosing ? closingTotals(selectedClosing.rows).slice(1) : null;
   const extraTotal=selectedCosts ? selectedCosts.reduce((a,b)=>a+b,0) : null;
@@ -306,32 +309,35 @@ function renderRentChart() {
     item.querySelector('.cost-progress i').style.setProperty('--value',`${ratio}%`);
   });
   document.querySelector('.cost-source-note').textContent='선택한 기준월의 확정 비용마감자료입니다. 현재 차량정보와 별도로 집계합니다.';
-  const chart = document.getElementById('rentChart');
+  const chart = document.getElementById('costTrendChart');
   const valid = /^\d{4}-(0[1-9]|1[0-2])$/.test(reference);
   const months = valid ? Array.from({ length: 12 }, (_, index) => shiftRentMonth(reference, index - 11)) : [];
-  const values = months.map(month => rentMonthlyData[month] ?? null);
-  const displayedValues = values.filter(value => Number.isFinite(value));
-  const average = displayedValues.length ? displayedValues.reduce((sum, value) => sum + value, 0) / displayedValues.length : null;
+  const series = [
+    { key:'fuel', label:'주유비', className:'fuel-line' },
+    { key:'toll', label:'통행료', className:'toll-line' },
+    { key:'parking', label:'주차비', className:'parking-line' }
+  ];
+  const knownValues = months.flatMap(month => {
+    const item=monthlyAdditionalCostData[month];
+    return item ? series.map(({key})=>item[key]) : [];
+  }).filter(Number.isFinite);
   const monthLabel = valid ? `${reference.slice(0, 4)}년 ${Number(reference.slice(5))}월` : '기준월 선택 필요';
-  const label = displayedValues.length ? `그래프에 집계된 ${displayedValues.length}개월 평균` : '조회기간 평균';
-  document.getElementById('rentAverageAmount').textContent = formatRentAmount(average);
-  document.getElementById('rentAverageLabel').textContent = label;
-  document.getElementById('rentAverageNote').textContent = !valid ? '조회할 기준월을 선택해 주세요.' : average === null
-    ? '선택한 조회기간에 집계된 월 렌트비용이 없습니다.'
-    : `확정 마감자료의 월 렌트비용 합계 ÷ ${displayedValues.length}개월 · 미마감 월 제외`;
+  document.getElementById('costTrendTotal').textContent = extraTotal===null ? '—' : won(extraTotal);
+  document.getElementById('costTrendLabel').textContent = selectedClosing ? `${monthLabel} 부대비용 합계` : '기준월 부대비용 합계';
+  document.getElementById('costTrendNote').textContent = !valid ? '조회할 기준월을 선택해 주세요.' : !knownValues.length
+    ? '선택한 조회기간에 확정된 주유비·통행료·주차비 자료가 없습니다.'
+    : '각 선은 확정 비용마감자료의 항목별 월 합계이며, 미마감 월은 표시하지 않습니다.';
   if (!valid) {
-    document.getElementById('rentChartPeriod').textContent = '기준월을 선택해 주세요.';
-    chart.innerHTML = '<title id="rentChartTitle">기준월 선택 필요</title><desc id="rentChartDesc">기준월을 선택하면 최근 12개월을 표시합니다.</desc>';
+    document.getElementById('costTrendPeriod').textContent = '기준월을 선택해 주세요.';
+    chart.innerHTML = '<title id="costTrendChartTitle">기준월 선택 필요</title><desc id="costTrendChartDesc">기준월을 선택하면 최근 12개월을 표시합니다.</desc>';
     return;
   }
 
-  const averages = months.map(() => average);
-  document.getElementById('rentChartPeriod').textContent = `${months[0].replace('-', '.')}~${reference.replace('-', '.')} · 최근 12개월 · 부가세 포함 · 단위 만원`;
-  const known = [...values, ...averages].filter(value => value !== null);
+  document.getElementById('costTrendPeriod').textContent = `${months[0].replace('-', '.')}~${reference.replace('-', '.')} · 최근 12개월 · 확정 마감자료 · 단위 만원`;
   const low = 0;
-  const high = known.length ? Math.max(low + 1000, Math.ceil(Math.max(...known) / 1000) * 1000) : 1000;
+  const high = knownValues.length ? Math.max(10, Math.ceil(Math.max(...knownValues) / 10) * 10) : 10;
   const yFor = value => 250 - (value - low) / (high - low) * 220;
-  let markup = `<title id="rentChartTitle">${monthLabel} 기준 최근 12개월 렌트비용</title><desc id="rentChartDesc">막대는 월 비용, 선은 조회기간의 확정월 전체 평균입니다. 자료가 없는 달은 미집계로 표시합니다.</desc>`;
+  let markup = `<title id="costTrendChartTitle">${monthLabel} 기준 최근 12개월 차량 부대비용</title><desc id="costTrendChartDesc">주유비, 통행료, 주차비의 월별 확정 합계입니다. 자료가 없는 달은 미집계로 표시합니다.</desc>`;
   for (let tick = 0; tick <= 6; tick++) {
     const y = 30 + tick * 220 / 6;
     const amount = high - tick * (high - low) / 6;
@@ -339,23 +345,22 @@ function renderRentChart() {
   }
   months.forEach((month, index) => {
     const x = 110 + index * 70;
-    const value = values[index];
-    markup += value === null ? `<text class="future-month" x="${x}" y="235" text-anchor="middle">미집계</text>`
-      : `<rect class="rent-bar" x="${x - 11}" y="${yFor(value)}" width="22" height="${250 - yFor(value)}" rx="4"><title>${month.replace('-', '.')} · 월 렌트비용 ${formatRentAmount(value)}</title></rect>`;
+    if (!monthlyAdditionalCostData[month]) markup += `<text class="future-month" x="${x}" y="235" text-anchor="middle">미집계</text>`;
     markup += `<text class="month-label" x="${x}" y="271" text-anchor="middle">${Number(month.slice(5))}월</text>`;
   });
-  let points = [];
-  const flushLine = () => {
-    if (points.length > 1) markup += `<polyline class="average-line" points="${points.join(' ')}"/>`;
-    points = [];
-  };
-  averages.forEach((value, index) => {
-    if (value === null) { flushLine(); return; }
-    points.push(`${110 + index * 70},${yFor(value)}`);
-  });
-  flushLine();
-  averages.forEach((value, index) => {
-    if (value !== null) markup += `<circle class="average-dot" cx="${110 + index * 70}" cy="${yFor(value)}" r="${index === 11 ? 4.4 : 3.8}"><title>${months[index].replace('-', '.')} · 전체 평균 ${formatRentAmount(value)}</title></circle>`;
+  series.forEach(({key,label,className})=>{
+    let points=[];
+    const flushLine=()=>{ if(points.length>1) markup+=`<polyline class="cost-trend-line ${className}" points="${points.join(' ')}"/>`; points=[]; };
+    months.forEach((month,index)=>{
+      const value=monthlyAdditionalCostData[month]?.[key];
+      if(!Number.isFinite(value)){ flushLine(); return; }
+      points.push(`${110+index*70},${yFor(value)}`);
+    });
+    flushLine();
+    months.forEach((month,index)=>{
+      const value=monthlyAdditionalCostData[month]?.[key];
+      if(Number.isFinite(value)) markup+=`<circle class="cost-trend-dot ${className}" cx="${110+index*70}" cy="${yFor(value)}" r="3.8"><title>${month.replace('-', '.')} · ${label} ${formatCostAmount(value)}</title></circle>`;
+    });
   });
   const years = [];
   months.forEach((month, index) => {
@@ -1562,17 +1567,17 @@ document.getElementById('restoreDrivingArchive').addEventListener('change',async
 });
 document.getElementById('usageMonth').addEventListener('change', renderDriving);
 document.getElementById('drivingSearch').addEventListener('input', renderDriving);
-document.getElementById('rentReferenceMonth').addEventListener('change', renderRentChart);
+document.getElementById('costTrendReferenceMonth').addEventListener('change', renderAdditionalCostTrend);
 
 document.getElementById('reportButton').addEventListener('click', () => {
-  const month=document.getElementById('rentReferenceMonth').value;
+  const month=document.getElementById('costTrendReferenceMonth').value;
   if(!parseYearMonth(month)){showToast('보고 기준월을 선택하세요.');return;}
   const costs=closingArchive[month], usage=drivingArchive[month];
   const totals=costs ? closingTotals(costs.rows) : null;
   let report=document.getElementById('printReport');
   if(!report){report=document.createElement('section');report.id='printReport';document.body.appendChild(report);}
   const fee=contractData.reduce((sum,row)=>sum+rentalNumber(row['렌탈료']),0);
-  report.innerHTML=`<h1>법인차량 관리 보고서</h1><p>기준월: ${escapeHtml(month)} · 비용은 부가세 포함</p><p>현재 저장계약 월 렌탈료 합계: ${won(fee)} (과거 확정비용과 별도)</p><h2>월별 확정 비용</h2>${totals ? `<p>확정일: ${escapeHtml(costs.confirmedAt)} · 버전 ${1+(costs.revisions||[]).length}</p><table><tr>${costKeys.map(key=>`<th>${escapeHtml(key)}</th>`).join('')}<th>합계</th></tr><tr>${totals.map(value=>`<td>${won(value)}</td>`).join('')}<td>${won(totals.reduce((a,b)=>a+b,0))}</td></tr></table>` : '<p>비용 미마감 — 금액 없음</p>'}<h2>최근 12개월 렌트비용</h2><p>${escapeHtml(document.getElementById('rentAverageLabel').textContent)}: ${escapeHtml(document.getElementById('rentAverageAmount').textContent)}</p>${document.getElementById('rentChart').outerHTML}<h2>부서별 확정 월 이동거리</h2>${usage ? `<p>확정일: ${escapeHtml(usage.confirmedAt)}</p><table><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량</th><th>월 이동거리</th><th>차량별 이용일수 합계</th><th>차량당 평균</th></tr></thead><tbody>${drivingReportMarkup(drivingReportForMonth(month))}</tbody></table>` : '<p>운행 미마감 — 거리 없음</p>'}<p>이용일수는 차량별 서로 다른 운행 날짜 수입니다. 부서 합계는 각 차량의 이용일수를 더한 값입니다.</p>`;
+  report.innerHTML=`<h1>법인차량 관리 보고서</h1><p>기준월: ${escapeHtml(month)} · 비용은 부가세 포함</p><p>현재 저장계약 월 렌탈료 합계: ${won(fee)} (과거 확정비용과 별도)</p><h2>월별 확정 비용</h2>${totals ? `<p>확정일: ${escapeHtml(costs.confirmedAt)} · 버전 ${1+(costs.revisions||[]).length}</p><table><tr>${costKeys.map(key=>`<th>${escapeHtml(key)}</th>`).join('')}<th>합계</th></tr><tr>${totals.map(value=>`<td>${won(value)}</td>`).join('')}<td>${won(totals.reduce((a,b)=>a+b,0))}</td></tr></table>` : '<p>비용 미마감 — 금액 없음</p>'}<h2>최근 12개월 차량 부대비용</h2><p>${escapeHtml(document.getElementById('costTrendLabel').textContent)}: ${escapeHtml(document.getElementById('costTrendTotal').textContent)}</p>${document.getElementById('costTrendChart').outerHTML}<h2>부서별 확정 월 이동거리</h2>${usage ? `<p>확정일: ${escapeHtml(usage.confirmedAt)}</p><table><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량</th><th>월 이동거리</th><th>차량별 이용일수 합계</th><th>차량당 평균</th></tr></thead><tbody>${drivingReportMarkup(drivingReportForMonth(month))}</tbody></table>` : '<p>운행 미마감 — 거리 없음</p>'}<p>이용일수는 차량별 서로 다른 운행 날짜 수입니다. 부서 합계는 각 차량의 이용일수를 더한 값입니다.</p>`;
   window.print();
 });
 document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보', { recordHistory: true }));
@@ -1587,6 +1592,6 @@ renderVehicles();
 refreshContractFilters();
 renderContracts();
 renderDriving();
-renderRentChart();
+renderAdditionalCostTrend();
 window.addEventListener('popstate', () => showView(pageFromLocation(), { smoothScroll: false }));
 if (window.location.hash) showView(pageFromLocation(), { smoothScroll: false });

@@ -226,11 +226,19 @@ h1 { margin: 0; font-size: clamp(1.65rem, 2.4vw, 2.15rem); line-height: 1.25; le
 .combo-chart .year-label { fill: var(--ink-soft); font-family: inherit; font-size: 11px; font-weight: 700; }
 .combo-chart .rent-bar { fill: var(--brand-soft); stroke: none; opacity: .76; }
 .combo-chart .average-line { fill: none; stroke: var(--brand); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.combo-chart .cost-trend-line { fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.combo-chart .cost-trend-dot { stroke: #fff; stroke-width: 1.6; }
+.combo-chart .fuel-line { stroke: var(--brand); fill: var(--brand); }
+.combo-chart .toll-line { stroke: #2f7bdc; fill: #2f7bdc; }
+.combo-chart .parking-line { stroke: #b45a9f; fill: #b45a9f; }
 .combo-chart .average-dot { fill: var(--white); stroke: var(--brand); stroke-width: 2.2; }
 .combo-legend { display: flex; justify-content: center; gap: 22px; margin-top: 8px; color: var(--ink-soft); font-size: .75rem; }
 .combo-legend span { display: inline-flex; align-items: center; gap: 7px; }
 .combo-legend i { width: 22px; height: 9px; border: 0; border-radius: 3px; background: var(--brand-soft); opacity: .76; }
 .combo-legend i.line { height: 0; border: 0; border-top: 3px solid var(--brand); background: transparent; opacity: 1; }
+.cost-trend-legend i { height: 0; border: 0; border-top: 3px solid var(--brand); background: transparent; opacity: 1; }
+.cost-trend-legend i.toll-line { border-color: #2f7bdc; }
+.cost-trend-legend i.parking-line { border-color: #b45a9f; }
 .year-badge { min-height: 34px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid #cae9e1; border-radius: 10px; color: var(--brand-dark); background: var(--brand-wash); font-size: .74rem; font-weight: 800; white-space: nowrap; }
 .future-month { fill: var(--grey); font-family: inherit; font-size: 10px; }
 
