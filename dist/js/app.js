@@ -766,7 +766,7 @@ function drivingVehicleSummaryForMonth(month) {
   return [...vehicles.values()].map(vehicle => ({ ...vehicle, usageDays: vehicle.days.size }));
 }
 function rankingMarkup(rows, valueFormatter) {
-  return rows.length ? rows.map(row => `<tr><td><div class="ranking-vehicle"><strong class="plate">${escapeHtml(row.plate)}</strong><small>${escapeHtml(row.team)}</small></div></td><td>${valueFormatter(row)}</td></tr>`).join('') : '<tr><td colspan="2" class="empty-table">확정 운행자료가 없습니다.</td></tr>';
+  return rows.length ? rows.map(row => `<tr><td class="plate">${escapeHtml(row.plate)}</td><td title="${escapeHtml(row.team)}">${escapeHtml(row.team)}</td><td>${valueFormatter(row)}</td></tr>`).join('') : '<tr><td colspan="3" class="empty-table">확정 운행자료가 없습니다.</td></tr>';
 }
 function renderDashboardUsage() {
   const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];
