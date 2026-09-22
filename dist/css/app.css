@@ -627,9 +627,9 @@ td strong { font-size: .8rem; }
 .member-summary { padding: 9px 13px; border-radius: 10px; color: var(--brand-dark); background: var(--brand-wash); font-size: 13px; font-weight: 700; }
 .member-table input, .member-table select { box-sizing: border-box; width: 100%; min-width: 105px; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: white; font: inherit; }
 .member-table select:disabled { color: var(--ink-soft); background: var(--surface); }
-.member-table tr.member-status-pending td, .member-table tr.member-status-disabled td { background: #fff8f8; border-top-color: #f3d9d9; }
-.member-table tr.member-status-pending td:first-child, .member-table tr.member-status-disabled td:first-child { border-left: 3px solid #d76565; }
-.member-table tr.member-status-pending .member-status, .member-table tr.member-status-disabled .member-status { color: #b64040; border-color: #efc6c6; background: #fff1f1; font-weight: 750; }
+.member-table tr.member-status-disabled td { background: #fff8f8; border-top-color: #f3d9d9; }
+.member-table tr.member-status-disabled td:first-child { border-left: 3px solid #d76565; }
+.member-table tr.member-status-disabled .member-status { color: #b64040; border-color: #efc6c6; background: #fff1f1; font-weight: 750; }
 .member-self { display: block; margin-top: 5px; color: var(--ink-soft); white-space: nowrap; }
 .read-only-label { color: var(--ink-soft); font-size: 12px; white-space: nowrap; }
 .heading-actions > [hidden], #vehicleUploadGuide[hidden], #memberNavItem[hidden] { display: none !important; }

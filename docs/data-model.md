@@ -1,6 +1,6 @@
 # 데이터 구조 초안
 
-- profiles는 Auth 사용자와 1:1로 연결하며 email, display_name, role, status를 저장한다. 신규 가입은 viewer/pending, 기존 계정은 006 실행 시 active로 유지한다. 상세는 member-management.md 참고.
+- profiles는 Auth 사용자와 1:1로 연결하며 email, display_name, role, status를 저장한다. 신규 가입은 viewer/disabled로 생성하며, 상태는 active 또는 disabled만 사용한다. 상세는 member-management.md 참고.
 
 - 2026-09-18 운행: driving_months 표·권한 검증 RPC로 월 원본과 확정 조직·확정일 저장 코드를 준비했다. 003_driving_months.sql의 실제 실행은 아직 미확인이다. driving-storage.md 참고.
 

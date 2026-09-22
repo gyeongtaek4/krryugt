@@ -25,7 +25,7 @@
     displayName.required=signup;passwordConfirm.required=signup;
     password.autocomplete=signup?'new-password':'current-password';
     title.textContent=signup?'직원 회원가입':'법인차량 관리';
-    copy.textContent=signup?'가입 후 관리자의 승인을 받아야 사용할 수 있습니다.':'회사 계정으로 로그인해 주세요.';
+    copy.textContent=signup?'가입 후 관리자가 계정을 활성화하면 사용할 수 있습니다.':'회사 계정으로 로그인해 주세요.';
     submit.textContent=signup?'가입 신청':'로그인';
     loginModeButton.classList.toggle('active',!signup);signupModeButton.classList.toggle('active',signup);
   }
@@ -67,7 +67,7 @@
       if (profileError) console.warn('프로필 조회 오류', profileError);
       if (roleError) console.warn('역할 조회 오류', roleError);
       if(!profile || profile.status!=='active'){
-        const message=profile?.status==='disabled'?'사용이 중지된 계정입니다. 관리자에게 문의하세요.':'관리자 승인 대기 중인 계정입니다.';
+        const message='비활성화된 계정입니다. 관리자에게 문의하세요.';
         await window.fleetSupabaseClient.auth.signOut();gate.classList.remove('hidden');error.textContent=message;return;
       }
       // 프로필 표의 실제 역할을 우선 사용하고, 프로필 조회가 제한될 때만 RPC 결과를 사용합니다.
@@ -116,7 +116,7 @@
       if(signUpError){error.textContent=signUpError.message.includes('already')?'이미 가입된 이메일입니다.':'회원가입을 완료하지 못했습니다.';return;}
       if(data.session)await window.fleetSupabaseClient.auth.signOut();
       form.reset();setMode('login');error.classList.add('success');
-      error.textContent=data.user?.identities?.length===0?'이미 가입된 이메일입니다.':'가입 신청이 완료되었습니다. 이메일 확인 후 관리자 승인을 기다려 주세요.';
+      error.textContent=data.user?.identities?.length===0?'이미 가입된 이메일입니다.':'회원가입이 완료되었습니다. 이메일 확인 후 관리자가 계정을 활성화하면 로그인할 수 있습니다.';
       return;
     }
     const { data, error: signInError } = await window.fleetSupabaseClient.auth.signInWithPassword({ email: email.value.trim(), password: password.value });

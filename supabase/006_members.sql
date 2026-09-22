@@ -2,9 +2,9 @@
 begin;
 
 alter table public.profiles add column if not exists email text not null default '';
-alter table public.profiles add column if not exists status text not null default 'pending';
+alter table public.profiles add column if not exists status text not null default 'disabled';
 do $$ begin
-  alter table public.profiles add constraint profiles_status_check check (status in ('pending','active','disabled'));
+  alter table public.profiles add constraint profiles_status_check check (status in ('active','disabled'));
 exception when duplicate_object then null;
 end $$;
 
@@ -17,7 +17,7 @@ returns trigger language plpgsql security definer set search_path=public
 as $$
 begin
   insert into public.profiles(id,email,display_name,role,status)
-  values(new.id,coalesce(new.email,''),coalesce(new.raw_user_meta_data->>'display_name',split_part(coalesce(new.email,''),'@',1)),'viewer','pending')
+  values(new.id,coalesce(new.email,''),coalesce(new.raw_user_meta_data->>'display_name',split_part(coalesce(new.email,''),'@',1)),'viewer','disabled')
   on conflict(id) do update set email=excluded.email;
   return new;
 end;
@@ -40,7 +40,7 @@ as $$
 begin
   if not public.is_active_user() or public.current_user_role()<>'admin' then raise exception '관리자만 회원정보를 변경할 수 있습니다.'; end if;
   if p_display_name is null or length(trim(p_display_name)) not between 1 and 50 then raise exception '이름을 확인하세요.'; end if;
-  if p_role not in ('admin','viewer') or p_status not in ('pending','active','disabled') then raise exception '역할 또는 상태를 확인하세요.'; end if;
+  if p_role not in ('admin','viewer') or p_status not in ('active','disabled') then raise exception '역할 또는 상태를 확인하세요.'; end if;
   if p_user_id=auth.uid() and (p_role<>'admin' or p_status<>'active') then raise exception '현재 관리자 계정의 역할이나 상태는 변경할 수 없습니다.'; end if;
   update public.profiles set display_name=trim(p_display_name),role=p_role::public.app_role,status=p_status where id=p_user_id;
   if not found then raise exception '회원을 찾을 수 없습니다.'; end if;

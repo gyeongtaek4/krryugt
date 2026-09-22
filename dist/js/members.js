@@ -2,10 +2,10 @@
   const rows=document.getElementById('memberRows'),summary=document.getElementById('memberSummary'),search=document.getElementById('memberSearch');
   if(!rows||!summary||!search)return;
   const roleLabel={admin:'관리자',viewer:'일반회원'};
-  const statusLabel={pending:'승인대기',active:'활성',disabled:'비활성'};
+  const statusLabel={active:'활성',disabled:'비활성'};
   let members=[];
 
-  function statusOrder(status){return ({pending:0,disabled:1,active:2})[status]??3;}
+  function statusOrder(status){return ({disabled:0,active:1})[status]??2;}
   function visibleMembers(){
     const keyword=search.value.trim().toLocaleLowerCase('ko-KR');
     return members.filter(item=>!keyword||[item.display_name,item.email,roleLabel[item.role],statusLabel[item.status]].some(value=>String(value||'').toLocaleLowerCase('ko-KR').includes(keyword)))
@@ -13,10 +13,9 @@
   }
 
   function renderMembers(){
-    const pending=members.filter(item=>item.status==='pending').length;
     const disabledCount=members.filter(item=>item.status==='disabled').length;
     const filtered=visibleMembers();
-    summary.textContent=`전체 ${members.length}명 · 승인대기 ${pending}명 · 비활성 ${disabledCount}명`;
+    summary.textContent=`전체 ${members.length}명 · 비활성 ${disabledCount}명`;
     rows.innerHTML=filtered.map(item=>{
       const self=item.id===window.fleetCurrentUser?.id,disabled=self?' disabled':'';
       return `<tr class="member-status-${escapeHtml(item.status||'')}" data-member-id="${escapeHtml(item.id)}"><td><input class="member-name" maxlength="50" value="${escapeHtml(item.display_name||'')}"></td><td>${escapeHtml(item.email||'')}</td><td>${escapeHtml(String(item.created_at||'').slice(0,10))}</td><td><select class="member-role"${disabled}>${Object.entries(roleLabel).map(([value,label])=>`<option value="${value}"${item.role===value?' selected':''}>${label}</option>`).join('')}</select></td><td><select class="member-status"${disabled}>${Object.entries(statusLabel).map(([value,label])=>`<option value="${value}"${item.status===value?' selected':''}>${label}</option>`).join('')}</select></td><td><button class="row-edit member-save">저장</button>${self?'<small class="member-self">내 계정</small>':''}</td></tr>`;
