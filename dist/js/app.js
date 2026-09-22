@@ -758,7 +758,7 @@ function drivingVehicleSummaryForMonth(month) {
     const plate = normalizePlate(row['차량번호']);
     const date = normalizeDrivingDate(row['운행년월일']);
     if (!plate || !date) return;
-    if (!vehicles.has(plate)) vehicles.set(plate, { plate: String(row['차량번호'] || '').trim() || plate, days: new Set(), distance: 0 });
+    if (!vehicles.has(plate)) vehicles.set(plate, { plate: String(row['차량번호'] || '').trim() || plate, team: String(row._organization?.['팀'] || '팀 미입력').trim() || '팀 미입력', days: new Set(), distance: 0 });
     const vehicle = vehicles.get(plate);
     vehicle.days.add(date);
     vehicle.distance += mileageNumber(row['키로수']);
@@ -766,7 +766,7 @@ function drivingVehicleSummaryForMonth(month) {
   return [...vehicles.values()].map(vehicle => ({ ...vehicle, usageDays: vehicle.days.size }));
 }
 function rankingMarkup(rows, valueFormatter) {
-  return rows.length ? rows.map(row => `<tr><td class="plate">${escapeHtml(row.plate)}</td><td>${valueFormatter(row)}</td></tr>`).join('') : '<tr><td colspan="2" class="empty-table">확정 운행자료가 없습니다.</td></tr>';
+  return rows.length ? rows.map(row => `<tr><td><div class="ranking-vehicle"><strong class="plate">${escapeHtml(row.plate)}</strong><small>${escapeHtml(row.team)}</small></div></td><td>${valueFormatter(row)}</td></tr>`).join('') : '<tr><td colspan="2" class="empty-table">확정 운행자료가 없습니다.</td></tr>';
 }
 function renderDashboardUsage() {
   const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];

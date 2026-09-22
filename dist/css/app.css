@@ -297,6 +297,9 @@ td strong { font-size: .8rem; }
 .ranking-table th:last-child, .ranking-table td:last-child { text-align: right; }
 .ranking-table td { padding: 8px 0; font-size: .74rem; }
 .ranking-table td:last-child { color: var(--brand-dark); font-weight: 800; }
+.ranking-vehicle { display: grid; gap: 2px; }
+.ranking-vehicle strong { font-size: .74rem; }
+.ranking-vehicle small { overflow: hidden; color: var(--ink-soft); font-size: .65rem; text-overflow: ellipsis; white-space: nowrap; }
 .ranking-table .empty-table { padding: 13px 0; text-align: left; white-space: normal; }
 @media (max-width: 900px) { .usage-ranking-grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .usage-ranking-tables { grid-template-columns: 1fr; } }

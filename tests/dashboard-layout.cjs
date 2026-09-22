@@ -15,4 +15,5 @@ assert(dashboard.includes('id="dashboardUsageDaysHigh"'));
 assert(dashboard.includes('id="dashboardUsageDaysLow"'));
 assert(dashboard.includes('id="dashboardUsageDistanceHigh"'));
 assert(dashboard.includes('id="dashboardUsageDistanceLow"'));
+assert((dashboard.match(/차량번호 \/ 팀/g) || []).length === 4);
 console.log('PASS: dashboard section order and month controls (HTML, no visual browser check).');
