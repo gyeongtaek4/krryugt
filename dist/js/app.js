@@ -1108,7 +1108,7 @@ scrim.addEventListener('click', () => toggleSidebar(false));
 document.getElementById('closeModal').addEventListener('click', () => toggleModal(false));
 document.getElementById('cancelUpload').addEventListener('click', () => toggleModal(false));
 modal.addEventListener('click', event => { if (event.target === modal) toggleModal(false); });
-['contractUploadButton', 'contractGuideUploadButton'].forEach(id => document.getElementById(id).addEventListener('click', () => toggleContractModal(true)));
+document.getElementById('contractUploadButton').addEventListener('click', () => toggleContractModal(true));
 document.getElementById('closeContractModal').addEventListener('click', () => toggleContractModal(false));
 document.getElementById('cancelContractUpload').addEventListener('click', () => toggleContractModal(false));
 contractModal.addEventListener('click', event => { if (event.target === contractModal) toggleContractModal(false); });

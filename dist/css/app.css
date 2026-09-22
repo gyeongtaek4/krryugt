@@ -390,13 +390,13 @@ td strong { font-size: .8rem; }
 .modal-header h2 { margin: 0; font-size: 1.2rem; }
 .modal-header p { margin: 5px 0 0; color: var(--ink-soft); font-size: .8rem; }
 .close-button { width: 34px; height: 34px; border: 0; border-radius: 9px; background: var(--surface); cursor: pointer; }
-.drop-zone { margin: 22px 0 18px; padding: 35px 20px; border: 1.5px dashed var(--brand-soft); border-radius: 16px; background: #f8fcfb; text-align: center; cursor: pointer; }
+.drop-zone { width: 100%; box-sizing: border-box; margin: 22px 0 18px; padding: 35px 20px; display: block; border: 1.5px dashed var(--brand-soft); border-radius: 16px; background: #f8fcfb; text-align: center; cursor: pointer; }
 .drop-zone:hover { background: var(--brand-wash); }
 .drop-icon { width: 44px; height: 44px; margin: 0 auto 12px; display: grid; place-items: center; border-radius: 13px; color: var(--brand); background: var(--white); box-shadow: 0 5px 15px rgba(1, 145, 109, .1); }
 .drop-zone strong { display: block; font-size: .87rem; }
 .drop-zone span { display: block; margin-top: 4px; color: var(--grey); font-size: .73rem; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 9px; }
-#fileInput { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+#fileInput, #contractFileInput, #drivingFileInput { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 
 .toast { position: fixed; right: 25px; bottom: 25px; z-index: 80; max-width: min(360px, calc(100vw - 40px)); padding: 13px 16px; display: flex; align-items: center; gap: 10px; border-radius: 13px; color: var(--white); background: #253532; box-shadow: var(--shadow); font-size: .8rem; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .22s ease; }
 .toast.show { opacity: 1; transform: translateY(0); }
