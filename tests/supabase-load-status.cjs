@@ -14,5 +14,6 @@ expect(app.includes("return false;\n  }\n  const { data, error } = await window.
 expect(app.includes('서버에 저장하지 않고 화면에만 표시할 수는 없습니다.'), '비로그인 임시 저장 차단 안내가 없습니다.');
 expect(!app.includes('else vehicleData = uploadedRows;'), '차량 Excel 업로드의 임시 화면 대체가 남아 있습니다.');
 expect(auth.includes('await new Promise(resolve => setTimeout(resolve, 700));'), '로그인 직후 서버 조회 재시도가 없습니다.');
+expect(auth.includes('if (control) control.hidden=readOnly;'), '없어진 권한 버튼 때문에 로그인 후 자료 조회가 중단되지 않도록 방어해야 합니다.');
 
 console.log('supabase-load-status: passed');

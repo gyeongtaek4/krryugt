@@ -43,7 +43,10 @@
     });
     memberNavItem.hidden=role!=='admin';
     const readOnly=role==='viewer';
-    ['addVehicleButton','vehicleUploadButton','guideUploadButton','deleteAllVehicles'].forEach(id=>{document.getElementById(id).hidden=readOnly;});
+    ['addVehicleButton','vehicleUploadButton','guideUploadButton','deleteAllVehicles'].forEach(id=>{
+      const control = document.getElementById(id);
+      if (control) control.hidden=readOnly;
+    });
     document.getElementById('vehicleUploadGuide').hidden=readOnly;
     const activePage=document.querySelector('.nav-button.active')?.dataset.page || '대시보드';
     if(readOnly&&!allowed.has(activePage))showView('차량 현황');
