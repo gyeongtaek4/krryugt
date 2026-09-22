@@ -325,6 +325,9 @@ td strong { font-size: .8rem; }
 .column-filter-control:hover { background: #e6f4f0; }
 .column-filter-control.is-filtered { color: #01916d; background: #e6f4f0; }
 .column-filter-control:focus-within { outline: 2px solid #99d3c5; outline-offset: 2px; }
+/* 표 제목의 필터 장식 여백을 제거해 아래 데이터의 시작선과 맞춘다. */
+.vehicle-table .column-filter-control { padding-left: 0; }
+.vehicle-table .column-filter { padding-left: 0; }
 .table-header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 #vehiclesView .vehicle-toolbar, #contractsView .vehicle-toolbar { flex-wrap: wrap; gap: 14px; }
 .reset-filter { margin-left: auto; border: 0; color: var(--brand-dark); background: transparent; font-size: .76rem; font-weight: 750; cursor: pointer; }
