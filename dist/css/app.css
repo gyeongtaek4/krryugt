@@ -284,6 +284,23 @@ td strong { font-size: .8rem; }
 .bar-fill { height: 100%; width: var(--value); border-radius: inherit; background: var(--brand); }
 .bar-fill.soft { background: var(--brand-soft); }
 
+.usage-ranking-panel { overflow: hidden; }
+.usage-ranking-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.usage-ranking-card { min-width: 0; padding: 18px 20px; border: 1px solid var(--line); border-radius: 14px; background: #fbfcfc; }
+.usage-ranking-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.usage-ranking-heading h3 { margin: 0; font-size: .91rem; }
+.usage-ranking-heading p { margin: 3px 0 0; color: var(--ink-soft); font-size: .72rem; }
+.usage-ranking-tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 15px; }
+.usage-ranking-tables h4 { margin: 0 0 8px; color: var(--ink-soft); font-size: .73rem; font-weight: 750; }
+.ranking-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.ranking-table th { padding: 0 0 7px; font-size: .67rem; }
+.ranking-table th:last-child, .ranking-table td:last-child { text-align: right; }
+.ranking-table td { padding: 8px 0; font-size: .74rem; }
+.ranking-table td:last-child { color: var(--brand-dark); font-weight: 800; }
+.ranking-table .empty-table { padding: 13px 0; text-align: left; white-space: normal; }
+@media (max-width: 900px) { .usage-ranking-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .usage-ranking-tables { grid-template-columns: 1fr; } }
+
 .data-note { margin-top: 21px; padding: 14px; display: flex; gap: 11px; border-radius: 13px; background: var(--surface); }
 .data-note svg { flex: 0 0 auto; width: 18px; height: 18px; color: var(--brand); margin-top: 1px; }
 .data-note strong { display: block; font-size: .76rem; }

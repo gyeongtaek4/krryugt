@@ -752,11 +752,33 @@ function drivingReportForMonth(month) {
   return [...groups.values()].map(group=>{const distance=[...group.vehicles.values()].reduce((sum,items)=>sum+distanceForItems(items),0);return {'본부':group.org['본부'],'부':group.org['부'],'팀':group.org['팀'],'운행 차량':group.vehicles.size,'월 주행거리(km)':distance,'운행일수':[...group.vehicles.values()].reduce((sum,items)=>sum+new Set(items.map(item=>normalizeDrivingDate(item.row['운행년월일']))).size,0),'차량당 평균(km)':Math.round(distance/group.vehicles.size)};}).sort((a,b)=>b['월 주행거리(km)']-a['월 주행거리(km)']);
 }
 function drivingReportMarkup(rows) { return rows.map(row=>`<tr>${['본부','부','팀'].map(key=>`<td>${escapeHtml(row[key])}</td>`).join('')}<td>${row['운행 차량']}대</td><td>${row['월 주행거리(km)'].toLocaleString('ko-KR')}km</td><td>${row['운행일수']}</td><td>${row['차량당 평균(km)'].toLocaleString('ko-KR')}km</td></tr>`).join(''); }
+function drivingVehicleSummaryForMonth(month) {
+  const vehicles = new Map();
+  (drivingArchive[month]?.rows || []).forEach(row => {
+    const plate = normalizePlate(row['차량번호']);
+    const date = normalizeDrivingDate(row['운행년월일']);
+    if (!plate || !date) return;
+    if (!vehicles.has(plate)) vehicles.set(plate, { plate: String(row['차량번호'] || '').trim() || plate, days: new Set(), distance: 0 });
+    const vehicle = vehicles.get(plate);
+    vehicle.days.add(date);
+    vehicle.distance += mileageNumber(row['키로수']);
+  });
+  return [...vehicles.values()].map(vehicle => ({ ...vehicle, usageDays: vehicle.days.size }));
+}
+function rankingMarkup(rows, valueFormatter) {
+  return rows.length ? rows.map(row => `<tr><td class="plate">${escapeHtml(row.plate)}</td><td>${valueFormatter(row)}</td></tr>`).join('') : '<tr><td colspan="2" class="empty-table">확정 운행자료가 없습니다.</td></tr>';
+}
 function renderDashboardUsage() {
   const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];
-  const report = item ? drivingReportForMonth(month) : [];
-  document.getElementById('dashboardUsageStatus').textContent=item ? `${month} · 운행기록 확정자료 · ${new Set(item.rows.map(row=>normalizePlate(row['차량번호']))).size}대 · 확정 당시 부서 기준` : `${month || '보고월 선택 필요'} · 확정된 운행자료 없음`;
-  document.getElementById('dashboardUsageRows').innerHTML=report.length ? drivingReportMarkup(report) : '<tr><td colspan="7" class="empty-table">운행기록데이터에서 해당 월의 자료를 마감 확정하면 표시됩니다.</td></tr>';
+  const summary = item ? drivingVehicleSummaryForMonth(month) : [];
+  const byDays = [...summary].sort((a,b) => b.usageDays-a.usageDays || a.plate.localeCompare(b.plate, 'ko'));
+  const byDistance = [...summary].sort((a,b) => b.distance-a.distance || a.plate.localeCompare(b.plate, 'ko'));
+  const lowest = rows => [...rows].reverse().slice(0,5).reverse();
+  document.getElementById('dashboardUsageStatus').textContent=item ? `${month} · 운행기록 확정자료 · ${summary.length}대 · 차량번호 기준` : `${month || '확정월 선택 필요'} · 확정된 운행자료 없음`;
+  document.getElementById('dashboardUsageDaysHigh').innerHTML=rankingMarkup(byDays.slice(0,5), row => `${row.usageDays}일`);
+  document.getElementById('dashboardUsageDaysLow').innerHTML=rankingMarkup(lowest(byDays), row => `${row.usageDays}일`);
+  document.getElementById('dashboardUsageDistanceHigh').innerHTML=rankingMarkup(byDistance.slice(0,5), row => `${row.distance.toLocaleString('ko-KR')}km`);
+  document.getElementById('dashboardUsageDistanceLow').innerHTML=rankingMarkup(lowest(byDistance), row => `${row.distance.toLocaleString('ko-KR')}km`);
 }
 function renderDrivingArchive() {
   const month=document.getElementById('usageMonth').value,saved=drivingArchive[month],rows=drivingData.filter(row=>drivingRowMonth(row)===month);
