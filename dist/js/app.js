@@ -1104,7 +1104,7 @@ async function readDrivingFile(file) {
 
 document.getElementById('menuButton').addEventListener('click', () => toggleSidebar(true));
 scrim.addEventListener('click', () => toggleSidebar(false));
-['vehicleUploadButton', 'guideUploadButton'].forEach(id => document.getElementById(id).addEventListener('click', () => toggleModal(true)));
+document.getElementById('vehicleUploadButton').addEventListener('click', () => toggleModal(true));
 document.getElementById('closeModal').addEventListener('click', () => toggleModal(false));
 document.getElementById('cancelUpload').addEventListener('click', () => toggleModal(false));
 modal.addEventListener('click', event => { if (event.target === modal) toggleModal(false); });
