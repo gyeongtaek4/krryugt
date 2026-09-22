@@ -630,6 +630,9 @@ td strong { font-size: .8rem; }
 .member-table tr.member-status-disabled td { background: #fff8f8; border-top-color: #f3d9d9; }
 .member-table tr.member-status-disabled td:first-child { border-left: 3px solid #d76565; }
 .member-table tr.member-status-disabled .member-status { color: #b64040; border-color: #efc6c6; background: #fff1f1; font-weight: 750; }
+.member-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.member-password-reset { font-size: 12px; white-space: nowrap; }
+.auth-help { margin: 14px 0 0; color: var(--ink-soft); font-size: 12px; line-height: 1.5; text-align: center; }
 .member-self { display: block; margin-top: 5px; color: var(--ink-soft); white-space: nowrap; }
 .read-only-label { color: var(--ink-soft); font-size: 12px; white-space: nowrap; }
 .heading-actions > [hidden], #vehicleUploadGuide[hidden], #memberNavItem[hidden] { display: none !important; }
