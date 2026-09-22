@@ -206,9 +206,15 @@ h1 { margin: 0; font-size: clamp(1.65rem, 2.4vw, 2.15rem); line-height: 1.25; le
 .change.warning { color: #c98527; }
 
 .grid-main { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, .75fr); gap: 16px; margin-bottom: 16px; }
+.cost-trend-section { grid-template-columns: minmax(0, 1fr); }
 .grid-bottom { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(340px, .8fr); gap: 16px; }
 .panel { padding: 22px; min-width: 0; }
 .panel-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.cost-trend-controls { display: flex; align-items: flex-end; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+.range-control { min-width: 180px; display: grid; gap: 7px; color: var(--ink-soft); font-size: .73rem; font-weight: 750; }
+.range-control span { display: flex; justify-content: space-between; gap: 12px; }
+.range-control output { color: var(--brand); }
+.range-control input { width: 100%; accent-color: var(--brand); cursor: pointer; }
 .panel-title { margin: 0; font-size: 1rem; letter-spacing: -.025em; }
 .panel-subtitle { margin: 4px 0 0; color: var(--grey); font-size: .75rem; }
 

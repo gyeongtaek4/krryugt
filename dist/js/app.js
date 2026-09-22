@@ -297,21 +297,14 @@ function formatCostAmount(value) {
 
 function renderAdditionalCostTrend() {
   const reference = document.getElementById('costTrendReferenceMonth').value;
+  const periodMonths=Number(document.getElementById('costTrendPeriodMonths').value) || 12;
   const selectedClosing=closingArchive[reference];
   const selectedCosts=selectedClosing ? closingTotals(selectedClosing.rows).slice(1) : null;
   const extraTotal=selectedCosts ? selectedCosts.reduce((a,b)=>a+b,0) : null;
-  document.querySelector('.cost-panel .panel-subtitle').textContent=`${reference || '기준월 선택 필요'} · ${selectedClosing ? '확정 마감자료' : '미마감'}`;
-  document.querySelector('.cost-total strong').textContent=extraTotal===null?'—':won(extraTotal);
-  document.querySelectorAll('.cost-item').forEach((item,index)=>{
-    const value=selectedCosts?.[index], ratio=extraTotal ? value/extraTotal*100 : 0;
-    item.querySelector('.cost-value').textContent=value===undefined?'—':won(value);
-    item.querySelector('small').textContent=selectedCosts ? `전체 부대비용의 ${ratio.toFixed(1)}%` : '확정 자료 없음';
-    item.querySelector('.cost-progress i').style.setProperty('--value',`${ratio}%`);
-  });
-  document.querySelector('.cost-source-note').textContent='선택한 기준월의 확정 비용마감자료입니다. 현재 차량정보와 별도로 집계합니다.';
+  document.getElementById('costTrendPeriodValue').textContent=`${periodMonths}개월`;
   const chart = document.getElementById('costTrendChart');
   const valid = /^\d{4}-(0[1-9]|1[0-2])$/.test(reference);
-  const months = valid ? Array.from({ length: 12 }, (_, index) => shiftRentMonth(reference, index - 11)) : [];
+  const months = valid ? Array.from({ length: periodMonths }, (_, index) => shiftRentMonth(reference, index - (periodMonths - 1))) : [];
   const series = [
     { key:'fuel', label:'주유비', className:'fuel-line' },
     { key:'toll', label:'통행료', className:'toll-line' },
@@ -333,18 +326,19 @@ function renderAdditionalCostTrend() {
     return;
   }
 
-  document.getElementById('costTrendPeriod').textContent = `${months[0].replace('-', '.')}~${reference.replace('-', '.')} · 최근 12개월 · 확정 마감자료 · 단위 만원`;
+  document.getElementById('costTrendPeriod').textContent = `${months[0].replace('-', '.')}~${reference.replace('-', '.')} · 최근 ${periodMonths}개월 · 확정 마감자료 · 단위 만원`;
   const low = 0;
   const high = knownValues.length ? Math.max(10, Math.ceil(Math.max(...knownValues) / 10) * 10) : 10;
   const yFor = value => 250 - (value - low) / (high - low) * 220;
-  let markup = `<title id="costTrendChartTitle">${monthLabel} 기준 최근 12개월 차량 부대비용</title><desc id="costTrendChartDesc">주유비, 통행료, 주차비의 월별 확정 합계입니다. 자료가 없는 달은 미집계로 표시합니다.</desc>`;
+  const xFor = index => periodMonths === 1 ? 495 : 110 + index * (770 / (periodMonths - 1));
+  let markup = `<title id="costTrendChartTitle">${monthLabel} 기준 최근 ${periodMonths}개월 차량 부대비용</title><desc id="costTrendChartDesc">주유비, 통행료, 주차비의 월별 확정 합계입니다. 자료가 없는 달은 미집계로 표시합니다.</desc>`;
   for (let tick = 0; tick <= 6; tick++) {
     const y = 30 + tick * 220 / 6;
     const amount = high - tick * (high - low) / 6;
     markup += `<line class="grid-line" x1="78" y1="${y}" x2="920" y2="${y}"/><text class="axis-label" x="67" y="${y + 4}" text-anchor="end">${Math.round(amount).toLocaleString('ko-KR')}</text>`;
   }
   months.forEach((month, index) => {
-    const x = 110 + index * 70;
+    const x = xFor(index);
     if (!monthlyAdditionalCostData[month]) markup += `<text class="future-month" x="${x}" y="235" text-anchor="middle">미집계</text>`;
     markup += `<text class="month-label" x="${x}" y="271" text-anchor="middle">${Number(month.slice(5))}월</text>`;
   });
@@ -354,12 +348,12 @@ function renderAdditionalCostTrend() {
     months.forEach((month,index)=>{
       const value=monthlyAdditionalCostData[month]?.[key];
       if(!Number.isFinite(value)){ flushLine(); return; }
-      points.push(`${110+index*70},${yFor(value)}`);
+      points.push(`${xFor(index)},${yFor(value)}`);
     });
     flushLine();
     months.forEach((month,index)=>{
       const value=monthlyAdditionalCostData[month]?.[key];
-      if(Number.isFinite(value)) markup+=`<circle class="cost-trend-dot ${className}" cx="${110+index*70}" cy="${yFor(value)}" r="3.8"><title>${month.replace('-', '.')} · ${label} ${formatCostAmount(value)}</title></circle>`;
+      if(Number.isFinite(value)) markup+=`<circle class="cost-trend-dot ${className}" cx="${xFor(index)}" cy="${yFor(value)}" r="3.8"><title>${month.replace('-', '.')} · ${label} ${formatCostAmount(value)}</title></circle>`;
     });
   });
   const years = [];
@@ -369,7 +363,7 @@ function renderAdditionalCostTrend() {
     else years[years.length - 1].end = index;
   });
   years.forEach(group => {
-    const start = 80 + group.start * 70, end = 150 + group.end * 70;
+    const start = Math.max(80, xFor(group.start) - 30), end = Math.min(920, xFor(group.end) + 40);
     markup += `<line class="grid-line" x1="${start}" y1="285" x2="${end}" y2="285"/><text class="year-label" x="${(start + end) / 2}" y="305" text-anchor="middle">${group.year}년</text>`;
   });
   chart.innerHTML = markup;
@@ -1568,6 +1562,7 @@ document.getElementById('restoreDrivingArchive').addEventListener('change',async
 document.getElementById('usageMonth').addEventListener('change', renderDriving);
 document.getElementById('drivingSearch').addEventListener('input', renderDriving);
 document.getElementById('costTrendReferenceMonth').addEventListener('change', renderAdditionalCostTrend);
+document.getElementById('costTrendPeriodMonths').addEventListener('input', renderAdditionalCostTrend);
 
 document.getElementById('reportButton').addEventListener('click', () => {
   const month=document.getElementById('costTrendReferenceMonth').value;
