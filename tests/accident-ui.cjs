@@ -1,0 +1,14 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const html=fs.readFileSync('dist/index.html','utf8');
+const js=fs.readFileSync('dist/js/accidents.js','utf8');
+const auth=fs.readFileSync('dist/js/supabase-auth.js','utf8');
+const sql=fs.readFileSync('supabase/014_vehicle_accidents.sql','utf8');
+assert(html.includes('data-page="사고접수 및 이력"'));
+['accidentView','accidentVehicle','accidentDate','accidentPassengers','accidentLocation','accidentDescription','accidentPhotos','accidentRows'].forEach(id=>assert(html.includes(`id="${id}"`)));
+assert(js.includes("vehicleForPlate(el('accidentVehicle').value)"));
+assert(js.includes("from('vehicle_accidents').insert"));
+assert(js.includes("from('accident-photos').upload"));
+assert(js.includes("rpc('comment_vehicle_accident'"));
+assert(auth.includes("'사고접수 및 이력'"));
+['create table if not exists public.vehicle_accidents','create or replace function public.comment_vehicle_accident','accident-photos','vehicle_accidents_insert_active',"current_user_role()<>'admin'"].forEach(value=>assert(sql.includes(value)));
+console.log('PASS: accident menu, vehicle snapshot, photo upload, admin comment UI, and SQL access rules (static).');

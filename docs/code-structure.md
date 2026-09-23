@@ -3,6 +3,7 @@
 - driving-months.js: app.js·handover.js 다음, 인증 코드 이전에 실행. 운행 합계·페이지 이동·서버 조회/저장·월합계 추출 담당.
 
 - dist/js/handover.js: 차량인수인계 폼·사진 미리보기·이력·JSON 백업/복원. app.js 다음에 실행하며 공통 차량 매칭·화면 전환 함수를 사용한다.
+- dist/js/accidents.js: 사고접수 폼·차량 스냅샷·현장 사진·이력·관리자 처리 코멘트. handover.js 다음, 인증 코드 이전에 실행하며 공통 차량 매칭·알림·Supabase 연결 객체를 사용한다.
 - dist/js/knowledge.js: Q&A와 운행가이드 목록, 관리자 작성·삭제, PDF 열람·다운로드. handover.js 다음, 인증 코드 이전에 실행하며 Supabase 연결 객체와 공통 알림을 사용한다.
 
 ## 현재 구조
@@ -15,6 +16,7 @@ dist/
   js/supabase-config.js  Supabase Project URL·Publishable key 공개 연결 설정
   js/supabase-client.js  Supabase 브라우저 연결 객체
   js/supabase-auth.js    이메일 로그인·로그아웃과 프로필 역할 표시
+  js/accidents.js        사고접수·사진·관리자 처리 코멘트와 서버 저장 호출
   js/knowledge.js        Q&A·운행가이드 화면 및 서버 저장 호출
   js/app.js       기존 데이터·계산·업로드·조회·마감 처리와 메뉴 해시·브라우저 뒤로가기 연동
 scripts/

@@ -570,6 +570,19 @@ td strong { font-size: .8rem; }
 .pagination { justify-content: flex-end; padding: 16px 0; color: var(--ink-soft); font-size: 13px; }
 .closing-file-button[hidden] { display: none; }
 .handover-entry { margin: 24px 0; }
+.accident-entry { margin: 24px 0; }
+#accidentForm .form-input { box-sizing: border-box; width: 100%; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--white); font: inherit; font-size: .83rem; outline: 0; }
+#accidentForm textarea.form-input { min-height: 112px; padding-top: 11px; padding-bottom: 11px; resize: vertical; line-height: 1.45; }
+#accidentForm .form-input:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
+.accident-vehicle-info { min-height: 43px; box-sizing: border-box; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink-soft); background: var(--surface); font-size: .78rem; line-height: 1.35; }
+.accident-comment { margin-top: 15px; padding: 15px; border-radius: 12px; background: var(--brand-wash); white-space: pre-wrap; overflow-wrap: anywhere; }
+.accident-comment strong { display: block; margin-bottom: 6px; color: var(--brand-dark); font-size: .78rem; }
+.accident-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 18px; margin: 14px 0; }
+.accident-detail-grid p { margin: 0; font-size: .82rem; overflow-wrap: anywhere; }
+.accident-detail-grid strong { color: var(--ink-soft); font-size: .72rem; }
+.accident-comment-form { margin-top: 15px; display: grid; gap: 8px; }
+.accident-comment-form textarea { min-height: 90px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; resize: vertical; }
+#accidentError { color: #b64040; }
 .handover-field-help { display: block; margin-top: 6px; color: var(--ink-soft); font-size: .72rem; line-height: 1.4; }
 .handover-photo-area { margin-top: 20px; padding: 20px; background: var(--brand-wash); border-radius: 14px; }
 #handoverForm .form-input { box-sizing: border-box; width: 100%; height: 43px; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background-color: var(--white); font: inherit; font-size: .83rem; outline: 0; }

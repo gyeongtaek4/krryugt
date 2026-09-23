@@ -154,7 +154,7 @@ function toggleModal(open) {
 
 const pageRoutes = {
   '대시보드': 'dashboard', '차량 현황': 'vehicles', '차량계약정보': 'contracts',
-  '차량인수인계': 'handover', 'Q&A': 'qna', '운행가이드': 'guide',
+  '사고접수 및 이력': 'accidents', '차량인수인계': 'handover', 'Q&A': 'qna', '운행가이드': 'guide',
   '운행기록데이터': 'driving', '월별 비용마감자료': 'closing', '회원관리': 'members'
 };
 const routePages = Object.fromEntries(Object.entries(pageRoutes).map(([page, route]) => [route, page]));
@@ -168,6 +168,7 @@ function showView(page, { recordHistory = false, smoothScroll = true } = {}) {
   const isDriving = page === '운행기록데이터';
   const isClosing = page === '월별 비용마감자료';
   const isHandover = page === '차량인수인계';
+  const isAccidents = page === '사고접수 및 이력';
   const isQna = page === 'Q&A';
   const isGuide = page === '운행가이드';
   const isMembers = page === '회원관리';
@@ -175,12 +176,13 @@ function showView(page, { recordHistory = false, smoothScroll = true } = {}) {
   document.getElementById('qnaView').classList.toggle('active', isQna);
   document.getElementById('guideView').classList.toggle('active', isGuide);
   document.getElementById('handoverView').classList.toggle('active', isHandover);
+  document.getElementById('accidentView').classList.toggle('active', isAccidents);
   document.getElementById('closingView').classList.toggle('active', isClosing);
-  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover && !isQna && !isGuide && !isMembers);
+  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover && !isAccidents && !isQna && !isGuide && !isMembers);
   document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
   document.getElementById('contractsView').classList.toggle('active', isContracts);
   document.getElementById('drivingView').classList.toggle('active', isDriving);
-  document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : isDriving ? '운행기록데이터' : isQna ? 'Q&A' : isGuide ? '운행가이드' : '대시보드';
+  document.getElementById('breadcrumbCurrent').textContent = isVehicles ? '차량현황' : isContracts ? '차량계약정보' : isDriving ? '운행기록데이터' : isAccidents ? '사고접수 및 이력' : isQna ? 'Q&A' : isGuide ? '운행가이드' : '대시보드';
   document.querySelectorAll('.nav-button').forEach(item => item.classList.toggle('active', item.dataset.page === page));
   if (isClosing) { document.getElementById('breadcrumbCurrent').textContent = page; renderClosing(); }
   if (isHandover) {
@@ -192,6 +194,11 @@ function showView(page, { recordHistory = false, smoothScroll = true } = {}) {
     if (window.fleetCurrentUser && window.refreshHandoverFromSupabase) {
       window.refreshHandoverFromSupabase().catch(error => showToast(error.message));
     }
+  }
+  if (isAccidents) {
+    document.getElementById('breadcrumbCurrent').textContent = page;
+    if (window.refreshAccidentVehicles) window.refreshAccidentVehicles();
+    if (window.fleetCurrentUser && window.refreshAccidentsFromSupabase) window.refreshAccidentsFromSupabase().catch(error => showToast(error.message));
   }
   if (isMembers) {
     document.getElementById('breadcrumbCurrent').textContent = page;
