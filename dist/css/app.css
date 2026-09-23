@@ -102,14 +102,6 @@ body.sidebar-unpinned .sidebar.open, body.sidebar-collapsed .sidebar.open { tran
 .nav-button.active { color: var(--brand-dark); background: var(--brand-wash); font-weight: 750; }
 .nav-button.active::after { content: ""; width: 5px; height: 5px; margin-left: auto; border-radius: 50%; background: var(--brand); }
 
-.sidebar-footer { margin-top: auto; }
-.sidebar-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 0 0 10px; }
-.sidebar-control { min-height: 34px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink-soft); background: var(--white); font-size: .72rem; font-weight: 700; cursor: pointer; }
-.sidebar-control:hover { color: var(--brand-dark); border-color: var(--brand-soft); background: var(--brand-wash); }
-.help-card { padding: 15px; border-radius: 14px; background: linear-gradient(145deg, var(--brand-wash), #f4fbf9); }
-.help-card strong { display: block; font-size: .83rem; }
-.help-card p { margin: 5px 0 0; color: var(--ink-soft); font-size: .74rem; line-height: 1.55; }
-
 .main { grid-column: 2; min-width: 0; }
 
 .server-status {
