@@ -10,6 +10,7 @@ assert(html.includes('인수 동의'));
 assert(js.includes("rpc('active_handover_recipients')"));
 assert(js.includes('renderHandoverRecipientResults'));
 assert(js.includes('data-handover-recipient'));
+assert(js.includes('data-handover-detail-close'));
 assert(js.includes("rpc('confirm_vehicle_handover'"));
 assert(js.includes('received_by_user_id:record.recipientUserId'));
 assert(js.includes('recipient_confirmed_by'));

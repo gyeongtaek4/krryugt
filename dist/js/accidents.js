@@ -55,11 +55,11 @@
   window.refreshAccidentsFromSupabase=refreshAccidentsFromSupabase;
   function matchingRecords() {
     const keyword=el('accidentSearch').value.trim().toLowerCase();
-    return !keyword?records:records.filter(item=>[item.vehicle_snapshot?.['차량번호'],item.passengers,item.incident_location,item.description].join(' ').toLowerCase().includes(keyword));
+    return !keyword?records:records.filter(item=>[item.vehicle_snapshot?.['차량번호'],item.passengers,item.replacement_vehicle_number,item.incident_location,item.description].join(' ').toLowerCase().includes(keyword));
   }
   function renderAccidents() {
     const items=matchingRecords();
-    rowsEl.innerHTML=items.map(item=>{const index=records.indexOf(item),vehicle=item.vehicle_snapshot||{};return `<tr><td>${safe(item.incident_date)}</td><td class="plate">${safe(vehicle['차량번호'])}<br>${safe(vehicle['차종'])}</td><td>${safe([vehicle['본부'],vehicle['부'],vehicle['팀']].filter(Boolean).join(' / ')||'—')}</td><td>${safe(item.passengers)}</td><td>${safe(item.incident_location)}</td><td>${item.photos.length}장</td><td><button class="row-edit" data-accident-detail="${index}">상세</button></td></tr>`;}).join('')||`<tr><td colspan="7" class="empty-table">${records.length?'조회 조건에 맞는 사고 접수 이력이 없습니다.':'등록된 사고 접수 이력이 없습니다.'}</td></tr>`;
+    rowsEl.innerHTML=items.map(item=>{const index=records.indexOf(item),vehicle=item.vehicle_snapshot||{};return `<tr><td>${safe(item.incident_date)}</td><td class="plate">${safe(vehicle['차량번호'])}<br>${safe(vehicle['차종'])}</td><td>${safe([vehicle['본부'],vehicle['부'],vehicle['팀']].filter(Boolean).join(' / ')||'—')}</td><td>${safe(item.passengers)}</td><td class="plate">${safe(item.replacement_vehicle_number||'—')}</td><td>${safe(item.incident_location)}</td><td>${item.photos.length}건</td><td><button class="row-edit" data-accident-detail="${index}">상세</button></td></tr>`;}).join('')||`<tr><td colspan="8" class="empty-table">${records.length?'조회 조건에 맞는 사고 접수 이력이 없습니다.':'등록된 사고 접수 이력이 없습니다.'}</td></tr>`;
   }
   async function storeAccident(record) {
     const uploaded=[];
@@ -71,14 +71,14 @@
         if(error)throw Error(`사고 현장 자료 저장에 실패했습니다: ${error.message||'Storage 오류'}`);
         uploaded.push({path,name:photo.name,size:photo.size,type:photo.type});
       }
-      const {error}=await window.fleetSupabaseClient.from('vehicle_accidents').insert({id:record.id,vehicle_id:record.vehicleId,incident_date:record.date,passengers:record.passengers,incident_location:record.location,description:record.description,vehicle_snapshot:record.vehicle,photo_paths:uploaded,created_by:window.fleetCurrentUser.id});
+      const {error}=await window.fleetSupabaseClient.from('vehicle_accidents').insert({id:record.id,vehicle_id:record.vehicleId,incident_date:record.date,passengers:record.passengers,replacement_vehicle_number:record.replacementVehicleNumber||null,incident_location:record.location,description:record.description,vehicle_snapshot:record.vehicle,photo_paths:uploaded,created_by:window.fleetCurrentUser.id});
       if(error)throw Error(error.message||'사고 접수 저장에 실패했습니다.');
     }catch(error){if(uploaded.length)await window.fleetSupabaseClient.storage.from('accident-photos').remove(uploaded.map(item=>item.path));throw error;}
   }
   function openDetail(item) {
     const vehicle=item.vehicle_snapshot||{},detail=el('accidentDetail'),comment=item.admin_comment||'';
     detail.hidden=false;
-    detail.innerHTML=`<h3>${safe(vehicle['차량번호'])} · ${safe(item.incident_date)}</h3><div class="accident-detail-grid"><p><strong>탑승자</strong><br>${safe(item.passengers)}</p><p><strong>사고장소</strong><br>${safe(item.incident_location)}</p></div><p class="handover-notes">${safe(item.description)}</p><div class="handover-gallery">${item.photos.map(photo=>`<figure><a href="${safe(photo.data)}" target="_blank" rel="noopener">${photo.type==='application/pdf'?'<span class="attachment-pdf">PDF 열기</span>':`<img src="${safe(photo.data)}" alt="${safe(photo.name)}">`}</a><figcaption>${safe(photo.name)}</figcaption></figure>`).join('')||'<p class="closing-help">첨부 자료 없음</p>'}</div><div class="accident-comment"><strong>관리자 처리 코멘트</strong>${safe(comment||'등록된 코멘트가 없습니다.')}</div>${isAdmin()?`<form class="accident-comment-form" data-accident-comment="${safe(item.id)}"><label class="form-field"><span>처리 코멘트</span><textarea maxlength="2000" required placeholder="사고 처리 현황, 후속 조치, 안내 사항을 입력하세요.">${safe(comment)}</textarea></label><button class="button primary" type="submit">코멘트 저장</button></form>`:''}`;
+    detail.innerHTML=`<div class="detail-heading"><h3>${safe(vehicle['차량번호'])} · ${safe(item.incident_date)}</h3><button class="button detail-close" type="button" data-accident-detail-close>접기</button></div><div class="accident-detail-grid"><p><strong>탑승자</strong><br>${safe(item.passengers)}</p><p><strong>대차 차량번호</strong><br>${safe(item.replacement_vehicle_number||'미입력')}</p><p><strong>사고장소</strong><br>${safe(item.incident_location)}</p></div><p class="handover-notes">${safe(item.description)}</p><div class="handover-gallery">${item.photos.map(photo=>`<figure><a href="${safe(photo.data)}" target="_blank" rel="noopener">${photo.type==='application/pdf'?'<span class="attachment-pdf">PDF 열기</span>':`<img src="${safe(photo.data)}" alt="${safe(photo.name)}">`}</a><figcaption>${safe(photo.name)}</figcaption></figure>`).join('')||'<p class="closing-help">첨부 자료 없음</p>'}</div><div class="accident-comment"><strong>관리자 처리 코멘트</strong>${safe(comment||'등록된 코멘트가 없습니다.')}</div>${isAdmin()?`<form class="accident-comment-form" data-accident-comment="${safe(item.id)}"><label class="form-field"><span>처리 코멘트</span><textarea maxlength="2000" required placeholder="사고 처리 현황, 후속 조치, 안내 사항을 입력하세요.">${safe(comment)}</textarea></label><button class="button primary" type="submit">코멘트 저장</button></form>`:''}`;
     detail.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
   el('accidentDate').value=today();
@@ -90,11 +90,12 @@
   });
   el('accidentForm').addEventListener('submit',async event=>{
     event.preventDefault();el('accidentError').textContent='';
-    try{if(photoLoading)throw Error('사고 현장 자료를 읽는 중입니다.');const vehicle=vehicleForPlate(el('accidentVehicle').value),passengers=el('accidentPassengers').value.trim(),location=el('accidentLocation').value.trim(),description=el('accidentDescription').value.trim();if(!vehicle)throw Error('등록된 차량을 선택하세요.');if(!passengers||!location||!description)throw Error('탑승자, 사고장소, 상황설명을 모두 입력하세요.');validatePhotos(photoDraft);el('accidentSave').disabled=true;await storeAccident({id:crypto.randomUUID(),vehicleId:vehicle._supabaseId,date:el('accidentDate').value,passengers,location,description,vehicle:vehicleSnapshot(vehicle)});photoDraft=[];el('accidentForm').reset();el('accidentDate').value=today();previewPhotos();renderAccidentVehicleInfo();await refreshAccidentsFromSupabase();showToast('사고 접수를 저장했습니다.');}
+    try{if(photoLoading)throw Error('사고 현장 자료를 읽는 중입니다.');const vehicle=vehicleForPlate(el('accidentVehicle').value),passengers=el('accidentPassengers').value.trim(),replacementVehicleNumber=el('accidentReplacementVehicle').value.trim(),location=el('accidentLocation').value.trim(),description=el('accidentDescription').value.trim();if(!vehicle)throw Error('등록된 차량을 선택하세요.');if(!passengers||!location||!description)throw Error('탑승자, 사고장소, 상황설명을 모두 입력하세요.');validatePhotos(photoDraft);el('accidentSave').disabled=true;await storeAccident({id:crypto.randomUUID(),vehicleId:vehicle._supabaseId,date:el('accidentDate').value,passengers,replacementVehicleNumber,location,description,vehicle:vehicleSnapshot(vehicle)});photoDraft=[];el('accidentForm').reset();el('accidentDate').value=today();previewPhotos();renderAccidentVehicleInfo();await refreshAccidentsFromSupabase();showToast('사고 접수를 저장했습니다.');}
     catch(error){el('accidentError').textContent=error.message;}finally{el('accidentSave').disabled=false;}
   });
   el('accidentSearch').addEventListener('input',renderAccidents);
   rowsEl.addEventListener('click',event=>{const button=event.target.closest('[data-accident-detail]');if(button)openDetail(records[Number(button.dataset.accidentDetail)]);});
+  el('accidentDetail').addEventListener('click',event=>{if(event.target.closest('[data-accident-detail-close]'))el('accidentDetail').hidden=true;});
   el('accidentDetail').addEventListener('submit',async event=>{
     const form=event.target.closest('[data-accident-comment]');if(!form)return;event.preventDefault();
     try{if(!isAdmin())throw Error('관리자만 처리 코멘트를 저장할 수 있습니다.');const comment=form.querySelector('textarea').value.trim();if(!comment)throw Error('처리 코멘트를 입력하세요.');const {error}=await window.fleetSupabaseClient.rpc('comment_vehicle_accident',{p_accident_id:form.dataset.accidentComment,p_comment:comment});if(error)throw Error(error.message||'처리 코멘트를 저장하지 못했습니다.');await refreshAccidentsFromSupabase();openDetail(records.find(item=>item.id===form.dataset.accidentComment));showToast('관리자 처리 코멘트를 저장했습니다.');}

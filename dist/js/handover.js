@@ -318,8 +318,9 @@ handoverEl('handoverRows').addEventListener('click',async event=>{
     : item.consentStatus === 'pending'
       ? `인수 동의 대기 · 지정 인수자만 동의할 수 있습니다.${canConfirmHandover(item) ? ' 이 계정으로 동의할 수 있습니다.' : ''}`
       : '인수자 계정 미지정 · 수신자 이름과 일치하는 활성 회원 계정을 확인한 뒤 동의할 수 있습니다.';
-  detail.innerHTML=`<h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(consentInfo)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
+  detail.innerHTML=`<div class="detail-heading"><h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><button class="button detail-close" type="button" data-handover-detail-close>접기</button></div><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(consentInfo)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
 });
+handoverEl('handoverDetail').addEventListener('click',event=>{if(event.target.closest('[data-handover-detail-close]'))handoverEl('handoverDetail').hidden=true;});
 handoverEl('closeHandoverManage').addEventListener('click',closeHandoverManage);
 handoverEl('cancelHandoverManage').addEventListener('click',closeHandoverManage);
 handoverEl('cancelHandoverDelete').addEventListener('click',closeHandoverManage);

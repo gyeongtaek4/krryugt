@@ -630,6 +630,9 @@ td strong { font-size: .8rem; }
 .handover-pdf small { color: var(--ink-soft); font-size: 12px; font-weight: 600; }
 .handover-gallery figcaption { font-size: 12px; color: var(--ink-soft); overflow-wrap: anywhere; margin-top: 5px; }
 .handover-detail { margin-top: 20px; padding: 20px; border-top: 1px solid var(--line); }
+.detail-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.detail-heading h3 { margin: 0; }
+.detail-close { flex: 0 0 auto; padding: 8px 13px; font-size: .78rem; }
 .handover-notes { white-space: pre-wrap; overflow-wrap: anywhere; }
 .handover-history-header { align-items: center; }
 .handover-history-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
