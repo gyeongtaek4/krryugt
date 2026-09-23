@@ -7,6 +7,7 @@
 - 관리자는 접수 건별 처리 코멘트를 남길 수 있도록 했으며, 서버 표·비공개 사진 Storage·권한 SQL은 `014_vehicle_accidents.sql`로 제공한다.
 - `014_vehicle_accidents.sql`을 Supabase SQL Editor에서 실제 실행해 사고접수 표·비공개 사진 Storage·활성 회원 권한·관리자 코멘트 함수를 적용했다.
 - 메뉴 클릭 처리에 새 카테고리를 연결해 접수 화면으로 정상 이동하도록 수정했다.
+- 사고 현장 자료에 PDF를 추가하고 첨부 한도를 최대 3개, 총 15MB로 조정했다. 기존 Storage 버킷에 PDF 형식을 허용하는 `015_accident_pdf_attachments.sql`을 추가하고 Supabase SQL Editor에서 실제 적용했다.
 
 ## 2026-09-23 — 일별 운행기록 휴일 표시·Excel 출력
 

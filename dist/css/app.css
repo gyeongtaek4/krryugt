@@ -581,6 +581,7 @@ td strong { font-size: .8rem; }
 .accident-detail-grid p { margin: 0; font-size: .82rem; overflow-wrap: anywhere; }
 .accident-detail-grid strong { color: var(--ink-soft); font-size: .72rem; }
 .accident-comment-form { margin-top: 15px; display: grid; gap: 8px; }
+.attachment-pdf { display: grid; place-items: center; min-width: 96px; min-height: 96px; padding: 12px; border: 1px solid var(--brand-soft); border-radius: 12px; background: #f3f6f5; color: var(--brand-dark); font-weight: 800; text-decoration: none; }
 .accident-comment-form textarea { min-height: 90px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; resize: vertical; }
 #accidentError { color: #b64040; }
 .handover-field-help { display: block; margin-top: 6px; color: var(--ink-soft); font-size: .72rem; line-height: 1.4; }
