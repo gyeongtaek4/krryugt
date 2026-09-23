@@ -7,7 +7,7 @@
 - 인수인계는 `vehicle_handovers`에 차량 참조·인계 정보·차량/조직 스냅샷·첨부 경로와 MIME 형식을 저장한다. `received_by_user_id`는 지정 인수자의 Auth ID, `consent_status`·`recipient_confirmed_at`·`recipient_confirmed_by`·`recipient_confirmed_name`은 인수 동의 상태·시각·동의 계정 ID·당시 표시 이름을 보관한다. 외관 사진·PDF 1~6개는 비공개 `handover-photos` Storage에 저장하며 로그인 사용자만 서명 URL로 조회한다. 상세 기준은 handover.md 참고.
 - 사고접수는 `vehicle_accidents`에 차량 참조, 사고일, 탑승자, 대차 차량번호(선택), 장소, 상황설명, 차량 스냅샷, 현장 사진·PDF 경로, 관리자 처리 코멘트·처리자·처리시각을 저장한다. 현장 자료는 비공개 `accident-photos` Storage에 최대 3개 보관한다. 상세 기준은 accidents.md 참고.
 
-- 인수인계 수정·삭제는 관리자만 가능하다. 수정은 이력의 업무 기재값만 바꾸며, 삭제 시 `vehicle_handovers` 행과 연결 Storage 파일을 함께 정리한다. Storage 삭제 실패 시 고아 파일은 비공개로 남을 수 있으므로 운영 점검 대상이다.
+- 사고접수·인수인계 수정·삭제는 작성자 본인 또는 관리자만 가능하다. 수정은 이력의 업무 기재값만 바꾸며, 삭제 시 행과 연결 Storage 파일을 함께 정리한다. Storage 삭제 실패 시 고아 파일은 비공개로 남을 수 있으므로 운영 점검 대상이다.
 
 - Q&A는 `fleet_questions`에 질문·답변과 등록/수정자·시각을, 운행가이드는 `fleet_guides`에 PDF 경로·파일명·크기와 등록자를 저장한다. PDF 원본은 비공개 `fleet-guides` Storage에 보관한다. 활성 회원은 읽기만, 관리자는 작성·수정·삭제한다. `011_knowledge_center.sql`은 2026-09-21 실제 적용됐으며, 업무 화면의 등록·열람 흐름은 후속 운영 점검 대상이다. 상세는 knowledge-center.md 참고.
 

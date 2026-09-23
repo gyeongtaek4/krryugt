@@ -14,7 +14,7 @@ assert(html.indexOf('./js/members.js')<html.indexOf('./js/supabase-auth.js'));
 assert(auth.includes('.auth.signUp('));
 assert(auth.includes("profile.status!=='active'"));
 assert(auth.includes("memberNavItem.hidden=role!=='admin'"));
-assert(auth.includes("new Set(['차량 현황','차량인수인계','Q&A','운행가이드'])"));
+assert(auth.includes("new Set(['차량 현황','사고접수 및 이력','차량인수인계','Q&A','운행가이드'])"));
 assert(auth.includes("document.getElementById('vehicleUploadGuide').hidden=readOnly"));
 assert(app.includes("page === '회원관리'"));
 assert(app.includes("const canEdit=window.fleetCurrentRole==='admin'"));
