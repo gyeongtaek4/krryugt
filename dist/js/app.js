@@ -137,10 +137,25 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-function toggleSidebar(open) {
-  sidebar.classList.toggle('open', open);
-  scrim.classList.toggle('open', open);
+const sidebarPreferenceKey='fleet-sidebar-preference-v1';
+let sidebarPinned=true,sidebarExpanded=true;
+function isNarrowScreen(){return window.matchMedia('(max-width: 900px)').matches;}
+function saveSidebarPreference(){try{localStorage.setItem(sidebarPreferenceKey,JSON.stringify({pinned:sidebarPinned,expanded:sidebarExpanded}));}catch(error){/* 브라우저 저장 제한 시 이번 접속에만 적용 */}}
+function applySidebarPreference(){
+  document.body.classList.toggle('sidebar-unpinned',!sidebarPinned);
+  document.body.classList.toggle('sidebar-collapsed',!sidebarExpanded);
+  if(isNarrowScreen()){sidebar.classList.remove('open');scrim.classList.remove('open');}
+  else {sidebar.classList.toggle('open',sidebarExpanded&&!sidebarPinned);scrim.classList.remove('open');}
+  document.getElementById('sidebarCollapseButton').textContent=sidebarExpanded?'사이드바 접기':'사이드바 펼치기';
+  document.getElementById('sidebarPinButton').textContent=sidebarPinned?'고정 해제':'사이드바 고정';
+  document.getElementById('sidebarPinButton').setAttribute('aria-pressed',String(sidebarPinned));
 }
+function toggleSidebar(open) {
+  if(isNarrowScreen()){sidebar.classList.toggle('open',open);scrim.classList.toggle('open',open);return;}
+  sidebarExpanded=open;saveSidebarPreference();applySidebarPreference();
+}
+try{const saved=JSON.parse(localStorage.getItem(sidebarPreferenceKey)||'null');if(saved&&typeof saved.pinned==='boolean'&&typeof saved.expanded==='boolean'){sidebarPinned=saved.pinned;sidebarExpanded=saved.expanded;}}catch(error){/* 기본값 사용 */}
+applySidebarPreference();
 
 function toggleModal(open) {
   modal.classList.toggle('open', open);
@@ -1168,8 +1183,11 @@ async function readDrivingFile(file) {
   return cleanRows.sort((a, b) => normalizeDrivingDate(a['운행년월일']).localeCompare(normalizeDrivingDate(b['운행년월일'])));
 }
 
-document.getElementById('menuButton').addEventListener('click', () => toggleSidebar(true));
+document.getElementById('menuButton').addEventListener('click', () => toggleSidebar(isNarrowScreen() ? !sidebar.classList.contains('open') : !sidebarExpanded));
+document.getElementById('sidebarCollapseButton').addEventListener('click',()=>toggleSidebar(!sidebarExpanded));
+document.getElementById('sidebarPinButton').addEventListener('click',()=>{sidebarPinned=!sidebarPinned;saveSidebarPreference();applySidebarPreference();});
 scrim.addEventListener('click', () => toggleSidebar(false));
+window.addEventListener('resize',applySidebarPreference);
 document.getElementById('vehicleUploadButton').addEventListener('click', () => toggleModal(true));
 document.getElementById('closeModal').addEventListener('click', () => toggleModal(false));
 document.getElementById('cancelUpload').addEventListener('click', () => toggleModal(false));
@@ -1497,7 +1515,7 @@ document.querySelectorAll('.nav-button').forEach(button => {
   button.addEventListener('click', () => {
     if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '사고접수 및 이력' || button.dataset.page === '차량인수인계' || button.dataset.page === 'Q&A' || button.dataset.page === '운행가이드' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page, { recordHistory: true });
     else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
-    toggleSidebar(false);
+    if(isNarrowScreen()||!sidebarPinned)toggleSidebar(false);
   });
 });
 
@@ -1585,10 +1603,17 @@ document.getElementById('reportButton').addEventListener('click', () => {
   window.print();
 });
 document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보', { recordHistory: true }));
-document.getElementById('noticeButton').addEventListener('click', () => showToast(`6개월 내 계약 만료 예정 차량: ${document.getElementById('dashboardExpiryCount').textContent}`));
+function toggleNotice(open){
+  const popover=document.getElementById('noticePopover'),button=document.getElementById('noticeButton');
+  const isOpen=open??popover.hidden;
+  if(isOpen){const count=document.getElementById('dashboardExpiryCount').textContent;popover.innerHTML=`<strong>주요 알림</strong><p>6개월 내 계약 만료 예정 차량: ${escapeHtml(count)}</p>`;}
+  popover.hidden=!isOpen;button.setAttribute('aria-expanded',String(isOpen));
+}
+document.getElementById('noticeButton').addEventListener('click',event=>{event.stopPropagation();toggleNotice();});
+document.addEventListener('click',event=>{if(!event.target.closest('.notice-wrap'))toggleNotice(false);});
 
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); toggleDrivingUploadModal(false); closeVehicleForm(); closeContractForm(); closeDrivingForm(); toggleSidebar(false); }
+  if (event.key === 'Escape') { toggleModal(false); toggleContractModal(false); toggleDrivingUploadModal(false); closeVehicleForm(); closeContractForm(); closeDrivingForm(); toggleSidebar(false); toggleNotice(false); }
 });
 
 refreshFilters();

@@ -56,6 +56,7 @@
         <li id="memberNavItem" hidden><button class="nav-button" data-page="회원관리"><svg viewBox="0 0 24 24" fill="none"><path d="M8.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7-1a3 3 0 1 0 0-6m-13 16v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2m1-7a4.5 4.5 0 0 1 5 4.5V20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>회원관리</button></li>
       </ul>
       <div class="sidebar-footer">
+        <div class="sidebar-controls"><button class="sidebar-control" id="sidebarCollapseButton" type="button">사이드바 접기</button><button class="sidebar-control" id="sidebarPinButton" type="button">고정 해제</button></div>
         <div class="help-card"><strong>데이터 기준</strong><p>등록한 차량·계약정보와 확정한 월별 자료를 기준으로 표시합니다.</p></div>
       </div>
     </aside>
@@ -63,11 +64,11 @@
     <main class="main">
       <header class="topbar">
         <div style="display:flex; align-items:center; gap:12px">
-          <button class="icon-button mobile-menu" id="menuButton" aria-label="메뉴 열기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="icon-button sidebar-menu" id="menuButton" aria-label="메뉴 열기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
           <div class="breadcrumb">차량관리&nbsp;&nbsp;/&nbsp;&nbsp;<strong id="breadcrumbCurrent">대시보드</strong></div>
         </div>
         <div class="top-actions">
-          <button class="icon-button" aria-label="알림" id="noticeButton"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="notice-wrap"><button class="icon-button" aria-label="알림" id="noticeButton" aria-expanded="false"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="notice-popover" id="noticePopover" hidden role="status"></div></div>
           <div class="avatar" aria-hidden="true">관리</div>
           <div class="user-copy"><strong id="userName">로그인 사용자</strong><small id="userRole">인증 확인 중</small></div><button class="button auth-logout" id="logoutButton">로그아웃</button>
         </div>
