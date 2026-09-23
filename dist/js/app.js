@@ -1087,7 +1087,7 @@ function downloadDrivingTemplate() {
 }
 
 function downloadClosingTemplate() {
-  downloadTemplate(['본부', '부', '팀', '차량번호', '렌탈료', '주유비', '통행료', '주차비'], '월별 비용마감 양식', '월별비용마감_업로드양식.xlsx');
+  downloadTemplate(['차량번호', '렌탈료', '주유비', '통행료', '주차비'], '월별 비용마감 양식', '월별비용마감_업로드양식.xlsx');
 }
 
 function showUploadError(message) {
@@ -1436,7 +1436,8 @@ document.getElementById('closingUpload').addEventListener('change',async event=>
       const result={'차량번호':plate};
       costKeys.forEach(key=>{const text=String(row[key]??'').trim().replace(/[,\s원₩]/g,'');const value=text===''?0:Number(text);if(!Number.isSafeInteger(value)||value<0)throw Error(`${index+2}행: ${key}는 0 이상의 정수(원)여야 합니다.`);result[key]=value;});
       const vehicle=vehicleForPlate(plate);
-      ['본부','부','팀'].forEach(key=>result[key]=String(row[key]||vehicle?.[key]||''));
+      if(!vehicle)throw Error(`${index+2}행: 차량현황에 등록되지 않은 차량번호입니다: ${plate}`);
+      ['본부','부','팀'].forEach(key=>result[key]=String(vehicle[key]||''));
       return result;
     });
     if(closingMonthValue()!==month)throw Error('월도가 변경되었습니다. 다시 업로드하세요.');

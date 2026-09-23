@@ -5,7 +5,9 @@ const elements = {};
 let templateHeaders;
 const templateContext = vm.createContext({downloadTemplate: headers => {templateHeaders = Array.from(headers);}});
 vm.runInContext(fn('downloadClosingTemplate') + '\ndownloadClosingTemplate();', templateContext);
-assert.deepEqual(templateHeaders, ['본부','부','팀','차량번호','렌탈료','주유비','통행료','주차비']);
+assert.deepEqual(templateHeaders, ['차량번호','렌탈료','주유비','통행료','주차비']);
+assert(source.includes("if(!vehicle)throw Error(`${index+2}행: 차량현황에 등록되지 않은 차량번호입니다: ${plate}`)"));
+assert(source.includes("result[key]=String(vehicle[key]||'')"));
 for (const match of html.matchAll(/id="([^"]+)"/g)) {
   assert(!elements[match[1]], 'duplicate ID: ' + match[1]);
   elements[match[1]] = {value: '2026-09', style: {}};
