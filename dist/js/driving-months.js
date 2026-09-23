@@ -1,4 +1,4 @@
-let drivingPage = 1, drivingArchivePage = 1;
+let drivingPage = 1, drivingArchivePage = 1, drivingDetailExportData = null;
 const drivingPageSize = 20;
 function drivingMonthlyTotals(month) {
   const rows = drivingArchive[month]?.rows || drivingData.filter(row=>drivingRowMonth(row)===month);
@@ -25,6 +25,20 @@ function drivingDailyTotals(month,plate) {
 function drivingWeekday(date) {
   return ['일','월','화','수','목','금','토'][new Date(`${date}T00:00:00+09:00`).getDay()];
 }
+function koreanHolidayName(date) {
+  const holidays={
+    '2025-01-01':'신정','2025-01-28':'설날 연휴','2025-01-29':'설날','2025-01-30':'설날 연휴','2025-03-01':'삼일절','2025-03-03':'삼일절 대체공휴일','2025-05-05':'어린이날·부처님오신날','2025-05-06':'대체공휴일','2025-06-06':'현충일','2025-08-15':'광복절','2025-10-03':'개천절','2025-10-05':'추석 연휴','2025-10-06':'추석','2025-10-07':'추석 연휴','2025-10-08':'추석 대체공휴일','2025-10-09':'한글날','2025-12-25':'성탄절',
+    '2026-01-01':'신정','2026-02-16':'설날 연휴','2026-02-17':'설날','2026-02-18':'설날 연휴','2026-03-01':'삼일절','2026-03-02':'삼일절 대체공휴일','2026-05-05':'어린이날','2026-05-24':'부처님오신날','2026-05-25':'부처님오신날 대체공휴일','2026-06-03':'전국동시지방선거','2026-06-06':'현충일','2026-08-15':'광복절','2026-08-17':'광복절 대체공휴일','2026-09-24':'추석 연휴','2026-09-25':'추석','2026-09-26':'추석 연휴','2026-10-03':'개천절','2026-10-09':'한글날','2026-12-25':'성탄절',
+    '2027-01-01':'신정','2027-02-06':'설날 연휴','2027-02-07':'설날','2027-02-08':'설날 연휴','2027-02-09':'설날 대체공휴일','2027-03-01':'삼일절','2027-05-05':'어린이날','2027-05-13':'부처님오신날','2027-06-06':'현충일','2027-06-07':'현충일 대체공휴일','2027-08-15':'광복절','2027-08-16':'광복절 대체공휴일','2027-09-14':'추석 연휴','2027-09-15':'추석','2027-09-16':'추석 연휴','2027-10-03':'개천절','2027-10-04':'개천절 대체공휴일','2027-10-09':'한글날','2027-10-11':'한글날 대체공휴일','2027-12-25':'성탄절','2027-12-27':'성탄절 대체공휴일'
+  };
+  return holidays[date]||'';
+}
+function drivingDayStatus(date) {
+  const holiday=koreanHolidayName(date);
+  if(holiday)return {isHoliday:true,label:holiday};
+  const weekday=new Date(`${date}T00:00:00+09:00`).getDay();
+  return weekday===0||weekday===6?{isHoliday:true,label:'주말'}:{isHoliday:false,label:'평일'};
+}
 function toggleDrivingDetail(open) {
   document.getElementById('drivingDetailModal').classList.toggle('open',open);
   document.body.style.overflow=open?'hidden':'';
@@ -37,8 +51,21 @@ function openDrivingDetail(month,plate) {
   document.getElementById('drivingDetailTitle').textContent=`${item.plate} 일별 운행기록`;
   document.getElementById('drivingDetailDescription').textContent=`${month} · 같은 날짜의 운행은 합산해 표시합니다.`;
   document.getElementById('drivingDetailSummary').innerHTML=`<div><strong>${escapeHtml(item.plate)}</strong><span class="detail-team">${escapeHtml(team||'차량현황 미매칭')}</span></div><div class="detail-total"><span>이용일수</span><strong>${days.length}일</strong></div><div class="detail-total"><span>월 이동거리</span><strong>${item.distance.toLocaleString('ko-KR')}km</strong></div>`;
-  document.getElementById('drivingDetailRows').innerHTML=days.map(day=>`<tr><td>${escapeHtml(day.date.replaceAll('-','.'))}</td><td>${drivingWeekday(day.date)}요일</td><td class="distance-value">${day.distance.toLocaleString('ko-KR')}km</td></tr>`).join('');
+  document.getElementById('drivingDetailRows').innerHTML=days.map(day=>{
+    const status=drivingDayStatus(day.date);
+    return `<tr class="${status.isHoliday?'holiday-row':''}" title="${escapeHtml(status.label)}"><td>${escapeHtml(day.date.replaceAll('-','.'))}</td><td>${drivingWeekday(day.date)}요일</td><td class="distance-value">${day.distance.toLocaleString('ko-KR')}km</td></tr>`;
+  }).join('');
+  drivingDetailExportData={month,plate:item.plate,team,days};
   toggleDrivingDetail(true);
+}
+function downloadDrivingDetailExcel() {
+  const detail=drivingDetailExportData;
+  if(!detail){showToast('내려받을 일별 운행기록이 없습니다.');return;}
+  const rows=detail.days.map(day=>{
+    const status=drivingDayStatus(day.date);
+    return {'이용월':detail.month,'차량번호':detail.plate,'소속':detail.team||'차량현황 미매칭','운행일':day.date,'요일':`${drivingWeekday(day.date)}요일`,'구분':status.label,'일 이동거리(km)':day.distance};
+  });
+  downloadExcel(rows,'일별 운행기록',`일별운행기록_${detail.month}_${normalizePlate(detail.plate)}.xlsx`);
 }
 function drivingPagination(id,total,page) {
   const pages=Math.max(1,Math.ceil(total/drivingPageSize));
@@ -119,6 +146,7 @@ document.getElementById('drivingTableBody').addEventListener('click',event=>{
   if(button)openDrivingDetail(document.getElementById('usageMonth').value,button.dataset.drivingDetail);
 });
 ['closeDrivingDetail','closeDrivingDetailConfirm'].forEach(id=>document.getElementById(id).addEventListener('click',()=>toggleDrivingDetail(false)));
+document.getElementById('downloadDrivingDetail').addEventListener('click',downloadDrivingDetailExcel);
 document.getElementById('drivingDetailModal').addEventListener('click',event=>{if(event.target===event.currentTarget)toggleDrivingDetail(false);});
 renderDriving();
 // 이전 월합계 파일에는 실제 운행 날짜가 없어 일수로 해석하지 않는다.

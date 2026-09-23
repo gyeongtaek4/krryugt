@@ -115,7 +115,7 @@
       <div class="table-wrap driving-detail-table-wrap">
         <table class="driving-detail-table"><thead><tr><th>운행일</th><th>요일</th><th>일 이동거리</th></tr></thead><tbody id="drivingDetailRows"></tbody></table>
       </div>
-      <div class="modal-actions"><button class="button primary" id="closeDrivingDetailConfirm">확인</button></div>
+      <div class="modal-actions"><button class="button" id="downloadDrivingDetail">Excel 내려받기</button><button class="button primary" id="closeDrivingDetailConfirm">확인</button></div>
     </div>
   </div>
 `;

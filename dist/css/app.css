@@ -453,6 +453,8 @@ td strong { font-size: .8rem; }
 .driving-detail-table th { position: sticky; top: 0; z-index: 1; padding: 11px 14px; background: var(--white); }
 .driving-detail-table td { padding: 12px 14px; }
 .driving-detail-table th:last-child, .driving-detail-table td:last-child { text-align: right; }
+.driving-detail-table .holiday-row td { color: #c94e4e; font-weight: 750; }
+.driving-detail-table .holiday-row .distance-value { color: #c94e4e; }
 .plate-detail-button { padding: 0; border: 0; color: var(--brand-dark); background: transparent; font: inherit; font-weight: 800; cursor: pointer; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; }
 .plate-detail-button:hover, .plate-detail-button:focus-visible { text-decoration-color: currentColor; }
 #fileInput, #contractFileInput, #drivingFileInput { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
