@@ -10,6 +10,36 @@ function drivingMonthlyTotals(month) {
   });
   return [...groups.values()].sort((a,b)=>normalizePlate(a.plate).localeCompare(normalizePlate(b.plate),'ko'));
 }
+function drivingDailyTotals(month,plate) {
+  const rows=drivingArchive[month]?.rows || drivingData.filter(row=>drivingRowMonth(row)===month);
+  const target=normalizePlate(plate),groups=new Map();
+  rows.forEach(row=>{
+    if(normalizePlate(row['차량번호'])!==target)return;
+    const date=normalizeDrivingDate(row['운행년월일']);
+    if(!date)return;
+    if(!groups.has(date))groups.set(date,{date,distance:0});
+    groups.get(date).distance+=mileageNumber(row['키로수']);
+  });
+  return [...groups.values()].sort((a,b)=>b.date.localeCompare(a.date));
+}
+function drivingWeekday(date) {
+  return ['일','월','화','수','목','금','토'][new Date(`${date}T00:00:00+09:00`).getDay()];
+}
+function toggleDrivingDetail(open) {
+  document.getElementById('drivingDetailModal').classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+}
+function openDrivingDetail(month,plate) {
+  const item=drivingMonthlyTotals(month).find(value=>normalizePlate(value.plate)===normalizePlate(plate));
+  const days=drivingDailyTotals(month,plate);
+  if(!item||!days.length){showToast('표시할 날짜별 운행기록이 없습니다.');return;}
+  const org=item.org||{},team=[org['본부'],org['부'],org['팀']].filter(Boolean).join(' / ');
+  document.getElementById('drivingDetailTitle').textContent=`${item.plate} 일별 운행기록`;
+  document.getElementById('drivingDetailDescription').textContent=`${month} · 같은 날짜의 운행은 합산해 표시합니다.`;
+  document.getElementById('drivingDetailSummary').innerHTML=`<div><strong>${escapeHtml(item.plate)}</strong><span class="detail-team">${escapeHtml(team||'차량현황 미매칭')}</span></div><div class="detail-total"><span>이용일수</span><strong>${days.length}일</strong></div><div class="detail-total"><span>월 이동거리</span><strong>${item.distance.toLocaleString('ko-KR')}km</strong></div>`;
+  document.getElementById('drivingDetailRows').innerHTML=days.map(day=>`<tr><td>${escapeHtml(day.date.replaceAll('-','.'))}</td><td>${drivingWeekday(day.date)}요일</td><td class="distance-value">${day.distance.toLocaleString('ko-KR')}km</td></tr>`).join('');
+  toggleDrivingDetail(true);
+}
 function drivingPagination(id,total,page) {
   const pages=Math.max(1,Math.ceil(total/drivingPageSize));
   document.getElementById(id).innerHTML=`<button class="button" data-page-step="-1" ${page<=1?'disabled':''}>이전</button><span>${page} / ${pages} 페이지 · 총 ${total}건</span><button class="button" data-page-step="1" ${page>=pages?'disabled':''}>다음</button>`;
@@ -64,7 +94,7 @@ renderDriving = function() {
   drivingPage=Math.min(drivingPage,Math.max(1,Math.ceil(items.length/20)));
   document.getElementById('drivingTableBody').innerHTML=items.slice((drivingPage-1)*20,drivingPage*20).map(item=>{
     const org=item.org||{};
-    return `<tr><td>${escapeHtml(month)}</td>${['본부','부','팀'].map(key=>`<td>${escapeHtml(org[key]||'미매칭')}</td>`).join('')}<td class="plate">${escapeHtml(item.plate)}</td><td>${escapeHtml(org['차종']||'—')}</td><td class="distance-value">${item.distance.toLocaleString('ko-KR')}km</td><td>${item.days.size}일</td><td>${item.org?'연결 완료':'차량현황 확인'}</td></tr>`;
+    return `<tr><td>${escapeHtml(month)}</td>${['본부','부','팀'].map(key=>`<td>${escapeHtml(org[key]||'미매칭')}</td>`).join('')}<td class="plate"><button class="plate-detail-button" data-driving-detail="${escapeHtml(normalizePlate(item.plate))}" aria-label="${escapeHtml(item.plate)} 일별 운행기록 보기">${escapeHtml(item.plate)}</button></td><td>${escapeHtml(org['차종']||'—')}</td><td class="distance-value">${item.distance.toLocaleString('ko-KR')}km</td><td>${item.days.size}일</td><td>${item.org?'연결 완료':'차량현황 확인'}</td></tr>`;
   }).join('')||'<tr><td colspan="9" class="empty-table">조건에 맞는 월별 차량자료가 없습니다.</td></tr>';
   document.getElementById('drivingRecordCount').textContent=`${items.length}대`;
   drivingPagination('drivingPagination',items.length,drivingPage);renderDrivingArchive();
@@ -84,6 +114,12 @@ const oldExport=document.getElementById('exportDrivingButton'),newExport=oldExpo
 }));
 document.getElementById('usageMonth').addEventListener('change',()=>{drivingPage=1;renderDriving();});
 document.getElementById('drivingSearch').addEventListener('input',()=>{drivingPage=1;renderDriving();});
+document.getElementById('drivingTableBody').addEventListener('click',event=>{
+  const button=event.target.closest('[data-driving-detail]');
+  if(button)openDrivingDetail(document.getElementById('usageMonth').value,button.dataset.drivingDetail);
+});
+['closeDrivingDetail','closeDrivingDetailConfirm'].forEach(id=>document.getElementById(id).addEventListener('click',()=>toggleDrivingDetail(false)));
+document.getElementById('drivingDetailModal').addEventListener('click',event=>{if(event.target===event.currentTarget)toggleDrivingDetail(false);});
 renderDriving();
 // 이전 월합계 파일에는 실제 운행 날짜가 없어 일수로 해석하지 않는다.
 document.getElementById('restoreDrivingArchive').disabled=true;

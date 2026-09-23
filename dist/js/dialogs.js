@@ -107,5 +107,16 @@
       </form>
     </div>
   </div>
+
+  <div class="modal-backdrop" id="drivingDetailModal" role="dialog" aria-modal="true" aria-labelledby="drivingDetailTitle">
+    <div class="modal driving-detail-modal">
+      <div class="modal-header"><div><h2 id="drivingDetailTitle">일별 운행기록</h2><p id="drivingDetailDescription">선택한 차량의 날짜별 합산 이동거리입니다.</p></div><button class="close-button" id="closeDrivingDetail" aria-label="닫기">✕</button></div>
+      <div class="driving-detail-summary" id="drivingDetailSummary"></div>
+      <div class="table-wrap driving-detail-table-wrap">
+        <table class="driving-detail-table"><thead><tr><th>운행일</th><th>요일</th><th>일 이동거리</th></tr></thead><tbody id="drivingDetailRows"></tbody></table>
+      </div>
+      <div class="modal-actions"><button class="button primary" id="closeDrivingDetailConfirm">확인</button></div>
+    </div>
+  </div>
 `;
 })();

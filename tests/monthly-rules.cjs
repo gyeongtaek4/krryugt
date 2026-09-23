@@ -15,7 +15,7 @@ const context=vm.createContext({drivingData:[],drivingArchive:{},drivingPageSize
   vehicleForPlate:()=>org,confirm:()=>true,
   document:{getElementById:id=>elements[id]||(elements[id]={})}});
 vm.runInContext(['mileageNumber','distanceForItems','drivingRowMonth'].map(name=>fn(app,name)).join('\n'),context);
-vm.runInContext(fn(months,'drivingMonthlyTotals')+'\n'+fn(months,'drivingPagination'),context);
+vm.runInContext(fn(months,'drivingMonthlyTotals')+'\n'+fn(months,'drivingDailyTotals')+'\n'+fn(months,'drivingWeekday')+'\n'+fn(months,'drivingPagination'),context);
 vm.runInContext(fn(app,'latestConfirmedDrivingMonth')+'\n'+fn(app,'confirmedDrivingSummary'),context);
 assert.equal(vm.runInContext('confirmedDrivingSummary().month',context),'');
 const summaryRows = [1,2,3,4,5].map((n)=>({...row(`테스트${n}`,10,'2026-07-01'),_organization:{'본부':'본부A','부':n<4?'부A':'부B','팀':n<3?'팀1':n===3?'팀2':n===4?'팀1':'팀3'}}));
@@ -33,6 +33,8 @@ context.drivingArchive={};
 context.drivingData=[row('12가 3456',20,'2026-08-01'),row('12가3456',30,'2026-08-01'),row('12가3456',40,'2026-08-02'),row('22가2222',10,'2026-08-01'),row('12가3456',80,'2026-09-01')];
 const result=vm.runInContext("drivingMonthlyTotals('2026-08')",context);
 assert.equal(result.length,2);assert.equal(result[0].distance,90);assert.equal(result[0].days.size,2);
+const daily=vm.runInContext("drivingDailyTotals('2026-08','12가 3456')",context);
+assert.equal(daily.length,2);assert.equal(daily[1].distance,50);assert.equal(vm.runInContext("drivingWeekday('2026-08-01')",context),'토');
 context.drivingArchive['2026-08']={rows:context.drivingData.slice(0,3).map(row=>({...row,_organization:{...org,'팀':'확정 당시 팀'}})),confirmedAt:'2026-09-02'};
 assert.equal(vm.runInContext("drivingMonthlyTotals('2026-08')[0].org['팀']",context),'확정 당시 팀');
 assert.equal(vm.runInContext("drivingMonthlyTotals('2026-09')[0].distance",context),80);
@@ -54,6 +56,6 @@ vm.runInContext(fn(app,'mergeDrivingRows'),context);
   context.storeDrivingMonth=async()=>{throw Error('mock storage failure');};
   context.incoming=[row('12가3456',123,'2026-09-01')];
   await assert.rejects(vm.runInContext('mergeDrivingRows(incoming)',context));assert.equal(JSON.stringify(context.drivingData),before);
-  assert(app.includes('const averages = months.map(() => average)'));
-  console.log('PASS: monthly SUM, unique days, snapshot, pagination, reupload, confirmed lock, mixed month, storage failure (mock).');
+  assert(app.includes("{ key:'fuel', label:'주유비', className:'fuel-line' }"));
+  console.log('PASS: monthly and daily SUM, unique days, weekday, snapshot, pagination, reupload, confirmed lock, mixed month, storage failure (mock).');
 })().catch(error=>{console.error(error);process.exitCode=1;});
