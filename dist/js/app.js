@@ -1494,7 +1494,7 @@ document.getElementById('closingRestore').addEventListener('change',async event=
 renderClosing();
 document.querySelectorAll('.nav-button').forEach(button => {
   button.addEventListener('click', () => {
-    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '차량인수인계' || button.dataset.page === 'Q&A' || button.dataset.page === '운행가이드' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page, { recordHistory: true });
+    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '사고접수 및 이력' || button.dataset.page === '차량인수인계' || button.dataset.page === 'Q&A' || button.dataset.page === '운행가이드' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page, { recordHistory: true });
     else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
     toggleSidebar(false);
   });
