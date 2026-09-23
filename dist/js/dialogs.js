@@ -20,7 +20,7 @@
 
   <div class="modal-backdrop" id="contractUploadModal" role="dialog" aria-modal="true" aria-labelledby="contractUploadTitle">
     <div class="modal">
-      <div class="modal-header"><div><h2 id="contractUploadTitle">차량계약정보 업로드</h2><p>차량 계약 정보가 들어 있는 Excel 또는 CSV 파일을 선택해 주세요.</p></div><button class="close-button" id="closeContractModal" aria-label="닫기">✕</button></div>
+      <div class="modal-header"><div><h2 id="contractUploadTitle">차량계약정보 업로드</h2><p>차량번호, 렌탈료, 계약시작, 계약종료가 들어 있는 Excel 또는 CSV 파일을 선택해 주세요. 조직·담당자·차종은 차량현황에서 자동 연결합니다.</p></div><button class="close-button" id="closeContractModal" aria-label="닫기">✕</button></div>
       <label class="drop-zone" for="contractFileInput">
         <span class="drop-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <strong id="contractFileLabel">파일을 끌어놓거나 눌러서 선택</strong>
@@ -28,7 +28,7 @@
       </label>
       <input type="file" id="contractFileInput" accept=".xlsx,.xls,.csv">
       <div class="upload-error" id="contractUploadError"></div>
-      <ul class="required-columns" aria-label="계약정보 필수 열"><li>본부</li><li>부</li><li>팀</li><li>담당자(정)</li><li>담당자(부)</li><li>차종</li><li>차량번호</li><li>렌탈료</li><li>계약시작</li><li>계약종료</li></ul>
+      <ul class="required-columns" aria-label="계약정보 필수 열"><li>차량번호</li><li>렌탈료</li><li>계약시작</li><li>계약종료</li></ul>
       <div class="modal-actions"><button class="button" id="cancelContractUpload">취소</button><button class="button primary" id="confirmContractUpload">자료 확인하기</button></div>
     </div>
   </div>

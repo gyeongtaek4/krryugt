@@ -11,6 +11,7 @@ let vehicleData = [];
 const contractModal = document.getElementById('contractUploadModal');
 const contractFileInput = document.getElementById('contractFileInput');
 const contractUploadError = document.getElementById('contractUploadError');
+const contractUploadColumns = ['차량번호', '렌탈료', '계약시작', '계약종료'];
 const contractColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차종', '차량번호', '렌탈료', '계약시작', '계약종료'];
 let contractData = [];
 const drivingUploadModal = document.getElementById('drivingUploadModal');
@@ -883,10 +884,10 @@ async function readContractFile(file) {
   if (!rows.length) throw new Error('파일에 표시할 계약정보가 없습니다.');
   const normalize = value => String(value).replace(/\s/g, '');
   const headerMap = Object.keys(rows[0]).reduce((map, key) => (map[normalize(key)] = key, map), {});
-  const missing = contractColumns.filter(column => !headerMap[normalize(column)]);
+  const missing = contractUploadColumns.filter(column => !headerMap[normalize(column)]);
   if (missing.length) throw new Error(`필수 열이 없습니다: ${missing.join(', ')}`);
-  const cleanRows = rows.map(row => Object.fromEntries(contractColumns.map(column => [column, String(row[headerMap[normalize(column)]] ?? '').trim()])))
-    .filter(row => contractColumns.some(column => row[column]));
+  const cleanRows = rows.map(row => Object.fromEntries(contractUploadColumns.map(column => [column, String(row[headerMap[normalize(column)]] ?? '').trim()])))
+    .filter(row => contractUploadColumns.some(column => row[column]));
   cleanRows.forEach((row, index) => {
     row['계약시작'] = normalizeYearMonth(row['계약시작']);
     row['계약종료'] = normalizeYearMonth(row['계약종료']);
@@ -1071,7 +1072,7 @@ function downloadVehicleTemplate() {
 }
 
 function downloadContractTemplate() {
-  downloadTemplate(contractColumns, '차량계약정보 양식', '차량계약정보_업로드양식.xlsx');
+  downloadTemplate(contractUploadColumns, '차량계약정보 양식', '차량계약정보_업로드양식.xlsx');
 }
 
 function downloadDrivingTemplate() {
