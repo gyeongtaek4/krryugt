@@ -849,12 +849,11 @@ function rankingMarkup(rows, valueFormatter) {
   return rows.length ? rows.map(row => `<tr><td class="plate">${escapeHtml(row.plate)}</td><td title="${escapeHtml(row.team)}">${escapeHtml(row.team)}</td><td>${valueFormatter(row)}</td></tr>`).join('') : '<tr><td colspan="3" class="empty-table">확정 운행자료가 없습니다.</td></tr>';
 }
 function renderDashboardUsage() {
-  const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];
+  const month=document.getElementById('dashboardUsageMonth').value;
   const summary = item ? drivingVehicleSummaryForMonth(month) : [];
   const byDays = [...summary].sort((a,b) => b.usageDays-a.usageDays || a.plate.localeCompare(b.plate, 'ko'));
   const byDistance = [...summary].sort((a,b) => b.distance-a.distance || a.plate.localeCompare(b.plate, 'ko'));
   const lowest = rows => [...rows].reverse().slice(0,5).reverse();
-  document.getElementById('dashboardUsageStatus').textContent=item ? `${month} · 운행기록 확정자료 · ${summary.length}대 · 차량번호 기준` : `${month || '확정월 선택 필요'} · 확정된 운행자료 없음`;
   document.getElementById('dashboardUsageDaysHigh').innerHTML=rankingMarkup(byDays.slice(0,5), row => `${row.usageDays}일`);
   document.getElementById('dashboardUsageDaysLow').innerHTML=rankingMarkup(lowest(byDays), row => `${row.usageDays}일`);
   document.getElementById('dashboardUsageDistanceHigh').innerHTML=rankingMarkup(byDistance.slice(0,5), row => `${row.distance.toLocaleString('ko-KR')}km`);
