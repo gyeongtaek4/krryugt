@@ -4,10 +4,32 @@ let handoverPhotoDraft = [], handoverPhotoLoading = false;
 let handoverRecipients = [];
 const handoverEl = id => document.getElementById(id);
 function refreshHandoverVehicles() {
-  const select = handoverEl('handoverVehicle'), selected = select.value;
-  select.innerHTML = '<option value="">차량 선택</option>' + vehicleData.map(row =>
-    `<option value="${escapeHtml(row['차량번호'])}">${escapeHtml(row['차량번호'])} · ${escapeHtml(row['차종'] || '')}</option>`).join('');
-  select.value = selected;
+  renderHandoverVehicleInfo();
+  renderHandoverVehicleResults();
+}
+function matchingHandoverVehicles(keyword) {
+  const query=normalizePlate(keyword);
+  if(!query)return [];
+  return vehicleData.filter(vehicle=>normalizePlate(vehicle['차량번호']).includes(query)).slice(0,8);
+}
+function renderHandoverVehicleResults() {
+  const input=handoverEl('handoverVehicle'),results=handoverEl('handoverVehicleResults');
+  const matches=matchingHandoverVehicles(input.value);
+  results.innerHTML=matches.map(vehicle=>`<button class="handover-vehicle-option" type="button" role="option" data-handover-vehicle="${escapeHtml(vehicle['차량번호'])}"><strong>${escapeHtml(vehicle['차량번호'])}</strong><small>${escapeHtml([vehicle['본부'],vehicle['부'],vehicle['팀'],vehicle['차종']].filter(Boolean).join(' / ')||'차량 정보')}</small></button>`).join('');
+  results.classList.toggle('open',Boolean(matches.length));
+  input.setAttribute('aria-expanded',String(Boolean(matches.length)));
+}
+function renderHandoverVehicleInfo() {
+  const vehicle=vehicleForPlate(handoverEl('handoverVehicle').value);
+  handoverEl('handoverVehicleInfo').textContent=vehicle?`${vehicle['본부']||'—'} / ${vehicle['부']||'—'} / ${vehicle['팀']||'—'} · ${vehicle['차종']||'차종 미입력'} · 담당 ${vehicle['담당자(정)']||'미지정'}`:'차량번호를 입력하면 본부 · 부 · 팀 · 차종 정보가 표시됩니다.';
+  return vehicle;
+}
+function selectHandoverVehicle(plate) {
+  handoverEl('handoverVehicle').value=plate;
+  handoverEl('handoverVehicleResults').classList.remove('open');
+  handoverEl('handoverVehicle').setAttribute('aria-expanded','false');
+  const vehicle=renderHandoverVehicleInfo();
+  if(vehicle)handoverEl('handoverFrom').value=vehicle['담당자(정)']||'';
 }
 function handoverRecipientName(member) {
   return String(member?.display_name || member?.email || '');
@@ -222,9 +244,14 @@ async function deleteHandoverRecord(item) {
   await refreshHandoverFromSupabase();
 }
 handoverEl('handoverDate').value = new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
-handoverEl('handoverVehicle').addEventListener('change',()=>{
-  handoverEl('handoverFrom').value = vehicleForPlate(handoverEl('handoverVehicle').value)?.['담당자(정)'] || '';
+handoverEl('handoverVehicle').addEventListener('input',()=>{
+  const vehicle=renderHandoverVehicleInfo();
+  if(vehicle)handoverEl('handoverFrom').value=vehicle['담당자(정)']||'';
+  renderHandoverVehicleResults();
 });
+handoverEl('handoverVehicle').addEventListener('focus',renderHandoverVehicleResults);
+handoverEl('handoverVehicle').addEventListener('blur',()=>setTimeout(()=>{handoverEl('handoverVehicleResults').classList.remove('open');handoverEl('handoverVehicle').setAttribute('aria-expanded','false');},150));
+handoverEl('handoverVehicleResults').addEventListener('click',event=>{const option=event.target.closest('[data-handover-vehicle]');if(option)selectHandoverVehicle(option.dataset.handoverVehicle);});
 handoverEl('handoverRecipientSearch').addEventListener('input', event => {
   handoverEl('handoverToUser').value = '';
   renderHandoverRecipientResults(event.target.value);

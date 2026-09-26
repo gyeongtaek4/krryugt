@@ -5,10 +5,14 @@ const app=fs.readFileSync('dist/js/app.js','utf8');
 const sql=fs.readFileSync('supabase/008_handover_recipient_consent.sql','utf8');
 const legacySql=fs.readFileSync('supabase/009_handover_consent_name_and_legacy_match.sql','utf8');
 
-for(const id of ['handoverToUser','handoverRecipientSearch','handoverRecipientResults','handoverHistorySearch']) assert(html.includes(`id="${id}"`),`missing ${id}`);
+for(const id of ['handoverVehicle','handoverVehicleResults','handoverVehicleInfo','handoverToUser','handoverRecipientSearch','handoverRecipientResults','handoverHistorySearch']) assert(html.includes(`id="${id}"`),`missing ${id}`);
+assert(html.includes('id="handoverVehicle" type="search"'));
+assert(html.includes('handover-transfer-row'));
 assert(html.includes('인수 동의'));
 assert(js.includes("rpc('active_handover_recipients')"));
 assert(js.includes('renderHandoverRecipientResults'));
+assert(js.includes('renderHandoverVehicleResults'));
+assert(js.includes('data-handover-vehicle'));
 assert(js.includes('data-handover-recipient'));
 assert(js.includes('data-handover-detail-close'));
 assert(js.includes('item.createdBy === window.fleetCurrentUser?.id'));
