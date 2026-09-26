@@ -782,6 +782,12 @@ function renderDashboardCurrentData() {
   document.getElementById('dashboardUrgentCount').textContent = `${countVehicles(expiring.filter(row => remainingMonths(row['계약종료']) <= 1))}대`;
 }
 
+function setDepartmentAccordionState(open) {
+  document.querySelectorAll('#dashboardDepartments details.department-node').forEach(node => {
+    node.open = open;
+  });
+}
+
 function vehicleForPlate(plate) {
   const normalized = normalizePlate(plate);
   return vehicleData.find(row => normalizePlate(row['차량번호']) === normalized) || null;
@@ -1240,6 +1246,8 @@ async function readDrivingFile(file) {
 }
 
 document.getElementById('menuButton').addEventListener('click', () => toggleSidebar(isNarrowScreen() ? !sidebar.classList.contains('open') : !sidebarExpanded));
+document.getElementById('expandDashboardDepartments').addEventListener('click', () => setDepartmentAccordionState(true));
+document.getElementById('collapseDashboardDepartments').addEventListener('click', () => setDepartmentAccordionState(false));
 scrim.addEventListener('click', () => toggleSidebar(false));
 window.addEventListener('resize',applySidebarPreference);
 document.getElementById('vehicleUploadButton').addEventListener('click', () => toggleModal(true));

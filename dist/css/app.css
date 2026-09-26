@@ -291,6 +291,8 @@ td strong { font-size: .8rem; }
 .department-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; gap: 14px; }
 .dashboard-overview { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
 .department-overview .department-list { gap: 14px; }
+.department-overview-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.department-overview-actions .button { min-height: 35px; padding: 0 12px; font-size: .78rem; }
 .expiry-overview .expiry-header-actions { justify-content: flex-start; }
 @media (max-width: 900px) { .dashboard-overview { grid-template-columns: 1fr; } }
 .department-headquarters-card { min-width: 0; padding: 10px; border: 1px solid #d8e8e4; border-radius: 14px; background: linear-gradient(145deg, #f4fbf9, #ffffff 54%); box-shadow: 0 5px 14px rgba(26, 84, 70, .035); }
@@ -528,6 +530,7 @@ td strong { font-size: .8rem; }
   .metric-card { min-height: 132px; }
   .panel { padding: 18px; }
   .panel-header { flex-direction: column; }
+  .department-overview-actions { width: 100%; justify-content: flex-start; }
   .period-tabs { align-self: stretch; }
   .period-tab { flex: 1; }
   .button { padding-inline: 12px; }

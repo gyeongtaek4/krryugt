@@ -15,5 +15,10 @@ assert(!js.includes('class="bar-track"'), 'dashboard department bars are still r
 assert(css.includes('.department-node summary'), 'accordion summary styling is missing');
 assert(css.includes('.department-team-list'), 'nested team list styling is missing');
 assert(css.includes('repeat(auto-fit, minmax(300px, 1fr))'), 'responsive headquarters card grid is missing');
+assert(html.includes('id="expandDashboardDepartments"'), 'expand all control is missing');
+assert(html.includes('id="collapseDashboardDepartments"'), 'collapse all control is missing');
+assert(js.includes('function setDepartmentAccordionState(open)'), 'department accordion state helper is missing');
+assert(js.includes("querySelectorAll('#dashboardDepartments details.department-node')"), 'accordion state helper does not target all department nodes');
+assert(css.includes('.department-overview-actions'), 'department accordion controls are not styled');
 assert(!html.includes('현재 차량현황 기준'), 'obsolete current fleet note is still rendered');
-console.log('PASS: dashboard department cards use responsive accordion hierarchy without bars or obsolete note (static).');
+console.log('PASS: dashboard department cards use responsive accordion hierarchy with all-open/all-close controls (static).');
