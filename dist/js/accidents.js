@@ -12,14 +12,31 @@
   const vehicleSnapshot=vehicle=>Object.fromEntries(['차량번호','차종','본부','부','팀','담당자(정)','담당자(부)','지역'].map(key=>[key,String(vehicle[key]||'')]));
 
   function refreshAccidentVehicles() {
-    const select=el('accidentVehicle'),selected=select.value;
-    select.innerHTML='<option value="">차량 선택</option>'+vehicleData.map(vehicle=>`<option value="${safe(vehicle['차량번호'])}">${safe(vehicle['차량번호'])} · ${safe(vehicle['차종'])}</option>`).join('');
-    select.value=selected;renderAccidentVehicleInfo();
+    renderAccidentVehicleInfo();
+    renderAccidentVehicleSuggestions();
   }
   window.refreshAccidentVehicles=refreshAccidentVehicles;
+  function matchingAccidentVehicles(query) {
+    const keyword=normalizePlate(query);
+    if(!keyword)return [];
+    return vehicleData.filter(vehicle=>normalizePlate(vehicle['차량번호']).includes(keyword)).slice(0,8);
+  }
+  function renderAccidentVehicleSuggestions() {
+    const input=el('accidentVehicle'),suggestions=el('accidentVehicleSuggestions');
+    const matches=matchingAccidentVehicles(input.value);
+    suggestions.hidden=!matches.length;
+    input.setAttribute('aria-expanded',String(Boolean(matches.length)));
+    suggestions.innerHTML=matches.map(vehicle=>`<button class="accident-vehicle-suggestion" type="button" role="option" data-accident-vehicle="${safe(vehicle['차량번호'])}"><strong>${safe(vehicle['차량번호'])}</strong><small>${safe([vehicle['본부'],vehicle['부'],vehicle['팀'],vehicle['차종']].filter(Boolean).join(' / ')||'차량 정보')}</small></button>`).join('');
+  }
+  function selectAccidentVehicle(plate) {
+    el('accidentVehicle').value=plate;
+    el('accidentVehicleSuggestions').hidden=true;
+    el('accidentVehicle').setAttribute('aria-expanded','false');
+    renderAccidentVehicleInfo();
+  }
   function renderAccidentVehicleInfo() {
     const vehicle=vehicleForPlate(el('accidentVehicle').value);
-    el('accidentVehicleInfo').textContent=vehicle?`${vehicle['본부']||'—'} / ${vehicle['부']||'—'} / ${vehicle['팀']||'—'} · ${vehicle['차종']||'차종 미입력'} · 담당 ${vehicle['담당자(정)']||'미지정'}`:'차량을 선택하면 본부 · 부 · 팀 · 차종 정보가 표시됩니다.';
+    el('accidentVehicleInfo').textContent=vehicle?`${vehicle['본부']||'—'} / ${vehicle['부']||'—'} / ${vehicle['팀']||'—'} · ${vehicle['차종']||'차종 미입력'} · 담당 ${vehicle['담당자(정)']||'미지정'}`:'차량번호를 입력하면 본부 · 부 · 팀 · 차종 정보가 표시됩니다.';
   }
   function validatePhotos(photos) {
     if(photos.length>3)throw Error('사고 현장 자료는 최대 3개까지 첨부할 수 있습니다.');
@@ -92,7 +109,10 @@
   async function updateAccident(item,values){const {error}=await window.fleetSupabaseClient.from('vehicle_accidents').update(values).eq('id',item.id);if(error)throw Error(error.message||'사고 접수 수정에 실패했습니다.');await refreshAccidentsFromSupabase();}
   async function deleteAccident(item){const {error}=await window.fleetSupabaseClient.from('vehicle_accidents').delete().eq('id',item.id);if(error)throw Error(error.message||'사고 접수 삭제에 실패했습니다.');const paths=(item.photo_paths||[]).map(photo=>photo.path).filter(Boolean);if(paths.length){const {error:photoError}=await window.fleetSupabaseClient.storage.from('accident-photos').remove(paths);if(photoError)showToast('사고 접수는 삭제됐지만 첨부자료 정리에 실패했습니다. 관리자에게 문의하세요.');}await refreshAccidentsFromSupabase();}
   el('accidentDate').value=today();
-  el('accidentVehicle').addEventListener('change',renderAccidentVehicleInfo);
+  el('accidentVehicle').addEventListener('input',()=>{renderAccidentVehicleInfo();renderAccidentVehicleSuggestions();});
+  el('accidentVehicle').addEventListener('focus',renderAccidentVehicleSuggestions);
+  el('accidentVehicle').addEventListener('blur',()=>setTimeout(()=>{el('accidentVehicleSuggestions').hidden=true;el('accidentVehicle').setAttribute('aria-expanded','false');},150));
+  el('accidentVehicleSuggestions').addEventListener('click',event=>{const option=event.target.closest('[data-accident-vehicle]');if(option)selectAccidentVehicle(option.dataset.accidentVehicle);});
   el('accidentPhotos').addEventListener('change',async event=>{
     const input=event.target;photoLoading=true;el('accidentSave').disabled=true;el('accidentError').textContent='';
     try{const files=Array.from(input.files);validatePhotos(files);const incoming=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,data:reader.result});reader.onerror=()=>reject(Error('사고 현장 자료를 읽지 못했습니다.'));reader.readAsDataURL(file);})));photoDraft=mergePhotos(incoming);previewPhotos();}

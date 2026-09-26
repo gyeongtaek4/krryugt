@@ -581,6 +581,13 @@ td strong { font-size: .8rem; }
 #accidentForm textarea.form-input { min-height: 112px; padding-top: 11px; padding-bottom: 11px; resize: vertical; line-height: 1.45; }
 #accidentForm .form-input:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
 .accident-vehicle-info { min-height: 43px; box-sizing: border-box; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink-soft); background: var(--surface); font-size: .78rem; line-height: 1.35; }
+.accident-vehicle-field { position: relative; }
+.accident-vehicle-suggestions { position: absolute; z-index: 12; top: calc(100% + 3px); right: 0; left: 0; overflow: hidden; max-height: 218px; border: 1px solid var(--brand-soft); border-radius: 10px; background: var(--white); box-shadow: 0 12px 24px rgba(25, 53, 48, .14); }
+.accident-vehicle-suggestion { display: grid; width: 100%; padding: 10px 12px; border: 0; border-bottom: 1px solid var(--line); color: var(--ink); background: var(--white); text-align: left; cursor: pointer; }
+.accident-vehicle-suggestion:last-child { border-bottom: 0; }
+.accident-vehicle-suggestion:hover, .accident-vehicle-suggestion:focus { background: var(--brand-wash); outline: 0; }
+.accident-vehicle-suggestion strong { color: var(--brand-dark); font-size: .82rem; }
+.accident-vehicle-suggestion small { margin-top: 2px; color: var(--ink-soft); font-size: .72rem; }
 .accident-comment { margin-top: 15px; padding: 15px; border-radius: 12px; background: var(--brand-wash); white-space: pre-wrap; overflow-wrap: anywhere; }
 .accident-comment strong { display: block; margin-bottom: 6px; color: var(--brand-dark); font-size: .78rem; }
 .accident-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 18px; margin: 14px 0; }

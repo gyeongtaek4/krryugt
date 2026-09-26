@@ -9,7 +9,11 @@ const replacementSql=fs.readFileSync('supabase/016_accident_replacement_vehicle.
 const authorSql=fs.readFileSync('supabase/017_author_manage_accidents_handovers.sql','utf8');
 assert(html.includes('data-page="사고접수 및 이력"'));
 ['accidentView','accidentVehicle','accidentDate','accidentPassengers','accidentReplacementVehicle','accidentLocation','accidentDescription','accidentPhotos','accidentRows'].forEach(id=>assert(html.includes(`id="${id}"`)));
+assert(html.includes('id="accidentVehicle" type="search"'));
+assert(html.includes('id="accidentVehicleSuggestions"'));
 assert(js.includes("vehicleForPlate(el('accidentVehicle').value)"));
+assert(js.includes('matchingAccidentVehicles'));
+assert(js.includes('data-accident-vehicle'));
 assert(js.includes("from('vehicle_accidents').insert"));
 assert(js.includes("from('accident-photos').upload"));
 assert(js.includes('replacement_vehicle_number'));
