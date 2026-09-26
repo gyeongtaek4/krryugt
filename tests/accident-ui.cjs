@@ -1,6 +1,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const html=fs.readFileSync('dist/index.html','utf8');
 const js=fs.readFileSync('dist/js/accidents.js','utf8');
+const css=fs.readFileSync('dist/css/app.css','utf8');
 const auth=fs.readFileSync('dist/js/supabase-auth.js','utf8');
 const app=fs.readFileSync('dist/js/app.js','utf8');
 const sql=fs.readFileSync('supabase/014_vehicle_accidents.sql','utf8');
@@ -27,6 +28,7 @@ assert(js.includes("photos.length>3"));
 assert(js.includes("'application/pdf'"));
 assert(html.includes('accept="image/jpeg,image/png,image/webp,application/pdf,.pdf"'));
 assert(js.includes("rpc('comment_vehicle_accident'"));
+assert(css.includes('.handover-detail .attachment-pdf') && css.includes('height: 78px'));
 assert(auth.includes("'사고접수 및 이력'"));
 assert(app.includes("button.dataset.page === '사고접수 및 이력'"));
 ['create table if not exists public.vehicle_accidents','create or replace function public.comment_vehicle_accident','accident-photos','vehicle_accidents_insert_active',"current_user_role()<>'admin'"].forEach(value=>assert(sql.includes(value)));

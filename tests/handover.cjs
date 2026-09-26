@@ -28,4 +28,5 @@ assert(source.includes("담당(정) ${vehicle['담당자(정)']||'미지정'} ·
 assert(css.includes('#handoverForm .form-input'));
 assert(css.includes('#handoverForm select.form-input'));
 assert(css.includes('#handoverForm textarea.form-input'));
+assert(css.includes('.handover-detail .handover-pdf') && css.includes('height: 78px'));
 console.log('PASS: photo constraints, Supabase save calls and metadata archive format (mock, no live upload).');

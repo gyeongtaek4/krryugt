@@ -653,6 +653,12 @@ td strong { font-size: .8rem; }
 .handover-pdf { display: flex; height: 160px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--brand); background: white; border: 1px solid var(--line); border-radius: 10px; font-weight: 800; font-size: 28px; }
 .handover-pdf small { color: var(--ink-soft); font-size: 12px; font-weight: 600; }
 .handover-gallery figcaption { font-size: 12px; color: var(--ink-soft); overflow-wrap: anywhere; margin-top: 5px; }
+.handover-detail .handover-gallery { grid-template-columns: repeat(auto-fill, minmax(104px, 132px)); gap: 9px; margin-top: 12px; }
+.handover-detail .handover-gallery img { height: 78px; border-radius: 8px; }
+.handover-detail .handover-pdf, .handover-detail .attachment-pdf { min-width: 0; min-height: 78px; height: 78px; padding: 8px; border-radius: 8px; font-size: 15px; }
+.handover-detail .handover-pdf { gap: 3px; }
+.handover-detail .handover-pdf small { font-size: 10px; }
+.handover-detail .handover-gallery figcaption { margin-top: 3px; font-size: 10px; line-height: 1.3; }
 .inline-detail-row > td { padding: 0; background: #eef1f1; }
 .handover-detail { margin: 12px; padding: 20px; border: 1px solid #d6dcdc; border-radius: 12px; background: #f7f8f8; box-shadow: inset 0 1px 0 rgba(255,255,255,.85); }
 .detail-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
