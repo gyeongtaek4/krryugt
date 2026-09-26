@@ -741,16 +741,41 @@ function normalizePlate(value) {
   return String(value || '').replace(/\s/g, '').toUpperCase();
 }
 
+function dashboardDepartmentTree() {
+  const headquarters = new Map();
+  vehicleData.forEach(row => {
+    const headquartersName = String(row['본부'] || '').trim() || '미입력 본부';
+    const divisionName = String(row['부'] || '').trim() || '미입력 부';
+    const teamName = String(row['팀'] || '').trim() || '미입력 팀';
+    if (!headquarters.has(headquartersName)) headquarters.set(headquartersName, { count: 0, divisions: new Map() });
+    const headquartersItem = headquarters.get(headquartersName);
+    headquartersItem.count += 1;
+    if (!headquartersItem.divisions.has(divisionName)) headquartersItem.divisions.set(divisionName, { count: 0, teams: new Map() });
+    const divisionItem = headquartersItem.divisions.get(divisionName);
+    divisionItem.count += 1;
+    divisionItem.teams.set(teamName, (divisionItem.teams.get(teamName) || 0) + 1);
+  });
+  return [...headquarters.entries()].sort((a, b) => b[1].count - a[1].count || a[0].localeCompare(b[0], 'ko'));
+}
+
+function dashboardDepartmentAccordionMarkup() {
+  return dashboardDepartmentTree().map(([headquartersName, headquarters]) => {
+    const divisions = [...headquarters.divisions.entries()]
+      .sort((a, b) => b[1].count - a[1].count || a[0].localeCompare(b[0], 'ko'))
+      .map(([divisionName, division]) => {
+        const teams = [...division.teams.entries()]
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'))
+          .map(([teamName, count]) => `<li class="department-team"><span>팀 · ${escapeHtml(teamName)}</span><strong>${count}대</strong></li>`).join('');
+        return `<details class="department-node department-division" open><summary><span class="department-label"><span class="department-level">부</span>${escapeHtml(divisionName)}</span><strong>${division.count}대</strong><span class="department-chevron" aria-hidden="true">⌄</span></summary><ul class="department-team-list">${teams}</ul></details>`;
+      }).join('');
+    return `<details class="department-node department-headquarters" open><summary><span class="department-label"><span class="department-level">본부</span>${escapeHtml(headquartersName)}</span><strong>${headquarters.count}대</strong><span class="department-chevron" aria-hidden="true">⌄</span></summary><div class="department-division-list">${divisions}</div></details>`;
+  }).join('');
+}
+
 function renderDashboardCurrentData() {
   document.getElementById('dashboardVehicleCount').textContent = `${vehicleData.length}대`;
-  const departments = new Map();
-  vehicleData.forEach(row => {
-    const name = ['본부', '부', '팀'].map(key => row[key] || '미입력').join(' / ');
-    departments.set(name, (departments.get(name) || 0) + 1);
-  });
-  const groups = [...departments.entries()].sort((a, b) => b[1] - a[1]);
-  const max = Math.max(1, ...groups.map(([, count]) => count));
-  document.getElementById('dashboardDepartments').innerHTML = groups.length ? groups.map(([name, count]) => `<div class="department-row"><div class="department-meta"><span>${escapeHtml(name)}</span><strong>${count}대</strong></div><div class="bar-track"><div class="bar-fill" style="--value:${count / max * 100}%"></div></div></div>`).join('') : '<p class="empty-table">등록된 차량이 없습니다.</p>';
+  const departments = dashboardDepartmentTree();
+  document.getElementById('dashboardDepartments').innerHTML = departments.length ? dashboardDepartmentAccordionMarkup() : '<p class="empty-table">등록된 차량이 없습니다.</p>';
   const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 6; });
   const countVehicles = rows => new Set(rows.map(row => normalizePlate(row['차량번호']))).size;
   document.getElementById('dashboardExpiryCount').textContent = `${countVehicles(expiring)}대`;
