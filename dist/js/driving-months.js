@@ -114,21 +114,18 @@ renderDriving = function() {
   document.getElementById('drivingSummaryBasis').textContent=summary.month?`마지막 확정 저장 기준 · ${summary.month}`:'확정된 자료 없음 · 아래 업로드 자료를 검토하세요.';
   document.getElementById('usageVehicleCount').textContent=summary.month?`${summary.count}대`:'—';
   document.getElementById('usageTotalDistance').textContent=summary.month?`${summary.distance.toLocaleString('ko-KR')}km`:'—';
-  ['Headquarters','Division','Team'].forEach((key,index)=>{
-    document.getElementById(`usage${key}Count`).textContent=summary.month?`${[summary.headquarters,summary.divisions,summary.teams][index]}개`:'—';
-  });
-  const items=drivingMonthlyTotals(month).filter(item=>!keyword || [item.plate,...Object.values(item.org||{})].join(' ').toLowerCase().includes(keyword));
+  const items=drivingMonthlyTotals(month).filter(item=>!keyword || [item.plate,item.org?.['차종']].filter(Boolean).join(' ').toLowerCase().includes(keyword));
   drivingPage=Math.min(drivingPage,Math.max(1,Math.ceil(items.length/20)));
   document.getElementById('drivingTableBody').innerHTML=items.slice((drivingPage-1)*20,drivingPage*20).map(item=>{
     const org=item.org||{};
-    return `<tr><td>${escapeHtml(month)}</td>${['본부','부','팀'].map(key=>`<td>${escapeHtml(org[key]||'미매칭')}</td>`).join('')}<td class="plate"><button class="plate-detail-button" data-driving-detail="${escapeHtml(normalizePlate(item.plate))}" aria-label="${escapeHtml(item.plate)} 일별 운행기록 보기">${escapeHtml(item.plate)}</button></td><td>${escapeHtml(org['차종']||'—')}</td><td class="distance-value">${item.distance.toLocaleString('ko-KR')}km</td><td>${item.days.size}일</td><td>${item.org?'연결 완료':'차량현황 확인'}</td></tr>`;
-  }).join('')||'<tr><td colspan="9" class="empty-table">조건에 맞는 월별 차량자료가 없습니다.</td></tr>';
+    return `<tr><td>${escapeHtml(month)}</td><td class="plate"><button class="plate-detail-button" data-driving-detail="${escapeHtml(normalizePlate(item.plate))}" aria-label="${escapeHtml(item.plate)} 일별 운행기록 보기">${escapeHtml(item.plate)}</button></td><td>${escapeHtml(org['차종']||'—')}</td><td class="distance-value">${item.distance.toLocaleString('ko-KR')}km</td><td>${item.days.size}일</td><td>${item.org?'연결 완료':'차량현황 확인'}</td></tr>`;
+  }).join('')||'<tr><td colspan="6" class="empty-table">조건에 맞는 월별 차량자료가 없습니다.</td></tr>';
   document.getElementById('drivingRecordCount').textContent=`${items.length}대`;
   drivingPagination('drivingPagination',items.length,drivingPage);renderDrivingArchive();
 };
 exportDrivingData = function() {
   const month=document.getElementById('usageMonth').value;
-  const rows=drivingMonthlyTotals(month).map(item=>({'이용월도':month,...Object.fromEntries(['본부','부','팀'].map(key=>[key,item.org?.[key]||'미매칭'])),'차량번호':item.plate,'차종':item.org?.['차종']||'','월 이용키로수':item.distance,'이용일수':item.days.size}));
+  const rows=drivingMonthlyTotals(month).map(item=>({'이용월도':month,'차량번호':item.plate,'차종':item.org?.['차종']||'','월 이용키로수':item.distance,'이용일수':item.days.size,'매칭상태':item.org?'연결 완료':'차량현황 확인'}));
   if(!rows.length){showToast('내려받을 자료가 없습니다.');return;}
   downloadExcel(rows,'차량별 월 운행합계',`차량별운행합계_${month}.xlsx`);
 };
