@@ -534,6 +534,9 @@ function renderVehicles() {
   </tr>`; }).join('') : '<tr><td class="empty-table" colspan="11">조건에 맞는 차량이 없습니다.</td></tr>';
   document.getElementById('recordCount').textContent = `${filtered.length}건`;
   document.getElementById('totalVehicles').textContent = `총 ${vehicleData.length}대`;
+  document.getElementById('vehicleHeadquartersCount').textContent = `${new Set(vehicleData.map(row => row['본부']).filter(Boolean)).size}개`;
+  document.getElementById('vehicleDivisionCount').textContent = `${new Set(vehicleData.map(row => row['부']).filter(Boolean)).size}개`;
+  document.getElementById('vehicleTeamCount').textContent = `${new Set(vehicleData.map(row => row['팀']).filter(Boolean)).size}개`;
   renderVehicleGroupSummary('teamVehicleSummary', '팀', '미지정 팀');
   renderVehicleGroupSummary('modelVehicleSummary', '차종', '미입력 차종');
   renderVehicleGroupSummary('regionVehicleSummary', '지역', '미입력 지역');
@@ -848,9 +851,6 @@ function renderDriving() {
   document.getElementById('drivingSummaryBasis').textContent = summary.month ? `마지막 확정 저장 기준 · ${summary.month} (아래 조회월·검토자료와 별도)` : '확정된 자료 없음 · 업로드 자료는 아래에서 검토하세요.';
   document.getElementById('usageVehicleCount').textContent = summary.month ? `${summary.count}대` : '—';
   document.getElementById('usageTotalDistance').textContent = summary.month ? `${summary.distance.toLocaleString('ko-KR')}km` : '—';
-  ['Headquarters','Division','Team'].forEach((key,index)=>{
-    document.getElementById(`usage${key}Count`).textContent = summary.month ? `${[summary.headquarters,summary.divisions,summary.teams][index]}개` : '—';
-  });
 
   const filtered = monthlyItems.filter(item => {
     const vehicle = item.vehicle || {};

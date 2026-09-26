@@ -244,7 +244,7 @@
           </div>
         </section>
         <section class="vehicle-summary vehicle-summary-breakdowns" aria-label="차량현황 요약">
-          <article class="fleet-total-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>등록 차량</span><strong id="totalVehicles">총 12대</strong></div></article>
+          <article class="fleet-total-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>등록 차량</span><strong id="totalVehicles">총 12대</strong></div><div class="fleet-org-mini" aria-label="등록 차량 조직 수"><span>본부 <b id="vehicleHeadquartersCount">—</b></span><span>부 <b id="vehicleDivisionCount">—</b></span><span>팀 <b id="vehicleTeamCount">—</b></span></div></article>
           <div class="fleet-breakdown-grid">
             <article class="fleet-breakdown-card"><h2>팀별 차량</h2><div class="fleet-breakdown-list" id="teamVehicleSummary" aria-live="polite">팀별 차량 대수를 불러오는 중입니다.</div></article>
             <article class="fleet-breakdown-card"><h2>차종별 차량</h2><div class="fleet-breakdown-list" id="modelVehicleSummary" aria-live="polite">차종별 차량 대수를 불러오는 중입니다.</div></article>
@@ -336,9 +336,6 @@
         </section>
         <p class="driving-summary-basis" id="drivingSummaryBasis">확정된 자료 없음</p>
         <section class="usage-summary" aria-label="마지막 확정 저장 기준 운행 요약">
-          <article class="summary-card"><span class="metric-icon" aria-hidden="true">본</span><div class="summary-copy"><span>본부</span><strong id="usageHeadquartersCount">—</strong></div></article>
-          <article class="summary-card"><span class="metric-icon" aria-hidden="true">부</span><div class="summary-copy"><span>부</span><strong id="usageDivisionCount">—</strong></div></article>
-          <article class="summary-card"><span class="metric-icon" aria-hidden="true">팀</span><div class="summary-copy"><span>팀</span><strong id="usageTeamCount">—</strong></div></article>
           <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="summary-copy"><span>운행 차량</span><strong id="usageVehicleCount">0대</strong></div></article>
           <article class="summary-card"><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 18a7 7 0 1 1 14 0M12 11l3-3M4 18h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div class="summary-copy"><span>월 총 주행거리</span><strong id="usageTotalDistance">0km</strong></div></article>
         </section>

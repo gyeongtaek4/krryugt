@@ -336,6 +336,9 @@ td strong { font-size: .8rem; }
 .fleet-total-card { display: flex; align-items: center; gap: 15px; min-height: 82px; padding: 18px 22px; border: 1px solid #cce8e1; border-radius: var(--radius); background: linear-gradient(120deg, var(--brand-wash), var(--white)); }
 .fleet-total-card .metric-icon { flex: 0 0 auto; width: 42px; height: 42px; }
 .fleet-total-card .summary-copy strong { color: var(--brand-dark); font-size: 1.55rem; }
+.fleet-org-mini { margin-left: auto; display: flex; flex-wrap: wrap; gap: 7px; justify-content: flex-end; }
+.fleet-org-mini span { padding: 5px 8px; border-radius: 8px; background: rgba(255,255,255,.78); color: var(--ink-soft); font-size: .72rem; white-space: nowrap; }
+.fleet-org-mini b { margin-left: 3px; color: var(--brand-dark); }
 .fleet-breakdown-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
 .fleet-breakdown-card { min-width: 0; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); }
 .fleet-breakdown-card h2 { margin: 0 0 12px; color: var(--ink-soft); font-size: .82rem; font-weight: 700; }
@@ -486,6 +489,8 @@ td strong { font-size: .8rem; }
   body.sidebar-unpinned .sidebar.open, body.sidebar-collapsed .sidebar.open, .sidebar.open { transform: translateX(0); }
   .grid-main { grid-template-columns: 1fr; }
   .vehicle-summary { grid-template-columns: 1fr; }
+  .fleet-total-card { align-items: flex-start; flex-wrap: wrap; }
+  .fleet-org-mini { width: 100%; justify-content: flex-start; margin-left: 0; }
   .fleet-breakdown-grid { grid-template-columns: 1fr; }
   .usage-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .vehicle-toolbar { align-items: stretch; flex-direction: column; }
