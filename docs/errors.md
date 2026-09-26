@@ -4,8 +4,8 @@
 
 - 증상: CC 열이 포함된 차량현황 Excel을 업로드할 때 `Could not find the 'cc' column of 'vehicles' in the schema cache` 오류가 표시됐다.
 - 원인: `vehicles.cc` DB 열은 생성됐지만 Supabase API(PostgREST)의 스키마 캐시가 새 열 정보를 아직 다시 읽지 않은 상태였다.
-- 조치: Supabase SQL Editor에서 `select pg_notify('pgrst', 'reload schema');`를 실행해 API 스키마 캐시를 갱신했다.
-- 검증: 캐시 갱신 SQL이 정상 완료된 것을 확인했다. 사용자는 업로드 팝업을 닫고 배포 홈페이지를 새로고침한 뒤 파일을 다시 선택해 업로드한다.
+- 조치: `alter table public.vehicles add column if not exists cc text not null default '';`를 단독으로 다시 실행한 뒤 `select pg_notify('pgrst', 'reload schema');`로 API 스키마 캐시를 갱신했다.
+- 검증: 배포 홈페이지와 같은 Supabase REST API의 `vehicles?select=cc` 읽기 요청이 2026-09-26 HTTP 200으로 성공했다. 사용자는 업로드 팝업을 닫고 배포 홈페이지를 새로고침한 뒤 파일을 다시 선택해 업로드한다.
 
 ## 사고접수 메뉴가 기존 안내 문구만 표시됨 (2026-09-23)
 
