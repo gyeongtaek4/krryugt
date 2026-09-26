@@ -768,7 +768,7 @@ function dashboardDepartmentAccordionMarkup() {
           .map(([teamName, count]) => `<li class="department-team"><span>팀 · ${escapeHtml(teamName)}</span><strong>${count}대</strong></li>`).join('');
         return `<details class="department-node department-division" open><summary><span class="department-label"><span class="department-level">부</span>${escapeHtml(divisionName)}</span><strong>${division.count}대</strong><span class="department-chevron" aria-hidden="true">⌄</span></summary><ul class="department-team-list">${teams}</ul></details>`;
       }).join('');
-    return `<details class="department-node department-headquarters" open><summary><span class="department-label"><span class="department-level">본부</span>${escapeHtml(headquartersName)}</span><strong>${headquarters.count}대</strong><span class="department-chevron" aria-hidden="true">⌄</span></summary><div class="department-division-list">${divisions}</div></details>`;
+    return `<article class="department-headquarters-card"><details class="department-node department-headquarters" open><summary><span class="department-label"><span class="department-level">본부</span>${escapeHtml(headquartersName)}</span><strong>${headquarters.count}대</strong><span class="department-chevron" aria-hidden="true">⌄</span></summary><div class="department-division-list">${divisions}</div></details></article>`;
   }).join('');
 }
 
