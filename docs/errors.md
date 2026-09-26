@@ -1,5 +1,12 @@
 # 오류 기록
 
+## 차량현황 CC 업로드 뒤 `querySelector` 오류 (2026-09-26)
+
+- 증상: CC 열이 포함된 차량현황 업로드 후 `Cannot read properties of undefined (reading 'querySelector')` 오류가 표시됐다.
+- 원인: 차량계약정보 표의 열별 필터 위치가 기존 열 순서에 고정돼 있어, 새 CC 열을 추가한 뒤 대상 헤더를 찾지 못했다.
+- 조치: CC를 포함한 계약 표의 열 위치를 다시 지정하고, 예상하지 못한 헤더 누락 시 필터 생성만 건너뛰어 업로드가 중단되지 않게 했다. 업로드 팝업의 필수 열 안내에도 CC를 추가했다.
+- 검증: 첨부한 Excel은 첫 행에 CC 열과 입력값이 포함된 것을 읽기 전용으로 확인했다. 배포 후 실제 업로드 재시도는 필요하다.
+
 ## 차량현황 CC 업로드 시 스키마 캐시 열 없음 오류 (2026-09-26)
 
 - 증상: CC 열이 포함된 차량현황 Excel을 업로드할 때 `Could not find the 'cc' column of 'vehicles' in the schema cache` 오류가 표시됐다.

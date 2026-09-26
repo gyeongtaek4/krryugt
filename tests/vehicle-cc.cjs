@@ -11,7 +11,9 @@ assert(js.includes("const contractColumns = ['본부', '부', '팀', 'CC', '담�
 assert(js.includes("'CC': row.cc || ''"), 'Supabase vehicle CC read mapping is missing');
 assert(js.includes("cc: row['CC']"), 'Supabase vehicle CC write mapping is missing');
 assert(js.includes("cfCc: 'CC'"), 'contract vehicle CC auto-fill is missing');
+assert(js.includes("const contractIndices = { 'CC': 3, '담당자(정)': 4"), 'contract CC filter index is missing');
 assert(html.includes('<th>팀</th><th>CC</th><th>담당자(정)</th>'), 'vehicle/contract table CC placement is missing');
+assert(dialogs.includes('aria-label="필수 열"><li>본부</li><li>부</li><li>팀</li><li>CC</li>'), 'vehicle upload CC guide is missing');
 assert(dialogs.includes('for="vfCc">CC *</label><input id="vfCc" required'), 'vehicle CC direct input is missing');
 assert(dialogs.includes('for="cfCc">CC *</label><input id="cfCc" required'), 'contract CC display field is missing');
 assert(sql.includes("add column if not exists cc text not null default ''"), 'vehicle cc migration is missing');

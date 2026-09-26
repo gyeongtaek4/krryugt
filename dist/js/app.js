@@ -442,7 +442,7 @@ function refreshFieldFilters(viewId, keys, rows, render) {
     document.querySelector(`#${viewId} .vehicle-toolbar`).appendChild(actions);
     oldRow.remove();
   }
-  const contractIndices = { '담당자(정)': 3, '담당자(부)': 4, '차종': 5, '차량번호': 6, '렌탈료': 7, '계약시작': 8, '계약종료': 8, '총계약기간': 9, '남은계약기간': 9 };
+  const contractIndices = { 'CC': 3, '담당자(정)': 4, '담당자(부)': 5, '차종': 6, '차량번호': 7, '렌탈료': 8, '계약시작': 9, '계약종료': 9, '총계약기간': 10, '남은계약기간': 10 };
   keys.forEach(key => {
     let select = [...container.querySelectorAll('[data-field-filter]')].find(element => element.dataset.fieldFilter === key);
     if (!select) {
@@ -452,6 +452,7 @@ function refreshFieldFilters(viewId, keys, rows, render) {
       select.setAttribute('aria-label', `${key} 필터`);
       select.addEventListener('change', render);
       const header = headers[viewId === 'vehiclesView' ? requiredColumns.indexOf(key) : contractIndices[key]];
+      if (!header) return;
       if (!header.querySelector('select')) header.textContent = '';
       header.appendChild(select);
       decorateColumnFilter(select, key);

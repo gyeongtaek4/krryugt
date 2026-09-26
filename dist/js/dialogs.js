@@ -13,7 +13,7 @@
       </label>
       <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
       <div class="upload-error" id="uploadError"></div>
-      <ul class="required-columns" aria-label="필수 열"><li>본부</li><li>부</li><li>팀</li><li>담당자(정)</li><li>담당자(부)</li><li>차량번호</li><li>차종</li><li>지역</li><li>주차장</li></ul>
+      <ul class="required-columns" aria-label="필수 열"><li>본부</li><li>부</li><li>팀</li><li>CC</li><li>담당자(정)</li><li>담당자(부)</li><li>차량번호</li><li>차종</li><li>지역</li><li>주차장</li></ul>
       <div class="modal-actions"><button class="button" id="cancelUpload">취소</button><button class="button primary" id="confirmUpload">자료 확인하기</button></div>
     </div>
   </div>
