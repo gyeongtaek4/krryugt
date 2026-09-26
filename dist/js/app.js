@@ -849,7 +849,7 @@ function rankingMarkup(rows, valueFormatter) {
   return rows.length ? rows.map(row => `<tr><td class="plate">${escapeHtml(row.plate)}</td><td title="${escapeHtml(row.team)}">${escapeHtml(row.team)}</td><td>${valueFormatter(row)}</td></tr>`).join('') : '<tr><td colspan="3" class="empty-table">확정 운행자료가 없습니다.</td></tr>';
 }
 function renderDashboardUsage() {
-  const month=document.getElementById('dashboardUsageMonth').value;
+  const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];
   const summary = item ? drivingVehicleSummaryForMonth(month) : [];
   const byDays = [...summary].sort((a,b) => b.usageDays-a.usageDays || a.plate.localeCompare(b.plate, 'ko'));
   const byDistance = [...summary].sort((a,b) => b.distance-a.distance || a.plate.localeCompare(b.plate, 'ko'));

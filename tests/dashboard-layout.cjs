@@ -6,6 +6,7 @@ const titles = ['전체 운영 차량', '렌트 계약금액', '6개월 내 계�
 const metrics = dashboard.split('class="metrics"')[1].split('</section>')[0];
 assert(metrics.includes('id="dashboardExpiryCount"'));
 const css = fs.readFileSync('dist/css/app.css', 'utf8');
+const js = fs.readFileSync('dist/js/app.js', 'utf8');
 assert(!/\.department-overview \.department-list\s*\{[^}]*(max-height|overflow-y)/.test(css));
 const positions = titles.map(title => dashboard.indexOf(title));
 assert(positions.every((position, index) => position >= 0 && (!index || position > positions[index - 1])));
@@ -20,4 +21,5 @@ assert(dashboard.includes('id="dashboardUsageDistanceLow"'));
 assert((dashboard.match(/<th>차량번호<\/th><th>팀<\/th>/g) || []).length === 4);
 assert(!dashboard.includes('dashboardUsageStatus'));
 assert(!dashboard.includes('확정월의 차량번호별 기록을 합산합니다.'));
+assert(js.includes("const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];"), 'usage ranking must retain its selected month archive lookup');
 console.log('PASS: dashboard section order and month controls (HTML, no visual browser check).');

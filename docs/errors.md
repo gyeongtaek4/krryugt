@@ -1,5 +1,13 @@
 # 오류 기록
 
+## 차량계약정보가 0건으로 보인 오류 (2026-09-27)
+
+- 증상: 대시보드에서 계약금액·계약만료 수가 0으로 보이고 차량계약정보 목록도 비어 보였다.
+- 확인: Supabase Table Editor에서 `contracts` 테이블의 행 수를 읽기 전용으로 조회한 결과 10건이 남아 있었다. 데이터 삭제나 Supabase 연결 해제 문제가 아니다.
+- 원인: 차량이용량(팀) 제목 정리 과정에서 `renderDashboardUsage()`가 선택한 확정월 자료를 확인하는 `item` 변수를 제거했지만, 다음 줄에서 계속 참조했다. `ReferenceError`가 차량현황 조회 뒤의 `renderDriving()`에서 발생해 계약 조회 단계까지 도달하지 못했다.
+- 조치: 선택월의 `drivingArchive[month]` 조회를 복원하고, 회귀 검증에 해당 코드를 추가했다.
+- 검증: JavaScript 문법 검사·대시보드 정적 검증 및 배포 후 로그인 상태에서 계약 10건 표시를 확인한다.
+
 ## 차량현황 CC 업로드 뒤 `querySelector` 오류 (2026-09-26)
 
 - 증상: CC 열이 포함된 차량현황 업로드 후 `Cannot read properties of undefined (reading 'querySelector')` 오류가 표시됐다.
