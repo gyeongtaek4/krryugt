@@ -5,14 +5,14 @@ const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toastMessage');
 const uploadError = document.getElementById('uploadError');
 const fileInput = document.getElementById('fileInput');
-const requiredColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차량번호', '차종', '지역', '주차장'];
+const requiredColumns = ['본부', '부', '팀', 'CC', '담당자(정)', '담당자(부)', '차량번호', '차종', '지역', '주차장'];
 let toastTimer;
 let vehicleData = [];
 const contractModal = document.getElementById('contractUploadModal');
 const contractFileInput = document.getElementById('contractFileInput');
 const contractUploadError = document.getElementById('contractUploadError');
 const contractUploadColumns = ['차량번호', '렌탈료', '계약시작', '계약종료'];
-const contractColumns = ['본부', '부', '팀', '담당자(정)', '담당자(부)', '차종', '차량번호', '렌탈료', '계약시작', '계약종료'];
+const contractColumns = ['본부', '부', '팀', 'CC', '담당자(정)', '담당자(부)', '차종', '차량번호', '렌탈료', '계약시작', '계약종료'];
 let contractData = [];
 const drivingUploadModal = document.getElementById('drivingUploadModal');
 const drivingFormModal = document.getElementById('drivingFormModal');
@@ -54,7 +54,7 @@ async function refreshVehiclesFromSupabase() {
     return false;
   }
   vehicleData = (data || []).sort((a, b) => String(a.vehicle_number_normalized || a.vehicle_number || '').localeCompare(String(b.vehicle_number_normalized || b.vehicle_number || ''))).map(row => ({
-    '본부': row.headquarters || '', '부': row.division || '', '팀': row.team || '',
+    '본부': row.headquarters || '', '부': row.division || '', '팀': row.team || '', 'CC': row.cc || '',
     '담당자(정)': row.primary_manager || '', '담당자(부)': row.secondary_manager || '',
     '차량번호': row.vehicle_number || '', '차종': row.vehicle_model || '',
     '지역': row.region || '', '주차장': row.parking_lot || '', _supabaseId: row.id
@@ -526,11 +526,11 @@ function renderVehicles() {
   const body = document.getElementById('vehicleTableBody');
   const canEdit=window.fleetCurrentRole==='admin',canDelete=window.fleetCurrentRole==='admin';
   body.innerHTML = filtered.length ? filtered.map(item => { const row = item.row; return `<tr>
-    <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
+    <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td><td>${escapeHtml(row['CC'] || '-')}</td>
     <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
     <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
     <td class="plate">${escapeHtml(row['차량번호'])}</td><td>${escapeHtml(row['차종'])}</td><td>${escapeHtml(row['지역'] || '-')}</td><td>${escapeHtml(row['주차장'] || '-')}</td><td>${canEdit?`<button class="row-edit" data-vehicle-edit="${item.index}">수정</button>${canDelete?` <button class="row-delete" data-vehicle-delete="${item.index}">삭제</button>`:''}`:'<span class="read-only-label">조회 전용</span>'}</td>
-  </tr>`; }).join('') : '<tr><td class="empty-table" colspan="10">조건에 맞는 차량이 없습니다.</td></tr>';
+  </tr>`; }).join('') : '<tr><td class="empty-table" colspan="11">조건에 맞는 차량이 없습니다.</td></tr>';
   document.getElementById('recordCount').textContent = `${filtered.length}건`;
   document.getElementById('totalVehicles').textContent = `총 ${vehicleData.length}대`;
   renderVehicleGroupSummary('teamVehicleSummary', '팀', '미지정 팀');
@@ -685,14 +685,14 @@ function renderContracts() {
     const stateClass = remaining <= 3 ? 'urgent' : remaining <= 12 ? 'soon' : '';
     const remainingText = remaining ? `${remaining}개월 남음` : '계약 종료';
     return `<tr>
-      <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td>
+      <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td><td>${escapeHtml(row['CC'] || '-')}</td>
       <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
       <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
       <td>${escapeHtml(row['차종'])}</td><td class="plate">${escapeHtml(row['차량번호'])}</td><td class="money">${rentalNumber(row['렌탈료']).toLocaleString('ko-KR')}원</td>
       <td><div class="contract-period"><strong>${escapeHtml(formatYearMonth(row['계약시작']))} ~ ${escapeHtml(formatYearMonth(row['계약종료']))}</strong></div></td>
       <td><div class="contract-period"><strong>총 ${total}개월</strong><span class="remaining-badge ${stateClass}">${remainingText}</span></div></td><td><button class="row-edit" data-contract-edit="${item.index}">수정</button> <button class="row-delete" data-contract-delete="${item.index}">삭제</button></td>
     </tr>`;
-  }).join('') : '<tr><td class="empty-table" colspan="11">조건에 맞는 계약정보가 없습니다.</td></tr>';
+  }).join('') : '<tr><td class="empty-table" colspan="12">조건에 맞는 계약정보가 없습니다.</td></tr>';
   const totalFee = contractData.reduce((sum, row) => sum + rentalNumber(row['렌탈료']), 0);
   document.getElementById('dashboardContractAmount').textContent = `${totalFee.toLocaleString('ko-KR')}원`;
   const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 12; }).length;
@@ -925,6 +925,7 @@ function openVehicleForm(index = null) {
     document.getElementById('vfHeadquarters').value = row['본부'];
     document.getElementById('vfDivision').value = row['부'];
     document.getElementById('vfTeam').value = row['팀'];
+    document.getElementById('vfCc').value = row['CC'] || '';
     document.getElementById('vfPrimary').value = row['담당자(정)'];
     document.getElementById('vfSecondary').value = row['담당자(부)'];
     document.getElementById('vfPlate').value = row['차량번호'];
@@ -945,7 +946,7 @@ function closeVehicleForm() {
 function vehicleSupabasePayload(row) {
   return {
     vehicle_number: row['차량번호'], vehicle_model: row['차종'], region: row['지역'], parking_lot: row['주차장'],
-    headquarters: row['본부'], division: row['부'], team: row['팀'],
+    headquarters: row['본부'], division: row['부'], team: row['팀'], cc: row['CC'],
     primary_manager: row['담당자(정)'], secondary_manager: row['담당자(부)']
   };
 }
@@ -981,6 +982,7 @@ function openContractForm(index = null) {
     document.getElementById('cfHeadquarters').value = row['본부'];
     document.getElementById('cfDivision').value = row['부'];
     document.getElementById('cfTeam').value = row['팀'];
+    document.getElementById('cfCc').value = row['CC'] || '';
     document.getElementById('cfPrimary').value = row['담당자(정)'];
     document.getElementById('cfSecondary').value = row['담당자(부)'];
     document.getElementById('cfModel').value = row['차종'];
@@ -1002,7 +1004,7 @@ function closeContractForm() {
 
 function fillContractVehicleFields() {
   const vehicle = vehicleForPlate(document.getElementById('cfPlate').value);
-  const fields = { cfHeadquarters: '본부', cfDivision: '부', cfTeam: '팀', cfPrimary: '담당자(정)', cfSecondary: '담당자(부)', cfModel: '차종' };
+  const fields = { cfHeadquarters: '본부', cfDivision: '부', cfTeam: '팀', cfCc: 'CC', cfPrimary: '담당자(정)', cfSecondary: '담당자(부)', cfModel: '차종' };
   Object.entries(fields).forEach(([id, key]) => {
     const field = document.getElementById(id);
     field.value = vehicle?.[key] || '';
@@ -1241,6 +1243,7 @@ document.getElementById('vehicleForm').addEventListener('submit', async event =>
     '본부': document.getElementById('vfHeadquarters').value.trim(),
     '부': document.getElementById('vfDivision').value.trim(),
     '팀': document.getElementById('vfTeam').value.trim(),
+    'CC': document.getElementById('vfCc').value.trim(),
     '담당자(정)': document.getElementById('vfPrimary').value.trim(),
     '담당자(부)': document.getElementById('vfSecondary').value.trim(),
     '차량번호': document.getElementById('vfPlate').value.trim(),
@@ -1277,6 +1280,7 @@ document.getElementById('contractForm').addEventListener('submit', async event =
     '본부': document.getElementById('cfHeadquarters').value.trim(),
     '부': document.getElementById('cfDivision').value.trim(),
     '팀': document.getElementById('cfTeam').value.trim(),
+    'CC': document.getElementById('cfCc').value.trim(),
     '담당자(정)': document.getElementById('cfPrimary').value.trim(),
     '담당자(부)': document.getElementById('cfSecondary').value.trim(),
     '차종': document.getElementById('cfModel').value.trim(),

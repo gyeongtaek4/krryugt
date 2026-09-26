@@ -41,6 +41,7 @@
           <div class="form-field"><label for="vfHeadquarters">본부 *</label><input id="vfHeadquarters" required></div>
           <div class="form-field"><label for="vfDivision">부 *</label><input id="vfDivision" required></div>
           <div class="form-field"><label for="vfTeam">팀 *</label><input id="vfTeam" required></div>
+          <div class="form-field"><label for="vfCc">CC *</label><input id="vfCc" required></div>
           <div class="form-field"><label for="vfPrimary">담당자(정) *</label><input id="vfPrimary" required></div>
           <div class="form-field"><label for="vfSecondary">담당자(부)</label><input id="vfSecondary"></div>
           <div class="form-field"><label for="vfPlate">차량번호 *</label><input id="vfPlate" required></div>
@@ -62,6 +63,7 @@
           <div class="form-field"><label for="cfHeadquarters">본부 *</label><input id="cfHeadquarters" required></div>
           <div class="form-field"><label for="cfDivision">부 *</label><input id="cfDivision" required></div>
           <div class="form-field"><label for="cfTeam">팀 *</label><input id="cfTeam" required></div>
+          <div class="form-field"><label for="cfCc">CC *</label><input id="cfCc" required></div>
           <div class="form-field"><label for="cfPrimary">담당자(정) *</label><input id="cfPrimary" required></div>
           <div class="form-field"><label for="cfSecondary">담당자(부)</label><input id="cfSecondary"></div>
           <div class="form-field"><label for="cfModel">차종 *</label><input id="cfModel" required></div>
