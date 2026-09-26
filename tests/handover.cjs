@@ -23,6 +23,7 @@ assert(source.includes("storage.from('handover-photos').upload"));
 assert(source.includes("'application/pdf'"));
 assert(source.includes('handoverPhotoDraft=merged'));
 assert(source.includes('PDF 허용 설정을 확인하세요'));
+assert(!source.includes("handoverFrom').value=vehicle"));
 assert(css.includes('#handoverForm .form-input'));
 assert(css.includes('#handoverForm select.form-input'));
 assert(css.includes('#handoverForm textarea.form-input'));

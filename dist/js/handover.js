@@ -28,8 +28,7 @@ function selectHandoverVehicle(plate) {
   handoverEl('handoverVehicle').value=plate;
   handoverEl('handoverVehicleResults').classList.remove('open');
   handoverEl('handoverVehicle').setAttribute('aria-expanded','false');
-  const vehicle=renderHandoverVehicleInfo();
-  if(vehicle)handoverEl('handoverFrom').value=vehicle['담당자(정)']||'';
+  renderHandoverVehicleInfo();
 }
 function handoverRecipientName(member) {
   return String(member?.display_name || member?.email || '');
@@ -245,8 +244,7 @@ async function deleteHandoverRecord(item) {
 }
 handoverEl('handoverDate').value = new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 handoverEl('handoverVehicle').addEventListener('input',()=>{
-  const vehicle=renderHandoverVehicleInfo();
-  if(vehicle)handoverEl('handoverFrom').value=vehicle['담당자(정)']||'';
+  renderHandoverVehicleInfo();
   renderHandoverVehicleResults();
 });
 handoverEl('handoverVehicle').addEventListener('focus',renderHandoverVehicleResults);
