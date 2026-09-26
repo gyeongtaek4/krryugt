@@ -1655,17 +1655,6 @@ document.getElementById('drivingSearch').addEventListener('input', renderDriving
 document.getElementById('costTrendReferenceMonth').addEventListener('change', renderAdditionalCostTrend);
 document.getElementById('costTrendPeriodMonths').addEventListener('input', renderAdditionalCostTrend);
 
-document.getElementById('reportButton').addEventListener('click', () => {
-  const month=document.getElementById('costTrendReferenceMonth').value;
-  if(!parseYearMonth(month)){showToast('보고 기준월을 선택하세요.');return;}
-  const costs=closingArchive[month], usage=drivingArchive[month];
-  const totals=costs ? closingTotals(costs.rows) : null;
-  let report=document.getElementById('printReport');
-  if(!report){report=document.createElement('section');report.id='printReport';document.body.appendChild(report);}
-  const fee=contractData.reduce((sum,row)=>sum+rentalNumber(row['렌탈료']),0);
-  report.innerHTML=`<h1>법인차량 관리 보고서</h1><p>기준월: ${escapeHtml(month)} · 비용은 부가세 포함</p><p>현재 저장계약 월 렌탈료 합계: ${won(fee)} (과거 확정비용과 별도)</p><h2>월별 확정 비용</h2>${totals ? `<p>확정일: ${escapeHtml(costs.confirmedAt)} · 버전 ${1+(costs.revisions||[]).length}</p><table><tr>${costKeys.map(key=>`<th>${escapeHtml(key)}</th>`).join('')}<th>합계</th></tr><tr>${totals.map(value=>`<td>${won(value)}</td>`).join('')}<td>${won(totals.reduce((a,b)=>a+b,0))}</td></tr></table>` : '<p>비용 미마감 — 금액 없음</p>'}<h2>최근 12개월 차량 부대비용</h2><p>${escapeHtml(document.getElementById('costTrendLabel').textContent)}: ${escapeHtml(document.getElementById('costTrendTotal').textContent)}</p>${document.getElementById('costTrendChart').outerHTML}<h2>부서별 확정 월 이동거리</h2>${usage ? `<p>확정일: ${escapeHtml(usage.confirmedAt)}</p><table><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량</th><th>월 이동거리</th><th>차량별 이용일수 합계</th><th>차량당 평균</th></tr></thead><tbody>${drivingReportMarkup(drivingReportForMonth(month))}</tbody></table>` : '<p>운행 미마감 — 거리 없음</p>'}<p>이용일수는 차량별 서로 다른 운행 날짜 수입니다. 부서 합계는 각 차량의 이용일수를 더한 값입니다.</p>`;
-  window.print();
-});
 document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보', { recordHistory: true }));
 function toggleNotice(open){
   const popover=document.getElementById('noticePopover'),button=document.getElementById('noticeButton');
