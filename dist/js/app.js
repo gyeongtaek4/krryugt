@@ -1258,7 +1258,7 @@ document.getElementById('contractUploadButton').addEventListener('click', () => 
 document.getElementById('closeContractModal').addEventListener('click', () => toggleContractModal(false));
 document.getElementById('cancelContractUpload').addEventListener('click', () => toggleContractModal(false));
 contractModal.addEventListener('click', event => { if (event.target === contractModal) toggleContractModal(false); });
-['drivingUploadButton', 'drivingGuideUploadButton'].forEach(id => document.getElementById(id).addEventListener('click', () => toggleDrivingUploadModal(true)));
+document.getElementById('drivingUploadButton').addEventListener('click', () => toggleDrivingUploadModal(true));
 document.getElementById('closeDrivingUpload').addEventListener('click', () => toggleDrivingUploadModal(false));
 document.getElementById('cancelDrivingUpload').addEventListener('click', () => toggleDrivingUploadModal(false));
 drivingUploadModal.addEventListener('click', event => { if (event.target === drivingUploadModal) toggleDrivingUploadModal(false); });

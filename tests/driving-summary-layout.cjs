@@ -21,4 +21,8 @@ assert(html.includes('class="driving-list-header"'), 'driving title and search w
 assert(html.indexOf('id="drivingSearch"') < html.indexOf('id="usageMonth"'), 'driving search must appear before the month control');
 assert(css.includes('.driving-list-header'), 'driving title and search wrapper styling is missing');
 assert(css.includes('.driving-vehicle-toolbar .month-control'), 'driving month control right alignment is missing');
+assert(!html.includes('id="drivingGuideUploadButton"'), 'removed driving guide upload button remains');
+assert(!html.includes('차량번호로 차량현황의 조직정보를 자동 연결합니다.'), 'removed driving upload guide remains');
+assert(js.includes("document.getElementById('drivingUploadButton').addEventListener"), 'top driving upload button handler is missing');
+assert(!js.includes('drivingGuideUploadButton'), 'removed driving guide upload button is still referenced');
 console.log('PASS: driving summary is compact with title-search grouping and right-aligned month control (static).');
