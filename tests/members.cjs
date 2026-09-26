@@ -15,7 +15,7 @@ assert(auth.includes('.auth.signUp('));
 assert(auth.includes("profile.status!=='active'"));
 assert(auth.includes("memberNavItem.hidden=role!=='admin'"));
 assert(auth.includes("new Set(['차량 현황','사고접수 및 이력','차량인수인계','Q&A','운행가이드'])"));
-assert(auth.includes("document.getElementById('vehicleUploadGuide').hidden=readOnly"));
+assert(!auth.includes('vehicleUploadGuide'), 'removed vehicle upload guide must not be controlled by role navigation');
 assert(app.includes("page === '회원관리'"));
 assert(app.includes("const canEdit=window.fleetCurrentRole==='admin'"));
 assert(members.includes("rpc('admin_update_profile'"));
