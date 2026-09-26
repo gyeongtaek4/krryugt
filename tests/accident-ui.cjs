@@ -22,6 +22,8 @@ assert(js.includes('replacement_vehicle_number'));
 assert(js.includes('data-accident-detail-close'));
 assert(js.includes('data-accident-row'));
 assert(js.includes("detailRow.className='inline-detail-row'"));
+assert(!html.includes('id="accidentDetail"'));
+assert(js.includes("rowsEl.addEventListener('submit'"));
 assert(js.includes('created_by===window.fleetCurrentUser?.id'));
 assert(js.includes('data-accident-edit'));
 assert(js.includes("photos.length>3"));

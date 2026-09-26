@@ -306,18 +306,15 @@ async function confirmHandover(item) {
   const { error } = await window.fleetSupabaseClient.rpc('confirm_vehicle_handover',{p_handover_id:item.id});
   if (error) throw Error(error.message || '인수 동의 처리에 실패했습니다.');
   await refreshHandoverFromSupabase();
-  showToast('인수 동의가 완료되었습니다. 동의자 이름·ID·시각이 기록되었습니다.');
+  showToast('인수 동의가 완료되었습니다. 동의자 이름과 시각이 기록되었습니다.');
 }
 function formatConsentDate(value) {
   if (!value) return '—';
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('ko-KR');
 }
-function maskedMemberId(id) {
-  const value = String(id || '');
-  return value.length > 12 ? `${value.slice(0,8)}…${value.slice(-4)}` : (value || '—');
-}
 handoverEl('handoverRows').addEventListener('click',async event=>{
+  if(event.target.closest('[data-handover-detail-close]')){event.target.closest('.inline-detail-row')?.remove();return;}
   const editButton=event.target.closest('[data-handover-edit]');
   if(editButton){
     const item=handoverRecords[Number(editButton.dataset.handoverEdit)];
@@ -340,16 +337,15 @@ handoverEl('handoverRows').addEventListener('click',async event=>{
   }
   const button=event.target.closest('[data-handover-detail]');if(!button)return;
   const index=Number(button.dataset.handoverDetail),item=handoverRecords[index],row=button.closest('tr');if(!item||!row)return;
-  const detail=handoverEl('handoverDetail');document.querySelectorAll('.inline-detail-row').forEach(item=>item.remove());detail.hidden=false;
+  const detail=document.createElement('div');detail.className='handover-detail';document.querySelectorAll('.inline-detail-row').forEach(item=>item.remove());
   const consentInfo = item.consentStatus === 'completed'
-    ? `인수 동의 완료 · ${item.consentedName || '인수자'} · ${formatConsentDate(item.consentedAt)} · 동의 ID ${maskedMemberId(item.consentedBy)}`
+    ? `인수 동의 완료 · 동의자 ${item.consentedName || '인수자'} · ${formatConsentDate(item.consentedAt)}`
     : item.consentStatus === 'pending'
       ? `인수 동의 대기 · 지정 인수자만 동의할 수 있습니다.${canConfirmHandover(item) ? ' 이 계정으로 동의할 수 있습니다.' : ''}`
       : '인수자 계정 미지정 · 수신자 이름과 일치하는 활성 회원 계정을 확인한 뒤 동의할 수 있습니다.';
   detail.innerHTML=`<div class="detail-heading"><h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><button class="button detail-close" type="button" data-handover-detail-close>접기</button></div><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(consentInfo)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
   const detailRow=document.createElement('tr');detailRow.className='inline-detail-row';detailRow.innerHTML='<td colspan="8"></td>';detailRow.firstElementChild.append(detail);row.after(detailRow);
 });
-handoverEl('handoverDetail').addEventListener('click',event=>{if(event.target.closest('[data-handover-detail-close]')){handoverEl('handoverDetail').hidden=true;handoverEl('handoverDetail').closest('.inline-detail-row')?.remove();}});
 handoverEl('closeHandoverManage').addEventListener('click',closeHandoverManage);
 handoverEl('cancelHandoverManage').addEventListener('click',closeHandoverManage);
 handoverEl('cancelHandoverDelete').addEventListener('click',closeHandoverManage);
@@ -395,7 +391,7 @@ handoverEl('handoverRestore').addEventListener('change',async event=>{
       pending.set(item.id,item);
     }
     handoverRecords.splice(0,handoverRecords.length,...Array.from(pending.values()).sort((a,b)=>b.createdAt.localeCompare(a.createdAt)));
-    handoverEl('handoverDetail').hidden=true;renderHandovers();showToast('사진 포함 인수인계 기록을 불러왔습니다.');
+    renderHandovers();showToast('사진 포함 인수인계 기록을 불러왔습니다.');
   }catch(error){showToast(error.message);}finally{input.value='';}
 });
 renderHandovers();
