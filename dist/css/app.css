@@ -319,7 +319,8 @@ td strong { font-size: .8rem; }
 .usage-ranking-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
 .usage-ranking-heading h3 { margin: 0; font-size: .91rem; }
 .usage-ranking-heading p { margin: 3px 0 0; color: var(--ink-soft); font-size: .72rem; }
-.usage-ranking-tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 15px; }
+.usage-ranking-tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; margin-top: 15px; }
+.usage-ranking-tables > div + div { padding-left: 28px; border-left: 1px solid var(--line); }
 .usage-ranking-tables h4 { margin: 0 0 8px; color: var(--ink-soft); font-size: .73rem; font-weight: 750; }
 .ranking-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
 .ranking-table th { padding: 0 0 7px; font-size: .67rem; }
@@ -329,7 +330,7 @@ td strong { font-size: .8rem; }
 .ranking-table th:nth-child(2), .ranking-table td:nth-child(2) { max-width: 105px; overflow: hidden; color: var(--ink-soft); text-overflow: ellipsis; white-space: nowrap; }
 .ranking-table .empty-table { padding: 13px 0; text-align: left; white-space: normal; }
 @media (max-width: 900px) { .usage-ranking-grid { grid-template-columns: 1fr; } }
-@media (max-width: 560px) { .usage-ranking-tables { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .usage-ranking-tables { grid-template-columns: 1fr; gap: 16px; } .usage-ranking-tables > div + div { padding: 16px 0 0; border-top: 1px solid var(--line); border-left: 0; } }
 
 .data-note { margin-top: 21px; padding: 14px; display: flex; gap: 11px; border-radius: 13px; background: var(--surface); }
 .data-note svg { flex: 0 0 auto; width: 18px; height: 18px; color: var(--brand); margin-top: 1px; }
