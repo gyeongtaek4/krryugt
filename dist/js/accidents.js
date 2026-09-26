@@ -36,7 +36,7 @@
   }
   function renderAccidentVehicleInfo() {
     const vehicle=vehicleForPlate(el('accidentVehicle').value);
-    el('accidentVehicleInfo').textContent=vehicle?`${vehicle['본부']||'—'} / ${vehicle['부']||'—'} / ${vehicle['팀']||'—'} · ${vehicle['차종']||'차종 미입력'} · 담당 ${vehicle['담당자(정)']||'미지정'}`:'차량번호를 입력하면 본부 · 부 · 팀 · 차종 정보가 표시됩니다.';
+    el('accidentVehicleInfo').textContent=vehicle?`${vehicle['본부']||'—'} / ${vehicle['부']||'—'} / ${vehicle['팀']||'—'} · ${vehicle['차종']||'차종 미입력'} · 담당(정) ${vehicle['담당자(정)']||'미지정'} · 담당(부) ${vehicle['담당자(부)']||'미지정'}`:'차량번호를 입력하면 본부 · 부 · 팀 · 차종·담당자 정보가 표시됩니다.';
   }
   function validatePhotos(photos) {
     if(photos.length>3)throw Error('사고 현장 자료는 최대 3개까지 첨부할 수 있습니다.');

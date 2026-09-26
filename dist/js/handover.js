@@ -21,7 +21,7 @@ function renderHandoverVehicleResults() {
 }
 function renderHandoverVehicleInfo() {
   const vehicle=vehicleForPlate(handoverEl('handoverVehicle').value);
-  handoverEl('handoverVehicleInfo').textContent=vehicle?`${vehicle['본부']||'—'} / ${vehicle['부']||'—'} / ${vehicle['팀']||'—'} · ${vehicle['차종']||'차종 미입력'} · 담당 ${vehicle['담당자(정)']||'미지정'}`:'차량번호를 입력하면 본부 · 부 · 팀 · 차종 정보가 표시됩니다.';
+  handoverEl('handoverVehicleInfo').textContent=vehicle?`${vehicle['본부']||'—'} / ${vehicle['부']||'—'} / ${vehicle['팀']||'—'} · ${vehicle['차종']||'차종 미입력'} · 담당(정) ${vehicle['담당자(정)']||'미지정'} · 담당(부) ${vehicle['담당자(부)']||'미지정'}`:'차량번호를 입력하면 본부 · 부 · 팀 · 차종·담당자 정보가 표시됩니다.';
   return vehicle;
 }
 function selectHandoverVehicle(plate) {

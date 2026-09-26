@@ -24,6 +24,7 @@ assert(source.includes("'application/pdf'"));
 assert(source.includes('handoverPhotoDraft=merged'));
 assert(source.includes('PDF 허용 설정을 확인하세요'));
 assert(!source.includes("handoverFrom').value=vehicle"));
+assert(source.includes("담당(정) ${vehicle['담당자(정)']||'미지정'} · 담당(부) ${vehicle['담당자(부)']||'미지정'}"));
 assert(css.includes('#handoverForm .form-input'));
 assert(css.includes('#handoverForm select.form-input'));
 assert(css.includes('#handoverForm textarea.form-input'));

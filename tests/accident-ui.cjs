@@ -14,6 +14,7 @@ assert(html.includes('id="accidentVehicleSuggestions"'));
 assert(js.includes("vehicleForPlate(el('accidentVehicle').value)"));
 assert(js.includes('matchingAccidentVehicles'));
 assert(js.includes('data-accident-vehicle'));
+assert(js.includes("담당(정) ${vehicle['담당자(정)']||'미지정'} · 담당(부) ${vehicle['담당자(부)']||'미지정'}"));
 assert(js.includes("from('vehicle_accidents').insert"));
 assert(js.includes("from('accident-photos').upload"));
 assert(js.includes('replacement_vehicle_number'));
