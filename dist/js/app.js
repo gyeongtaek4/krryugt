@@ -8,6 +8,7 @@ const fileInput = document.getElementById('fileInput');
 const requiredColumns = ['본부', '부', '팀', 'CC', '담당자(정)', '담당자(부)', '차량번호', '차종', '지역', '주차장'];
 let toastTimer;
 let vehicleData = [];
+let activeVehicleSummaryFilter = null;
 const contractModal = document.getElementById('contractUploadModal');
 const contractFileInput = document.getElementById('contractFileInput');
 const contractUploadError = document.getElementById('contractUploadError');
@@ -411,7 +412,11 @@ function renderVehicleGroupSummary(elementId, key, emptyLabel) {
   const element = document.getElementById(elementId);
   const entries = vehicleGroupSummary(key, emptyLabel);
   element.innerHTML = entries.length
-    ? entries.map(([label, count]) => `<span class="fleet-summary-pill"><b>${escapeHtml(label)}</b><em>${count}대</em></span>`).join('')
+    ? entries.map(([label, count]) => {
+      const value = label === emptyLabel ? '__EMPTY__' : label;
+      const active = activeVehicleSummaryFilter?.key === key && activeVehicleSummaryFilter?.value === value;
+      return `<button class="fleet-summary-pill${active ? ' is-active' : ''}" type="button" data-vehicle-summary-filter="${escapeHtml(key)}" data-vehicle-summary-value="${escapeHtml(value)}" aria-pressed="${active}"><b>${escapeHtml(label)}</b><em>${count}대</em></button>`;
+    }).join('')
     : '<span class="fleet-summary-empty">등록 차량이 없습니다.</span>';
 }
 
@@ -470,6 +475,7 @@ function decorateColumnFilter(select, label) {
     wrapper.className = 'column-filter-control';
     const title = document.createElement('span');
     title.className = 'column-filter-title';
+    title.dataset.columnFilterLabel = label;
     title.textContent = `${label} ▾`;
     title.setAttribute('aria-hidden', 'true');
     select.parentElement.insertBefore(wrapper, select);
@@ -482,6 +488,12 @@ function paintColumnFilters(viewId) {
     const wrapper = select.parentElement;
     wrapper.classList.toggle('is-filtered', Boolean(select.value));
     wrapper.title = select.value ? `선택: ${select.options[select.selectedIndex]?.textContent || select.value}` : '전체';
+    const title = wrapper.querySelector('.column-filter-title');
+    if (title) {
+      const label = title.dataset.columnFilterLabel || '필터';
+      const value = select.value ? select.options[select.selectedIndex]?.textContent : '';
+      title.textContent = value ? `${label}: ${value}` : `${label} ▾`;
+    }
   });
 }
 
@@ -509,6 +521,25 @@ function refreshFilters() {
   setSelectOptions(division, '부', uniqueValues('부', divisionRows));
   const teamRows = divisionRows.filter(row => !division.value || row['부'] === division.value);
   setSelectOptions(team, '팀', uniqueValues('팀', teamRows));
+}
+
+function applyVehicleSummaryFilter(key, value) {
+  resetFieldFilters('vehiclesView');
+  document.getElementById('vehicleSearch').value = '';
+  ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => { document.getElementById(id).value = ''; });
+  refreshFilters();
+
+  if (key === '팀' && value !== '__EMPTY__') {
+    document.getElementById('teamFilter').value = value;
+  } else {
+    const fieldSelect = [...document.querySelectorAll('#vehiclesView [data-field-filter]')]
+      .find(select => select.dataset.fieldFilter === key);
+    if (fieldSelect) fieldSelect.value = value;
+  }
+  activeVehicleSummaryFilter = { key, value };
+  renderVehicles();
+  const label = value === '__EMPTY__' ? '(미입력)' : value;
+  showToast(`${key} ${label} 필터를 적용했습니다.`);
 }
 
 function renderVehicles() {
@@ -1520,11 +1551,19 @@ document.querySelectorAll('.nav-button').forEach(button => {
   });
 });
 
-document.getElementById('vehicleSearch').addEventListener('input', renderVehicles);
-document.getElementById('headquartersFilter').addEventListener('change', () => { document.getElementById('divisionFilter').value = ''; document.getElementById('teamFilter').value = ''; refreshFilters(); renderVehicles(); });
-document.getElementById('divisionFilter').addEventListener('change', () => { document.getElementById('teamFilter').value = ''; refreshFilters(); renderVehicles(); });
-document.getElementById('teamFilter').addEventListener('change', renderVehicles);
+document.getElementById('vehicleSearch').addEventListener('input', () => { activeVehicleSummaryFilter = null; renderVehicles(); });
+document.getElementById('headquartersFilter').addEventListener('change', () => { activeVehicleSummaryFilter = null; document.getElementById('divisionFilter').value = ''; document.getElementById('teamFilter').value = ''; refreshFilters(); renderVehicles(); });
+document.getElementById('divisionFilter').addEventListener('change', () => { activeVehicleSummaryFilter = null; document.getElementById('teamFilter').value = ''; refreshFilters(); renderVehicles(); });
+document.getElementById('teamFilter').addEventListener('change', () => { activeVehicleSummaryFilter = null; renderVehicles(); });
+document.getElementById('vehiclesView').addEventListener('change', event => {
+  if (event.target.matches('[data-field-filter]')) activeVehicleSummaryFilter = null;
+}, true);
+document.querySelector('.fleet-breakdown-grid').addEventListener('click', event => {
+  const button = event.target.closest('[data-vehicle-summary-filter]');
+  if (button) applyVehicleSummaryFilter(button.dataset.vehicleSummaryFilter, button.dataset.vehicleSummaryValue);
+});
 document.getElementById('resetFilters').addEventListener('click', () => {
+  activeVehicleSummaryFilter = null;
   resetFieldFilters('vehiclesView');
   document.getElementById('vehicleSearch').value = '';
   ['headquartersFilter', 'divisionFilter', 'teamFilter'].forEach(id => document.getElementById(id).value = '');
