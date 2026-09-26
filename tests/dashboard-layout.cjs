@@ -5,6 +5,8 @@ const dashboard = html.split('id="dashboardView"')[1].split('id="vehiclesView"')
 const titles = ['전체 운영 차량', '렌트 계약금액', '6개월 내 계약 만료 예정 차량', '부서별 차량 현황', '차량이용량(팀)', '월별 차량 부대비용 추이'];
 const metrics = dashboard.split('class="metrics"')[1].split('</section>')[0];
 assert(metrics.includes('id="dashboardExpiryCount"'));
+assert(!dashboard.includes('현재 저장정보 현황'));
+assert(!dashboard.includes('렌터카 자료를 기준으로 주요 운영 현황과 비용을 요약했습니다.'));
 const css = fs.readFileSync('dist/css/app.css', 'utf8');
 const js = fs.readFileSync('dist/js/app.js', 'utf8');
 assert(!/\.department-overview \.department-list\s*\{[^}]*(max-height|overflow-y)/.test(css));
