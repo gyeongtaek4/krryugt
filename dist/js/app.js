@@ -733,6 +733,8 @@ function vehicleForPlate(plate) {
 
 function normalizeDrivingDate(value) {
   const text = String(value ?? '').trim();
+  // Excel/CSV에서는 2026-9-1처럼 월·일의 앞자리 0을 생략해도 받되,
+  // 저장·조회에는 항상 yyyy-mm-dd로 맞춘다.
   let match = text.match(/^(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
   if (!match && /^\d{8}$/.test(text)) match = [text, text.slice(0, 4), text.slice(4, 6), text.slice(6, 8)];
   if (!match) return '';
@@ -897,7 +899,7 @@ async function readContractFile(file) {
   if (window.XLSX) {
     const buffer = await file.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: 'array' });
-    rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '', raw: false });
+    rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '', raw: false, dateNF: 'yyyy-mm-dd' });
   } else if (extension === 'csv') rows = parseCsv(await file.text());
   else throw new Error('Excel 읽기 기능을 불러오지 못했습니다. 잠시 후 다시 시도하거나 CSV 파일을 사용해 주세요.');
   if (!rows.length) throw new Error('파일에 표시할 계약정보가 없습니다.');
@@ -1135,7 +1137,7 @@ async function readVehicleFile(file) {
     const buffer = await file.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: 'array' });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
+    rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false, dateNF: 'yyyy-mm-dd' });
   } else if (extension === 'csv') {
     rows = parseCsv(await file.text());
   } else {
@@ -1159,7 +1161,7 @@ async function readDrivingFile(file) {
   if (window.XLSX) {
     const buffer = await file.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: 'array' });
-    rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '', raw: false });
+    rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '', raw: false, dateNF: 'yyyy-mm-dd' });
   } else if (extension === 'csv') rows = parseCsv(await file.text());
   else throw new Error('Excel 읽기 기능을 불러오지 못했습니다. 잠시 후 다시 시도하거나 CSV 파일을 사용해 주세요.');
   if (!rows.length) throw new Error('파일에 표시할 운행기록이 없습니다.');
@@ -1442,7 +1444,7 @@ document.getElementById('closingUpload').addEventListener('change',async event=>
     if(file.size>20*1024*1024)throw Error('파일은 20MB 이하로 올려주세요.');
     if(!window.XLSX)throw Error('Excel 기능을 불러오지 못했습니다. 잠시 후 다시 시도하세요.');
     const workbook=XLSX.read(await file.arrayBuffer(),{type:'array'});
-    const raw=XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{defval:'',raw:false});
+    const raw=XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{defval:'',raw:false,dateNF:'yyyy-mm-dd'});
     if(!raw.length)throw Error('비용자료가 비어 있습니다.');
     const seen=new Set();
     const rows=raw.map((row,index)=>{

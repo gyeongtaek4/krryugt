@@ -9,6 +9,12 @@ function fn(source,name){
 }
 const row=(plate,km,date)=>({'차량번호':plate,'키로수':String(km),'운행년월일':date});
 const org={'본부':'익명본부','부':'익명부','팀':'익명팀','차종':'테스트'};
+const dateContext=vm.createContext({});
+vm.runInContext(fn(app,'normalizeDrivingDate'),dateContext);
+assert.equal(vm.runInContext("normalizeDrivingDate('2026-9-1')",dateContext),'2026-09-01');
+assert.equal(vm.runInContext("normalizeDrivingDate('2026-10-27')",dateContext),'2026-10-27');
+assert.equal(vm.runInContext("normalizeDrivingDate('2026-02-30')",dateContext),'');
+assert(app.includes("dateNF: 'yyyy-mm-dd'"));
 const elements={};
 const context=vm.createContext({drivingData:[],drivingArchive:{},drivingPageSize:20,
   normalizePlate:v=>v.replace(/\s/g,''),normalizeDrivingDate:v=>v,
