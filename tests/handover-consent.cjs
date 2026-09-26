@@ -15,6 +15,8 @@ assert(js.includes('renderHandoverVehicleResults'));
 assert(js.includes('data-handover-vehicle'));
 assert(js.includes('data-handover-recipient'));
 assert(js.includes('data-handover-detail-close'));
+assert(js.includes('data-handover-row'));
+assert(js.includes("detailRow.className='inline-detail-row'"));
 assert(js.includes('item.createdBy === window.fleetCurrentUser?.id'));
 assert(js.includes('canManageHandover'));
 assert(js.includes("rpc('confirm_vehicle_handover'"));

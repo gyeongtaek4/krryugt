@@ -156,7 +156,7 @@ function renderHandovers() {
   handoverEl('handoverRows').innerHTML = records.map(item => {
     const index = handoverRecords.indexOf(item);
     const manageActions = canManageHandover(item) ? `<button class="row-edit" data-handover-edit="${index}">수정</button><button class="row-delete" data-handover-delete="${index}">삭제</button>` : '';
-    return `<tr><td>${escapeHtml(item.date)}</td><td class="plate">${escapeHtml(item.vehicle['차량번호'])}<br>${escapeHtml(item.vehicle['차종'] || '')}</td><td>${escapeHtml(['본부','부','팀'].map(key=>item.vehicle[key] || '').join(' / '))}</td><td>${escapeHtml(item.from)} → ${escapeHtml(item.to)}</td><td>${escapeHtml(item.condition)}</td><td>${handoverConsentMarkup(item)}${canConfirmHandover(item) ? `<button class="row-edit handover-consent-action" data-handover-consent="${index}">인수 동의</button>` : ''}</td><td>${item.photos.length}장</td><td class="handover-management"><button class="row-edit" data-handover-detail="${index}">상세</button>${manageActions}</td></tr>`;
+    return `<tr data-handover-row="${index}"><td>${escapeHtml(item.date)}</td><td class="plate">${escapeHtml(item.vehicle['차량번호'])}<br>${escapeHtml(item.vehicle['차종'] || '')}</td><td>${escapeHtml(['본부','부','팀'].map(key=>item.vehicle[key] || '').join(' / '))}</td><td>${escapeHtml(item.from)} → ${escapeHtml(item.to)}</td><td>${escapeHtml(item.condition)}</td><td>${handoverConsentMarkup(item)}${canConfirmHandover(item) ? `<button class="row-edit handover-consent-action" data-handover-consent="${index}">인수 동의</button>` : ''}</td><td>${item.photos.length}장</td><td class="handover-management"><button class="row-edit" data-handover-detail="${index}">상세</button>${manageActions}</td></tr>`;
   }).join('') || `<tr><td colspan="8" class="empty-table">${handoverRecords.length ? '조회한 차량번호의 인수인계 이력이 없습니다.' : '등록된 인수인계 기록이 없습니다.'}</td></tr>`;
 }
 function downloadHandoverArchive() {
@@ -339,16 +339,17 @@ handoverEl('handoverRows').addEventListener('click',async event=>{
     return;
   }
   const button=event.target.closest('[data-handover-detail]');if(!button)return;
-  const item=handoverRecords[Number(button.dataset.handoverDetail)];if(!item)return;
-  const detail=handoverEl('handoverDetail');detail.hidden=false;
+  const index=Number(button.dataset.handoverDetail),item=handoverRecords[index],row=button.closest('tr');if(!item||!row)return;
+  const detail=handoverEl('handoverDetail');document.querySelectorAll('.inline-detail-row').forEach(item=>item.remove());detail.hidden=false;
   const consentInfo = item.consentStatus === 'completed'
     ? `인수 동의 완료 · ${item.consentedName || '인수자'} · ${formatConsentDate(item.consentedAt)} · 동의 ID ${maskedMemberId(item.consentedBy)}`
     : item.consentStatus === 'pending'
       ? `인수 동의 대기 · 지정 인수자만 동의할 수 있습니다.${canConfirmHandover(item) ? ' 이 계정으로 동의할 수 있습니다.' : ''}`
       : '인수자 계정 미지정 · 수신자 이름과 일치하는 활성 회원 계정을 확인한 뒤 동의할 수 있습니다.';
   detail.innerHTML=`<div class="detail-heading"><h3>${escapeHtml(item.vehicle['차량번호'])} · ${escapeHtml(item.date)}</h3><button class="button detail-close" type="button" data-handover-detail-close>접기</button></div><p>${escapeHtml(item.from)} → ${escapeHtml(item.to)} · ${escapeHtml(item.condition)}</p><p class="handover-notes">${escapeHtml(consentInfo)}</p><p class="handover-notes">${escapeHtml(item.notes || '특이사항 없음')}</p><p class="closing-help">사진 또는 PDF를 누르면 원본을 내려받습니다.</p><div class="handover-gallery">${handoverGallery(item.photos)}</div>`;
+  const detailRow=document.createElement('tr');detailRow.className='inline-detail-row';detailRow.innerHTML='<td colspan="8"></td>';detailRow.firstElementChild.append(detail);row.after(detailRow);
 });
-handoverEl('handoverDetail').addEventListener('click',event=>{if(event.target.closest('[data-handover-detail-close]'))handoverEl('handoverDetail').hidden=true;});
+handoverEl('handoverDetail').addEventListener('click',event=>{if(event.target.closest('[data-handover-detail-close]')){handoverEl('handoverDetail').hidden=true;handoverEl('handoverDetail').closest('.inline-detail-row')?.remove();}});
 handoverEl('closeHandoverManage').addEventListener('click',closeHandoverManage);
 handoverEl('cancelHandoverManage').addEventListener('click',closeHandoverManage);
 handoverEl('cancelHandoverDelete').addEventListener('click',closeHandoverManage);

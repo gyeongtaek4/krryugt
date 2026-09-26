@@ -19,6 +19,8 @@ assert(js.includes("from('vehicle_accidents').insert"));
 assert(js.includes("from('accident-photos').upload"));
 assert(js.includes('replacement_vehicle_number'));
 assert(js.includes('data-accident-detail-close'));
+assert(js.includes('data-accident-row'));
+assert(js.includes("detailRow.className='inline-detail-row'"));
 assert(js.includes('created_by===window.fleetCurrentUser?.id'));
 assert(js.includes('data-accident-edit'));
 assert(js.includes("photos.length>3"));
