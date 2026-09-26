@@ -23,5 +23,7 @@ assert(dashboard.includes('id="dashboardUsageDistanceLow"'));
 assert((dashboard.match(/<th>차량번호<\/th><th>팀<\/th>/g) || []).length === 4);
 assert(!dashboard.includes('dashboardUsageStatus'));
 assert(!dashboard.includes('확정월의 차량번호별 기록을 합산합니다.'));
+assert(!dashboard.includes('차량별 서로 다른 운행 날짜 수'));
+assert(!dashboard.includes('차량별 해당 월 이동거리 합계'));
 assert(js.includes("const month=document.getElementById('dashboardUsageMonth').value,item=drivingArchive[month];"), 'usage ranking must retain its selected month archive lookup');
 console.log('PASS: dashboard section order and month controls (HTML, no visual browser check).');
