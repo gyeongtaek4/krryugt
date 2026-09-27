@@ -9,6 +9,7 @@ const pdfSql=fs.readFileSync('supabase/015_accident_pdf_attachments.sql','utf8')
 const replacementSql=fs.readFileSync('supabase/016_accident_replacement_vehicle.sql','utf8');
 const authorSql=fs.readFileSync('supabase/017_author_manage_accidents_handovers.sql','utf8');
 assert(html.includes('data-page="사고접수 및 이력"'));
+assert(!html.includes('차량 기본정보와 사고 접수 내용은 Supabase에 저장하며'), 'accident storage guide remains');
 ['accidentView','accidentVehicle','accidentDate','accidentPassengers','accidentReplacementVehicle','accidentLocation','accidentDescription','accidentPhotos','accidentRows'].forEach(id=>assert(html.includes(`id="${id}"`)));
 assert(html.includes('id="accidentVehicle" type="search"'));
 assert(html.includes('id="accidentVehicleSuggestions"'));
