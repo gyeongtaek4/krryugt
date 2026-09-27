@@ -197,14 +197,16 @@ h1 { margin: 0; font-size: clamp(1.65rem, 2.4vw, 2.15rem); line-height: 1.25; le
 .metric-card::after { content: ""; position: absolute; right: -28px; bottom: -42px; width: 102px; height: 102px; border-radius: 50%; background: var(--brand-wash); opacity: .7; }
 .metric-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .metric-label { color: var(--ink-soft); font-size: .82rem; font-weight: 650; }
+.metric-shortcut-icon { position: relative; z-index: 1; width: 34px; height: 34px; display: grid; place-items: center; flex: 0 0 auto; padding: 0; border: 0; border-radius: 10px; color: var(--brand); background: var(--brand-wash); cursor: pointer; transition: transform .16s ease, background-color .16s ease, box-shadow .16s ease; }
+.metric-shortcut-icon svg { width: 18px; height: 18px; }
+.metric-shortcut-icon:hover { transform: translateY(-1px); background: #d5eee8; box-shadow: 0 4px 10px rgba(1, 145, 109, .14); }
+.metric-shortcut-icon:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .metric-value { position: relative; z-index: 1; margin: 14px 0 4px; font-size: 1.65rem; font-weight: 820; letter-spacing: -.045em; }
 .contract-amount-field { display: flex; align-items: center; gap: 10px; margin: 14px 0 8px; }
 .contract-amount-field input { width: 100%; min-width: 0; padding: 9px 12px; border: 1px solid #d6d6d6; border-radius: 10px; background: white; color: inherit; font: inherit; font-size: 1.5rem; font-weight: 800; }
 .contract-amount-field input:focus { outline: 2px solid #01916d; outline-offset: 2px; }
 .contract-amount-field span { font-size: 1.1rem; font-weight: 700; }
 .metric-meta { position: relative; z-index: 1; color: var(--grey); font-size: .75rem; }
-.metric-shortcut { position: relative; z-index: 1; min-height: 30px; margin-top: 12px; padding: 0 10px; border-color: #c9e4dc; color: var(--brand-dark); background: rgba(255,255,255,.85); font-size: .72rem; font-weight: 750; }
-.metric-shortcut:hover { border-color: var(--brand); background: var(--brand-wash); }
 .capacity-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .capacity-card { padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); }
 .capacity-card.warning { border-color: #e7d39e; background: #fffdf6; }
@@ -314,7 +316,6 @@ td strong { font-size: .8rem; }
 .department-overview-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .department-overview-actions .button { min-height: 35px; padding: 0 12px; font-size: .78rem; }
 .expiry-overview .expiry-header-actions { position: relative; z-index: 1; justify-content: flex-start; }
-.expiry-overview .metric-shortcut { margin-top: 0; }
 @media (max-width: 900px) { .dashboard-overview { grid-template-columns: 1fr; } }
 @media (max-width: 680px) { .capacity-summary { grid-template-columns: 1fr; } .capacity-card dl { grid-template-columns: 1fr 1fr; } }
 .department-headquarters-card { min-width: 0; padding: 10px; border: 1px solid #d8e8e4; border-radius: 14px; background: linear-gradient(145deg, #f4fbf9, #ffffff 54%); box-shadow: 0 5px 14px rgba(26, 84, 70, .035); }
