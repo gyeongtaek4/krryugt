@@ -15,6 +15,7 @@
   const userRole = document.getElementById('userRole');
   const logout = document.getElementById('logoutButton');
   const memberNavItem = document.getElementById('memberNavItem');
+  const capacityNavItem = document.getElementById('capacityNavItem');
   const idleLogoutMs = 10 * 60 * 1000;
   let idleLogoutTimer = null;
   let idleLogoutInProgress = false;
@@ -62,6 +63,7 @@
       group.hidden=!Array.from(group.querySelectorAll('li')).some(item=>!item.hidden);
     });
     memberNavItem.hidden=role!=='admin';
+    capacityNavItem.hidden=role!=='admin';
     const readOnly=role==='viewer';
     ['addVehicleButton','vehicleUploadButton','guideUploadButton','deleteAllVehicles'].forEach(id=>{
       const control = document.getElementById(id);
@@ -122,6 +124,9 @@
       }
       if(role==='admin'&&window.refreshMembersFromSupabase){
         try{await window.refreshMembersFromSupabase();}catch(loadError){showToast(loadError.message);}
+      }
+      if(role==='admin'&&window.refreshCapacityUsage){
+        try{await window.refreshCapacityUsage({announce:true});}catch(loadError){console.warn('용량 사용량 조회 오류',loadError);}
       }
       resetIdleLogoutTimer();
     }

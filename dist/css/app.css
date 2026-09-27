@@ -205,6 +205,26 @@ h1 { margin: 0; font-size: clamp(1.65rem, 2.4vw, 2.15rem); line-height: 1.25; le
 .contract-amount-field input:focus { outline: 2px solid #01916d; outline-offset: 2px; }
 .contract-amount-field span { font-size: 1.1rem; font-weight: 700; }
 .metric-meta { position: relative; z-index: 1; color: var(--grey); font-size: .75rem; }
+.capacity-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.capacity-card { padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); }
+.capacity-card.warning { border-color: #e7d39e; background: #fffdf6; }
+.capacity-card.danger { border-color: #efc3c3; background: #fff8f8; }
+.capacity-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: var(--ink-soft); font-size: .9rem; font-weight: 750; }
+.capacity-card-top strong { color: var(--brand-dark); font-size: 1.35rem; letter-spacing: -.04em; }
+.capacity-card.warning .capacity-card-top strong { color: #b57618; }
+.capacity-card.danger .capacity-card-top strong { color: #bf5252; }
+.capacity-bar { height: 10px; margin: 19px 0; overflow: hidden; border-radius: 999px; background: var(--surface); }
+.capacity-bar span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--brand); transition: width .25s ease; }
+.capacity-card.warning .capacity-bar span { background: var(--warning); }
+.capacity-card.danger .capacity-bar span { background: var(--danger); }
+.capacity-card dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.capacity-card dl div { min-width: 0; }
+.capacity-card dt { color: var(--grey); font-size: .72rem; }
+.capacity-card dd { margin: 3px 0 0; color: var(--ink); font-size: .86rem; font-weight: 750; overflow-wrap: anywhere; }
+.capacity-alert-panel { margin-top: 16px; }
+.capacity-alert-panel .closing-help { margin: 8px 0 0; }
+.capacity-updated { margin: 12px 0 0; color: var(--grey); font-size: .75rem; }
+.capacity-notice { margin-top: 7px !important; color: #b57618 !important; font-weight: 700; }
 .change { color: var(--brand); font-weight: 750; }
 .change.warning { color: #c98527; }
 
@@ -295,6 +315,7 @@ td strong { font-size: .8rem; }
 .department-overview-actions .button { min-height: 35px; padding: 0 12px; font-size: .78rem; }
 .expiry-overview .expiry-header-actions { justify-content: flex-start; }
 @media (max-width: 900px) { .dashboard-overview { grid-template-columns: 1fr; } }
+@media (max-width: 680px) { .capacity-summary { grid-template-columns: 1fr; } .capacity-card dl { grid-template-columns: 1fr 1fr; } }
 .department-headquarters-card { min-width: 0; padding: 10px; border: 1px solid #d8e8e4; border-radius: 14px; background: linear-gradient(145deg, #f4fbf9, #ffffff 54%); box-shadow: 0 5px 14px rgba(26, 84, 70, .035); }
 .department-node { border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
 .department-node summary { min-height: 44px; padding: 0 13px; display: flex; align-items: center; gap: 10px; cursor: pointer; list-style: none; color: var(--ink); font-size: .8rem; font-weight: 750; }

@@ -11,6 +11,8 @@
 
 - Q&A는 `fleet_questions`에 질문·답변과 등록/수정자·시각을, 운행가이드는 `fleet_guides`에 PDF 경로·파일명·크기와 등록자를 저장한다. PDF 원본은 비공개 `fleet-guides` Storage에 보관한다. 활성 회원은 읽기만, 관리자는 작성·수정·삭제한다. `011_knowledge_center.sql`은 2026-09-21 실제 적용됐으며, 업무 화면의 등록·열람 흐름은 후속 운영 점검 대상이다. 상세는 knowledge-center.md 참고.
 
+- 용량확인은 `admin_get_capacity_usage` RPC로 비공개 Storage 객체 메타데이터의 파일 크기 합계와 현재 Postgres DB 크기를 관리자에게만 반환한다. 화면의 무료 플랜 표시는 Storage 1GB, DB 500MB를 기준으로 하며 80% 이상이면 관리자 로그인·조회 시 알림을 표시한다. 용량 기준은 관리 화면용 조기 경고이며 Supabase 청구 기준의 기간 평균 사용량과는 다를 수 있다. `019_admin_capacity_usage.sql`은 2026-09-27 실제 적용했다.
+
 ## 구현된 Supabase 연결 (2026-09-17)
 
 - 로그인·RLS와 vehicles 조회·추가·수정·Excel 저장·삭제 연결. vehicles의 `cc`는 팀과 담당자(정) 사이에 관리하는 차량 기본정보다.

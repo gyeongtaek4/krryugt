@@ -5,6 +5,7 @@
 - dist/js/handover.js: 차량인수인계 폼·사진 미리보기·이력·JSON 백업/복원. app.js 다음에 실행하며 공통 차량 매칭·화면 전환 함수를 사용한다.
 - dist/js/accidents.js: 사고접수 폼·차량 스냅샷·현장 사진·이력·관리자 처리 코멘트. handover.js 다음, 인증 코드 이전에 실행하며 공통 차량 매칭·알림·Supabase 연결 객체를 사용한다.
 - dist/js/knowledge.js: Q&A와 운행가이드 목록, 관리자 작성·삭제, PDF 열람·다운로드. handover.js 다음, 인증 코드 이전에 실행하며 Supabase 연결 객체와 공통 알림을 사용한다.
+- dist/js/capacity.js: 관리자 전용 Storage·DB 사용량 조회, 무료 한도 잔여량·80% 경고 표시. 인증 코드 이전에 실행하며 `admin_get_capacity_usage` RPC를 사용한다.
 
 ## 현재 구조
 

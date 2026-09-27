@@ -137,6 +137,7 @@ function showToast(message) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
 }
+window.showToast = showToast;
 
 const sidebarPreferenceKey='fleet-sidebar-preference-v1';
 let sidebarExpanded=true;
@@ -167,7 +168,7 @@ function toggleModal(open) {
 const pageRoutes = {
   '대시보드': 'dashboard', '차량 현황': 'vehicles', '차량계약정보': 'contracts',
   '사고접수 및 이력': 'accidents', '차량인수인계': 'handover', 'Q&A': 'qna', '운행가이드': 'guide',
-  '운행기록데이터': 'driving', '월별 비용마감자료': 'closing', '회원관리': 'members'
+  '운행기록데이터': 'driving', '월별 비용마감자료': 'closing', '회원관리': 'members', '용량확인': 'capacity'
 };
 const routePages = Object.fromEntries(Object.entries(pageRoutes).map(([page, route]) => [route, page]));
 function pageFromLocation() {
@@ -184,13 +185,15 @@ function showView(page, { recordHistory = false, smoothScroll = true } = {}) {
   const isQna = page === 'Q&A';
   const isGuide = page === '운행가이드';
   const isMembers = page === '회원관리';
+  const isCapacity = page === '용량확인';
+  document.getElementById('capacityView').classList.toggle('active', isCapacity);
   document.getElementById('membersView').classList.toggle('active', isMembers);
   document.getElementById('qnaView').classList.toggle('active', isQna);
   document.getElementById('guideView').classList.toggle('active', isGuide);
   document.getElementById('handoverView').classList.toggle('active', isHandover);
   document.getElementById('accidentView').classList.toggle('active', isAccidents);
   document.getElementById('closingView').classList.toggle('active', isClosing);
-  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover && !isAccidents && !isQna && !isGuide && !isMembers);
+  document.getElementById('dashboardView').classList.toggle('active', !isVehicles && !isContracts && !isDriving && !isClosing && !isHandover && !isAccidents && !isQna && !isGuide && !isMembers && !isCapacity);
   document.getElementById('vehiclesView').classList.toggle('active', isVehicles);
   document.getElementById('contractsView').classList.toggle('active', isContracts);
   document.getElementById('drivingView').classList.toggle('active', isDriving);
@@ -215,6 +218,10 @@ function showView(page, { recordHistory = false, smoothScroll = true } = {}) {
   if (isMembers) {
     document.getElementById('breadcrumbCurrent').textContent = page;
     if (window.refreshMembersFromSupabase) window.refreshMembersFromSupabase().catch(error => showToast(error.message));
+  }
+  if (isCapacity) {
+    document.getElementById('breadcrumbCurrent').textContent = page;
+    if (window.refreshCapacityUsage) window.refreshCapacityUsage({ announce: false }).catch(error => showToast(error.message));
   }
   if (isDriving) {
     const latest = latestConfirmedDrivingMonth();
@@ -1593,7 +1600,7 @@ document.getElementById('closingRestore').addEventListener('change',async event=
 renderClosing();
 document.querySelectorAll('.nav-button').forEach(button => {
   button.addEventListener('click', () => {
-    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '사고접수 및 이력' || button.dataset.page === '차량인수인계' || button.dataset.page === 'Q&A' || button.dataset.page === '운행가이드' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리') showView(button.dataset.page, { recordHistory: true });
+    if (button.dataset.page === '대시보드' || button.dataset.page === '차량 현황' || button.dataset.page === '차량계약정보' || button.dataset.page === '사고접수 및 이력' || button.dataset.page === '차량인수인계' || button.dataset.page === 'Q&A' || button.dataset.page === '운행가이드' || button.dataset.page === '운행기록데이터' || button.dataset.page === '월별 비용마감자료' || button.dataset.page === '회원관리' || button.dataset.page === '용량확인') showView(button.dataset.page, { recordHistory: true });
     else showToast(`${button.dataset.page} 화면은 다음 단계에서 함께 만들 수 있습니다.`);
     if(isNarrowScreen())toggleSidebar(false);
   });
@@ -1683,7 +1690,7 @@ document.getElementById('allVehiclesButton').addEventListener('click', () => sho
 function toggleNotice(open){
   const popover=document.getElementById('noticePopover'),button=document.getElementById('noticeButton');
   const isOpen=open??popover.hidden;
-  if(isOpen){const count=document.getElementById('dashboardExpiryCount').textContent;popover.innerHTML=`<strong>주요 알림</strong><p>6개월 내 계약 만료 예정 차량: ${escapeHtml(count)}</p>`;}
+  if(isOpen){const count=document.getElementById('dashboardExpiryCount').textContent;const capacity=window.fleetCapacityNotice||'';popover.innerHTML=`<strong>주요 알림</strong><p>6개월 내 계약 만료 예정 차량: ${escapeHtml(count)}</p>${capacity?`<p class="capacity-notice">${escapeHtml(capacity)}</p>`:''}`;}
   popover.hidden=!isOpen;button.setAttribute('aria-expanded',String(isOpen));
 }
 document.getElementById('noticeButton').addEventListener('click',event=>{event.stopPropagation();toggleNotice();});
