@@ -1,6 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('dist/js/handover.js','utf8');
 const css=fs.readFileSync('dist/css/app.css','utf8');
+const html=fs.readFileSync('dist/index.html','utf8');
 const start=source.indexOf('function validateHandoverPhotos('),end=source.indexOf('\nfunction handoverGallery',start);
 const context=vm.createContext({});
 vm.runInContext(source.slice(start,end),context);
@@ -29,4 +30,6 @@ assert(css.includes('#handoverForm .form-input'));
 assert(css.includes('#handoverForm select.form-input'));
 assert(css.includes('#handoverForm textarea.form-input'));
 assert(css.includes('.handover-detail .handover-pdf') && css.includes('height: 78px'));
+assert(!html.includes('인수인계 내용과 당시 차량·조직 정보는 Supabase에 저장하고'), 'entry storage guide remains');
+assert(!html.includes('기록 당시 차량·조직 정보와 비공개 사진·PDF를 Supabase에 보관합니다.'), 'history storage guide remains');
 console.log('PASS: photo constraints, Supabase save calls and metadata archive format (mock, no live upload).');
