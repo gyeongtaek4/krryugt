@@ -62,7 +62,7 @@
     return true;
   }
 
-  document.getElementById('refreshCapacity').addEventListener('click', () => {
+  document.getElementById('refreshCapacity')?.addEventListener('click', () => {
     refreshCapacityUsage({ announce: true }).catch(error => {
       document.getElementById('capacityAlertMessage').textContent = error.message;
       if (window.showToast) showToast(error.message);

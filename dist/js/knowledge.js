@@ -63,7 +63,7 @@
   }
 
   el('qnaSearch').addEventListener('input', () => { qnaPage = 1; renderQna(); });
-  ['qnaPagination', 'guidePagination'].forEach(id => el(id).addEventListener('click', event => {
+  ['qnaPagination', 'guidePagination'].forEach(id => el(id)?.addEventListener('click', event => {
     const button = event.target.closest('[data-knowledge-page-step]');
     if (!button || button.disabled) return;
     if (button.dataset.knowledgePage === 'qna') qnaPage += Number(button.dataset.knowledgePageStep);

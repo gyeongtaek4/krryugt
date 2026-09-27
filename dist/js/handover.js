@@ -312,7 +312,7 @@ handoverEl('handoverForm').addEventListener('submit',async event=>{
   finally{handoverEl('handoverSave').disabled=false;}
 });
 handoverEl('handoverHistorySearch').addEventListener('input',()=>{handoverPage=1;renderHandovers();});
-handoverEl('handoverPagination').addEventListener('click',event=>{const button=event.target.closest('[data-handover-page-step]');if(!button||button.disabled)return;handoverPage+=Number(button.dataset.handoverPageStep);renderHandovers();});
+handoverEl('handoverPagination')?.addEventListener('click',event=>{const button=event.target.closest('[data-handover-page-step]');if(!button||button.disabled)return;handoverPage+=Number(button.dataset.handoverPageStep);renderHandovers();});
 async function confirmHandover(item) {
   const { error } = await window.fleetSupabaseClient.rpc('confirm_vehicle_handover',{p_handover_id:item.id});
   if (error) throw Error(error.message || '인수 동의 처리에 실패했습니다.');

@@ -1267,8 +1267,8 @@ async function readDrivingFile(file) {
 }
 
 document.getElementById('menuButton').addEventListener('click', () => toggleSidebar(isNarrowScreen() ? !sidebar.classList.contains('open') : !sidebarExpanded));
-document.getElementById('expandDashboardDepartments').addEventListener('click', () => setDepartmentAccordionState(true));
-document.getElementById('collapseDashboardDepartments').addEventListener('click', () => setDepartmentAccordionState(false));
+document.getElementById('expandDashboardDepartments')?.addEventListener('click', () => setDepartmentAccordionState(true));
+document.getElementById('collapseDashboardDepartments')?.addEventListener('click', () => setDepartmentAccordionState(false));
 scrim.addEventListener('click', () => toggleSidebar(false));
 window.addEventListener('resize',applySidebarPreference);
 document.getElementById('vehicleUploadButton').addEventListener('click', () => toggleModal(true));

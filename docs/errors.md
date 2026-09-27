@@ -133,3 +133,10 @@
 - 확인: Supabase 조회 결과 `image/jpeg`, `image/png`, `image/webp`만 허용됨.
 - 조치: 화면 오류에 Storage 상세 사유를 표시하고, `005_handovers.sql`과 실제 버킷 허용 목록에 `application/pdf`를 추가했다.
 - 검증: 실제 조회 결과 허용 목록에 `application/pdf`가 표시되고 `pdf_allowed=true`임을 확인했다.
+
+## 배포 파일 버전 불일치로 인한 로그인 미동작 (2026-09-27)
+
+- 증상: 운영 주소에서 이전 HTML과 최신 JavaScript가 함께 로드되어 `null.addEventListener` 오류가 발생하고 로그인 버튼 동작을 확인할 수 없었다.
+- 원인: 정적 `index.html`과 JavaScript 파일의 브라우저 캐시 버전이 달라, 최신 스크립트가 이전 화면에 없는 요소를 참조했다.
+- 조치: 선택적 화면 요소의 이벤트 연결을 null-safe로 바꾸고, `vercel.json`으로 배포 파일을 재검증하도록 `Cache-Control: no-store`를 적용했다.
+- 검증: 정적 문법·캐시 설정 검사는 배포 전 수행한다. 최신 Vercel 배포본에서 로그인 및 메뉴 동작 재확인이 필요하다.
