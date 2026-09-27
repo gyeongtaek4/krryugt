@@ -15,8 +15,28 @@
   const userRole = document.getElementById('userRole');
   const logout = document.getElementById('logoutButton');
   const memberNavItem = document.getElementById('memberNavItem');
+  const idleLogoutMs = 10 * 60 * 1000;
+  let idleLogoutTimer = null;
+  let idleLogoutInProgress = false;
   let mode = 'login';
   if (!gate || !form) return;
+
+  function stopIdleLogoutTimer() {
+    if (idleLogoutTimer) window.clearTimeout(idleLogoutTimer);
+    idleLogoutTimer = null;
+  }
+  function resetIdleLogoutTimer() {
+    if (!window.fleetCurrentUser || idleLogoutInProgress) return;
+    stopIdleLogoutTimer();
+    idleLogoutTimer = window.setTimeout(async () => {
+      if (!window.fleetCurrentUser || idleLogoutInProgress) return;
+      idleLogoutInProgress = true;
+      stopIdleLogoutTimer();
+      await window.fleetSupabaseClient.auth.signOut({ scope: 'local' });
+      error.textContent = '10분 동안 사용하지 않아 자동 로그아웃되었습니다.';
+      idleLogoutInProgress = false;
+    }, idleLogoutMs);
+  }
 
   function setMode(nextMode) {
     mode=nextMode;error.textContent='';error.classList.remove('success');
@@ -56,6 +76,7 @@
     window.fleetCurrentRole = 'viewer';
     memberNavItem.hidden=true;
     gate.classList.toggle('hidden', Boolean(session));
+    if (!session) { stopIdleLogoutTimer(); return; }
     if (session) {
       userName.textContent = session.user.email || '로그인 사용자';
       userRole.textContent = '인증 확인 중';
@@ -102,6 +123,7 @@
       if(role==='admin'&&window.refreshMembersFromSupabase){
         try{await window.refreshMembersFromSupabase();}catch(loadError){showToast(loadError.message);}
       }
+      resetIdleLogoutTimer();
     }
   }
 
@@ -127,6 +149,9 @@
     await applySession(data.session);
   });
   logout.addEventListener('click', () => window.fleetSupabaseClient.auth.signOut());
+  ['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll'].forEach(eventName => {
+    window.addEventListener(eventName, resetIdleLogoutTimer, { passive: eventName !== 'keydown' });
+  });
   window.fleetSupabaseClient.auth.onAuthStateChange((_event, session) => { applySession(session); });
   window.fleetSupabaseClient.auth.getSession().then(({ data }) => applySession(data.session));
 })();

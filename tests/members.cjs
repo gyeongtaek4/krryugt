@@ -1,6 +1,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const html=fs.readFileSync('dist/index.html','utf8');
 const auth=fs.readFileSync('dist/js/supabase-auth.js','utf8');
+const client=fs.readFileSync('dist/js/supabase-client.js','utf8');
 const members=fs.readFileSync('dist/js/members.js','utf8');
 const app=fs.readFileSync('dist/js/app.js','utf8');
 const sql=fs.readFileSync('supabase/006_members.sql','utf8');
@@ -15,6 +16,10 @@ assert(auth.includes('.auth.signUp('));
 assert(auth.includes("profile.status!=='active'"));
 assert(auth.includes("memberNavItem.hidden=role!=='admin'"));
 assert(auth.includes("new Set(['차량 현황','사고접수 및 이력','차량인수인계','Q&A','운행가이드'])"));
+assert(auth.includes('const idleLogoutMs = 10 * 60 * 1000'), '10-minute idle logout setting is missing');
+assert(auth.includes("auth.signOut({ scope: 'local' })"), 'idle logout is not local session sign-out');
+assert(auth.includes("['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll']"), 'idle activity tracking is missing');
+assert(client.includes('storage: window.sessionStorage'), 'tab session storage is not configured');
 assert(!auth.includes('vehicleUploadGuide'), 'removed vehicle upload guide must not be controlled by role navigation');
 assert(app.includes("page === '회원관리'"));
 assert(app.includes("const canEdit=window.fleetCurrentRole==='admin'"));

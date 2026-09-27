@@ -6,5 +6,5 @@ if (!window.supabase || !window.FLEET_SUPABASE_CONFIG) {
 const supabaseClient = window.fleetSupabaseClient = window.supabase.createClient(
   window.FLEET_SUPABASE_CONFIG.url,
   window.FLEET_SUPABASE_CONFIG.publishableKey,
-  { auth: { persistSession: true, autoRefreshToken: true } }
+  { auth: { persistSession: true, autoRefreshToken: true, storage: window.sessionStorage } }
 );
