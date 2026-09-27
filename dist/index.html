@@ -81,7 +81,7 @@
           <div class="panel-header"><div><h2 class="panel-title" id="qnaFormTitle">Q&amp;A 등록</h2><p class="closing-help">관리자가 질문과 답변을 직접 등록·수정합니다.</p></div></div>
           <form id="qnaForm" class="knowledge-form"><label class="form-field full"><span>질문 제목</span><input class="form-input" id="qnaTitle" maxlength="160" required placeholder="예: 법인차량 운행 전 확인할 사항은 무엇인가요?"></label><label class="form-field full"><span>질문 내용</span><textarea class="form-input" id="qnaQuestion" maxlength="4000" required placeholder="질문 또는 안내가 필요한 배경을 입력하세요."></textarea></label><label class="form-field full"><span>관리자 답변</span><textarea class="form-input" id="qnaAnswer" maxlength="8000" required placeholder="직원이 참고할 답변을 입력하세요."></textarea></label><p class="form-error" id="qnaError" role="alert"></p><div class="knowledge-form-actions"><button class="button" type="button" id="qnaCancelEdit" hidden>수정 취소</button><button class="button primary" type="submit" id="qnaSave">Q&amp;A 등록</button></div></form>
         </section>
-        <section class="panel knowledge-list-panel"><div class="panel-header"><div><h2 class="panel-title">등록된 Q&amp;A</h2><p class="closing-help">전 직원이 열람할 수 있습니다.</p></div><label class="search-box knowledge-search" for="qnaSearch"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="qnaSearch" type="search" placeholder="질문 또는 답변 검색" autocomplete="off"></label></div><div class="knowledge-list" id="qnaRows"></div></section>
+        <section class="panel knowledge-list-panel"><div class="panel-header"><div><h2 class="panel-title">등록된 Q&amp;A</h2><p class="closing-help">전 직원이 열람할 수 있습니다.</p></div><label class="search-box knowledge-search" for="qnaSearch"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="qnaSearch" type="search" placeholder="질문 또는 답변 검색" autocomplete="off"></label></div><div class="knowledge-list" id="qnaRows"></div><div class="closing-actions pagination" id="qnaPagination"></div></section>
       </div>
       <div class="content view" id="guideView">
         <div class="page-heading"><div><p class="eyebrow">운행 기준 · PDF 자료</p><h1>운행가이드</h1><p class="heading-copy">관리자가 등록한 운행 안내 PDF를 열람하거나 내려받을 수 있습니다.</p></div></div>
@@ -89,7 +89,7 @@
           <div class="panel-header"><div><h2 class="panel-title">운행가이드 등록</h2><p class="closing-help">PDF 파일 1개와 제목을 등록합니다. 파일당 최대 20MB입니다.</p></div></div>
           <form id="guideForm" class="knowledge-form"><label class="form-field full"><span>가이드 제목</span><input class="form-input" id="guideTitle" maxlength="160" required placeholder="예: 법인차량 운행 안전수칙"></label><label class="form-field full"><span>간단한 설명</span><textarea class="form-input" id="guideDescription" maxlength="2000" placeholder="직원이 열기 전에 알면 좋은 내용을 입력하세요."></textarea></label><label class="form-field full"><span>PDF 파일</span><input class="form-input guide-file-input" id="guideFile" type="file" accept="application/pdf,.pdf" required></label><p class="form-error" id="guideError" role="alert"></p><div class="knowledge-form-actions"><button class="button primary" type="submit" id="guideSave">PDF 등록</button></div></form>
         </section>
-        <section class="panel knowledge-list-panel"><div class="panel-header"><div><h2 class="panel-title">운행가이드 자료</h2><p class="closing-help">PDF를 열람하거나 파일로 내려받을 수 있습니다.</p></div></div><div class="knowledge-list" id="guideRows"></div></section>
+        <section class="panel knowledge-list-panel"><div class="panel-header"><div><h2 class="panel-title">운행가이드 자료</h2><p class="closing-help">PDF를 열람하거나 파일로 내려받을 수 있습니다.</p></div></div><div class="knowledge-list" id="guideRows"></div><div class="closing-actions pagination" id="guidePagination"></div></section>
       </div>
       <div class="content view" id="handoverView">
         <div class="page-heading"><div><p class="eyebrow">담당자 변경 · 차량 상태 기록</p><h1>차량인수인계</h1><p class="heading-copy">누가 어떤 차량을 넘겼는지, 인계 당시 외관 상태를 사진 또는 PDF와 함께 기록합니다.</p></div></div>
@@ -113,7 +113,7 @@
         </section>
         <section class="panel">
           <div class="panel-header handover-history-header"><div><h2 class="panel-title">인수인계 이력</h2></div><div class="handover-history-actions"><label class="search-box handover-history-search" for="handoverHistorySearch"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="handoverHistorySearch" type="search" placeholder="차량번호로 과거 이력 조회" autocomplete="off"></label><div class="closing-actions"><button class="button" id="handoverDownload">이력 자료 내려받기</button><label class="button closing-file-button" hidden>이전 보관파일 불러오기<input id="handoverRestore" type="file" accept=".json"></label></div></div></div>
-          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>인계일</th><th>차량번호 / 차종</th><th>조직</th><th>인계자 → 인수자</th><th>차량 상태</th><th>인수 동의</th><th>첨부</th><th>관리</th></tr></thead><tbody id="handoverRows"></tbody></table></div>
+          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>인계일</th><th>차량번호 / 차종</th><th>조직</th><th>인계자 → 인수자</th><th>차량 상태</th><th>인수 동의</th><th>첨부</th><th>관리</th></tr></thead><tbody id="handoverRows"></tbody></table></div><div class="closing-actions pagination" id="handoverPagination"></div>
         </section>
       </div>
       <div class="content view" id="accidentView">
@@ -155,12 +155,12 @@
         <section class="panel closing-detail">
           <div class="panel-header"><div><h2 class="panel-title">선택월 비용자료</h2><p class="closing-help">차량별 비용과 연결된 조직정보를 확인하세요.</p></div><div class="closing-actions"><button class="button" id="closingAdminEdit" style="display:none">관리자 마감 수정</button><button class="button primary" id="closingConfirm">마감 확정 · 보관파일 저장</button></div></div>
           <div class="closing-correction"><input class="form-input" id="closingCorrectionReason" aria-label="정정 사유" placeholder="정정 사유를 입력하세요 (필수)" style="display:none"></div>
-          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량번호</th><th>렌탈료</th><th>주유비</th><th>통행료</th><th>주차비</th><th>총금액</th></tr></thead><tbody id="closingRows"></tbody></table></div>
+          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>본부</th><th>부</th><th>팀</th><th>차량번호</th><th>렌탈료</th><th>주유비</th><th>통행료</th><th>주차비</th><th>총금액</th></tr></thead><tbody id="closingRows"></tbody></table></div><div class="closing-actions pagination" id="closingPagination"></div>
         </section>
         <section class="panel closing-archive">
           <div class="panel-header"><div><h2 class="panel-title">확정 마감자료 보관함</h2><p class="closing-help">지난 월의 확정자료는 조회 버튼으로 다시 확인합니다.</p></div></div>
           <div class="closing-backup"><div><strong>보관파일 관리</strong><p class="closing-help">전체 확정월을 하나의 JSON 파일로 내려받거나 복원합니다.</p></div><div class="closing-actions"><button class="button" id="closingDownload">전체 보관파일 다운로드</button><label class="button closing-file-button">보관파일 불러오기<input id="closingRestore" type="file" accept=".json"></label></div></div>
-          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>마감월도</th><th>차량수</th><th>렌트비용</th><th>총 비용</th><th>확정일</th><th>정정 이력</th><th>조회</th></tr></thead><tbody id="closingArchiveRows"></tbody></table></div>
+          <div class="table-wrap"><table class="vehicle-table"><thead><tr><th>마감월도</th><th>차량수</th><th>렌트비용</th><th>총 비용</th><th>확정일</th><th>정정 이력</th><th>조회</th></tr></thead><tbody id="closingArchiveRows"></tbody></table></div><div class="closing-actions pagination" id="closingArchivePagination"></div>
         </section>
       </div>
       <div class="content view active" id="dashboardView">

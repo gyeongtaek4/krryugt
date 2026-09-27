@@ -15,8 +15,9 @@ assert.equal(vm.runInContext("normalizeDrivingDate('2026-9-1')",dateContext),'20
 assert.equal(vm.runInContext("normalizeDrivingDate('2026-10-27')",dateContext),'2026-10-27');
 assert.equal(vm.runInContext("normalizeDrivingDate('2026-02-30')",dateContext),'');
 assert(app.includes("dateNF: 'yyyy-mm-dd'"));
+assert(months.includes('const drivingPageSize = 30'), 'driving page size must be 30');
 const elements={};
-const context=vm.createContext({drivingData:[],drivingArchive:{},drivingPageSize:20,
+const context=vm.createContext({drivingData:[],drivingArchive:{},drivingPageSize:30,
   normalizePlate:v=>v.replace(/\s/g,''),normalizeDrivingDate:v=>v,
   vehicleForPlate:()=>org,confirm:()=>true,
   document:{getElementById:id=>elements[id]||(elements[id]={})}});
@@ -47,9 +48,9 @@ assert.equal(vm.runInContext("drivingDayStatus('2026-08-12').isHoliday",context)
 context.drivingArchive['2026-08']={rows:context.drivingData.slice(0,3).map(row=>({...row,_organization:{...org,'팀':'확정 당시 팀'}})),confirmedAt:'2026-09-02'};
 assert.equal(vm.runInContext("drivingMonthlyTotals('2026-08')[0].org['팀']",context),'확정 당시 팀');
 assert.equal(vm.runInContext("drivingMonthlyTotals('2026-09')[0].distance",context),80);
-vm.runInContext("drivingPagination('pager',21,1)",context);
+vm.runInContext("drivingPagination('pager',31,1)",context);
 assert(elements.pager.innerHTML.includes('1 / 2'));assert(elements.pager.innerHTML.includes('data-page-step="-1" disabled'));
-vm.runInContext("drivingPagination('pager',21,2)",context);assert(elements.pager.innerHTML.includes('data-page-step="1" disabled'));
+vm.runInContext("drivingPagination('pager',31,2)",context);assert(elements.pager.innerHTML.includes('data-page-step="1" disabled'));
 context.storeDrivingMonth=async(month,rows)=>{context.drivingData=context.drivingData.filter(row=>row['운행년월일'].slice(0,7)!==month).concat(rows);};
 vm.runInContext(fn(app,'mergeDrivingRows'),context);
 (async()=>{

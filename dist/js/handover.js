@@ -2,6 +2,8 @@
 const handoverRecords = [];
 let handoverPhotoDraft = [], handoverPhotoLoading = false;
 let handoverRecipients = [];
+let handoverPage = 1;
+const handoverPageSize = 20;
 const handoverEl = id => document.getElementById(id);
 function refreshHandoverVehicles() {
   renderHandoverVehicleInfo();
@@ -153,11 +155,19 @@ function matchingHandovers() {
 }
 function renderHandovers() {
   const records = matchingHandovers();
-  handoverEl('handoverRows').innerHTML = records.map(item => {
+  handoverPage = Math.min(handoverPage, Math.max(1, Math.ceil(records.length / handoverPageSize)));
+  const pageRecords = records.slice((handoverPage - 1) * handoverPageSize, handoverPage * handoverPageSize);
+  handoverEl('handoverRows').innerHTML = pageRecords.map(item => {
     const index = handoverRecords.indexOf(item);
     const manageActions = canManageHandover(item) ? `<button class="row-edit" data-handover-edit="${index}">수정</button><button class="row-delete" data-handover-delete="${index}">삭제</button>` : '';
     return `<tr data-handover-row="${index}"><td>${escapeHtml(item.date)}</td><td class="plate">${escapeHtml(item.vehicle['차량번호'])}<br>${escapeHtml(item.vehicle['차종'] || '')}</td><td>${escapeHtml(['본부','부','팀'].map(key=>item.vehicle[key] || '').join(' / '))}</td><td>${escapeHtml(item.from)} → ${escapeHtml(item.to)}</td><td>${escapeHtml(item.condition)}</td><td>${handoverConsentMarkup(item)}${canConfirmHandover(item) ? `<button class="row-edit handover-consent-action" data-handover-consent="${index}">인수 동의</button>` : ''}</td><td>${item.photos.length}장</td><td class="handover-management"><button class="row-edit" data-handover-detail="${index}">상세</button>${manageActions}</td></tr>`;
   }).join('') || `<tr><td colspan="8" class="empty-table">${handoverRecords.length ? '조회한 차량번호의 인수인계 이력이 없습니다.' : '등록된 인수인계 기록이 없습니다.'}</td></tr>`;
+  const pager = handoverEl('handoverPagination');
+  if (records.length <= handoverPageSize) pager.innerHTML = '';
+  else {
+    const pages = Math.ceil(records.length / handoverPageSize);
+    pager.innerHTML = `<button class="button" data-handover-page-step="-1" ${handoverPage <= 1 ? 'disabled' : ''}>이전</button><span>${handoverPage} / ${pages} 페이지 · 총 ${records.length}건</span><button class="button" data-handover-page-step="1" ${handoverPage >= pages ? 'disabled' : ''}>다음</button>`;
+  }
 }
 function downloadHandoverArchive() {
   if (!handoverRecords.length) { showToast('저장된 기록이 없습니다.'); return; }
@@ -301,7 +311,8 @@ handoverEl('handoverForm').addEventListener('submit',async event=>{
   }catch(error){handoverEl('handoverError').textContent=error.message;}
   finally{handoverEl('handoverSave').disabled=false;}
 });
-handoverEl('handoverHistorySearch').addEventListener('input',renderHandovers);
+handoverEl('handoverHistorySearch').addEventListener('input',()=>{handoverPage=1;renderHandovers();});
+handoverEl('handoverPagination').addEventListener('click',event=>{const button=event.target.closest('[data-handover-page-step]');if(!button||button.disabled)return;handoverPage+=Number(button.dataset.handoverPageStep);renderHandovers();});
 async function confirmHandover(item) {
   const { error } = await window.fleetSupabaseClient.rpc('confirm_vehicle_handover',{p_handover_id:item.id});
   if (error) throw Error(error.message || '인수 동의 처리에 실패했습니다.');

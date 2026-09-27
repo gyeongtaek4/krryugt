@@ -13,7 +13,7 @@ for (const match of html.matchAll(/id="([^"]+)"/g)) {
   elements[match[1]] = {value: '2026-09', style: {}};
 }
 const context = vm.createContext({
-  closingArchive: {}, closingDraft: null, closingEditMonth: null,
+  closingArchive: {}, closingDraft: null, closingEditMonth: null, closingPage: 1, closingArchivePage: 1, closingPageSize: 30,
   costKeys: ['렌탈료', '주유비', '통행료', '주차비'],
   closingMonthValue: () => '2026-09',
   won: value => value.toLocaleString('ko-KR') + '원',
@@ -24,7 +24,7 @@ function fn(name) {
   const start = source.indexOf('function ' + name + '(');
   return source.slice(start, source.indexOf('\nfunction ', start + 1));
 }
-vm.runInContext(fn('closingTotals') + '\n' + fn('renderClosing') + '\n' + fn('closingExportRows'), context);
+vm.runInContext(fn('closingTotals') + '\n' + fn('renderClosingPagination') + '\n' + fn('renderClosing') + '\n' + fn('closingExportRows'), context);
 vm.runInContext('renderClosing()', context);
 assert.equal(elements.closingTotal.textContent, '—');
 assert.equal(elements.closingConfirm.disabled, true);
@@ -36,6 +36,7 @@ assert.equal(elements.closingOtherAmount.textContent, '270원');
 assert.equal(elements.closingTotal.textContent, '1,270원');
 assert(elements.closingRows.innerHTML.includes('전체 합계'));
 assert(elements.closingRows.innerHTML.includes('closing-row-total">1,270원'));
+assert.equal(elements.closingPagination.innerHTML, '');
 context.closingArchive['2026-09'] = {rows: context.closingDraft.rows, confirmedAt: '2026-09-17'};
 vm.runInContext('renderClosing()', context);
 assert.equal(elements.closingUpload.disabled, true);
@@ -55,4 +56,8 @@ assert.equal(exported[1]['총금액'], 900);
 assert.equal(vm.runInContext("closingExportRows('2026-09')[0]['총금액']", context), 1270);
 assert.equal(vm.runInContext("closingExportRows('2026-07').length", context), 0);
 assert.equal(JSON.stringify(context.closingArchive), backup);
+context.closingDraft = {month: '2026-09', rows: Array.from({length: 31}, (_, index) => ({'본부':'테스트','부':'부','팀':'팀','차량번호':`차량${index}`, '렌탈료': 1, '주유비': 0, '통행료': 0, '주차비': 0}))};
+context.closingPage = 1;
+vm.runInContext('renderClosing()', context);
+assert(elements.closingPagination.innerHTML.includes('1 / 2 페이지 · 총 31건'));
 console.log('PASS: closing UI IDs, summaries, locks, row/grand totals and two-month snapshot export after JSON roundtrip (mock DOM, no browser download).');

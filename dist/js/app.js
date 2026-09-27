@@ -246,10 +246,18 @@ const monthlyAdditionalCostData = {};
 const closingArchive = {};
 let closingDraft = null;
 let closingEditMonth = null;
+let closingPage = 1, closingArchivePage = 1;
+const closingPageSize = 30;
 const costKeys = ['렌탈료', '주유비', '통행료', '주차비'];
 const closingMonthValue = () => document.getElementById('closingMonth').value;
 const won = value => `${value.toLocaleString('ko-KR')}원`;
 function closingTotals(rows) { return costKeys.map(key => rows.reduce((sum, row) => sum + row[key], 0)); }
+function renderClosingPagination(id, total, page) {
+  const target = document.getElementById(id);
+  if (total <= closingPageSize) { target.innerHTML = ''; return; }
+  const pages = Math.ceil(total / closingPageSize);
+  target.innerHTML = `<button class="button" data-closing-page-step="-1" ${page <= 1 ? 'disabled' : ''}>이전</button><span>${page} / ${pages} 페이지 · 총 ${total}건</span><button class="button" data-closing-page-step="1" ${page >= pages ? 'disabled' : ''}>다음</button>`;
+}
 function renderClosing() {
   const month = closingMonthValue(), saved = closingArchive[month];
   const isEditing = closingEditMonth === month && closingDraft && closingDraft.month === month;
@@ -265,8 +273,14 @@ function renderClosing() {
   document.getElementById('closingRentAmount').textContent = rows.length ? won(totals[0]) : '—';
   document.getElementById('closingOtherAmount').textContent = rows.length ? won(totals.slice(1).reduce((a,b)=>a+b,0)) : '—';
   document.getElementById('closingTotal').textContent = rows.length ? won(totals.reduce((a,b)=>a+b,0)) : '—';
-  document.getElementById('closingRows').innerHTML = rows.length ? rows.map(row=>`<tr>${['본부','부','팀','차량번호'].map(key=>`<td>${escapeHtml(row[key] || '미매칭')}</td>`).join('')}${costKeys.map(key=>`<td>${won(row[key])}</td>`).join('')}<td class="closing-row-total">${won(costKeys.reduce((sum,key)=>sum+row[key],0))}</td></tr>`).join('') + `<tr class="closing-total-row"><th colspan="4" scope="row">전체 합계</th>${totals.map(value=>`<td>${won(value)}</td>`).join('')}<td>${won(totals.reduce((a,b)=>a+b,0))}</td></tr>` : '<tr><td colspan="9" class="empty-table">선택월의 자료를 업로드하거나 보관파일을 불러오세요.</td></tr>';
-  document.getElementById('closingArchiveRows').innerHTML = Object.keys(closingArchive).sort().reverse().map(key=>{const item=closingArchive[key], totals=closingTotals(item.rows), revisions=item.revisions||[];return `<tr><td>${escapeHtml(key)}</td><td>${item.rows.length}대</td><td>${won(totals[0])}</td><td>${won(totals.reduce((a,b)=>a+b,0))}</td><td>${escapeHtml(item.confirmedAt)}</td><td>${revisions.length ? `${revisions.length}회` : '없음'}</td><td><div class="closing-actions"><button class="row-edit" data-closing-month="${escapeHtml(key)}">조회</button><button class="row-edit" data-closing-export="${escapeHtml(key)}">자료 내려받기</button></div></td></tr>`;}).join('') || '<tr><td colspan="7" class="empty-table">확정된 비용마감자료가 없습니다.</td></tr>';
+  closingPage = Math.min(closingPage, Math.max(1, Math.ceil(rows.length / closingPageSize)));
+  const pageRows = rows.slice((closingPage - 1) * closingPageSize, closingPage * closingPageSize);
+  document.getElementById('closingRows').innerHTML = rows.length ? pageRows.map(row=>`<tr>${['본부','부','팀','차량번호'].map(key=>`<td>${escapeHtml(row[key] || '미매칭')}</td>`).join('')}${costKeys.map(key=>`<td>${won(row[key])}</td>`).join('')}<td class="closing-row-total">${won(costKeys.reduce((sum,key)=>sum+row[key],0))}</td></tr>`).join('') + `<tr class="closing-total-row"><th colspan="4" scope="row">전체 합계</th>${totals.map(value=>`<td>${won(value)}</td>`).join('')}<td>${won(totals.reduce((a,b)=>a+b,0))}</td></tr>` : '<tr><td colspan="9" class="empty-table">선택월의 자료를 업로드하거나 보관파일을 불러오세요.</td></tr>';
+  const archiveMonths = Object.keys(closingArchive).sort().reverse();
+  closingArchivePage = Math.min(closingArchivePage, Math.max(1, Math.ceil(archiveMonths.length / closingPageSize)));
+  document.getElementById('closingArchiveRows').innerHTML = archiveMonths.slice((closingArchivePage - 1) * closingPageSize, closingArchivePage * closingPageSize).map(key=>{const item=closingArchive[key], totals=closingTotals(item.rows), revisions=item.revisions||[];return `<tr><td>${escapeHtml(key)}</td><td>${item.rows.length}대</td><td>${won(totals[0])}</td><td>${won(totals.reduce((a,b)=>a+b,0))}</td><td>${escapeHtml(item.confirmedAt)}</td><td>${revisions.length ? `${revisions.length}회` : '없음'}</td><td><div class="closing-actions"><button class="row-edit" data-closing-month="${escapeHtml(key)}">조회</button><button class="row-edit" data-closing-export="${escapeHtml(key)}">자료 내려받기</button></div></td></tr>`;}).join('') || '<tr><td colspan="7" class="empty-table">확정된 비용마감자료가 없습니다.</td></tr>';
+  renderClosingPagination('closingPagination', rows.length, closingPage);
+  renderClosingPagination('closingArchivePagination', archiveMonths.length, closingArchivePage);
 }
 function closingExportRows(month) {
   const saved = closingArchive[month];
@@ -1497,7 +1511,7 @@ document.querySelectorAll('.period-tab').forEach(button => {
   });
 });
 
-document.getElementById('closingMonth').addEventListener('change',()=>{closingDraft=null;closingEditMonth=null;document.getElementById('closingCorrectionReason').value='';document.getElementById('closingUpload').value='';renderClosing();});
+document.getElementById('closingMonth').addEventListener('change',()=>{closingDraft=null;closingEditMonth=null;closingPage=1;document.getElementById('closingCorrectionReason').value='';document.getElementById('closingUpload').value='';renderClosing();});
 document.getElementById('closingUpload').addEventListener('change',async event=>{
   const file=event.target.files[0], month=closingMonthValue();
   if(!file)return;
@@ -1523,7 +1537,7 @@ document.getElementById('closingUpload').addEventListener('change',async event=>
       return result;
     });
     if(closingMonthValue()!==month)throw Error('월도가 변경되었습니다. 다시 업로드하세요.');
-    closingDraft={month,rows,source:file.name};renderClosing();
+    closingDraft={month,rows,source:file.name};closingPage=1;renderClosing();
     const missing=rows.filter(row=>!row['본부']||!row['부']||!row['팀']).length;
     document.getElementById('closingMessage').textContent=missing?`조직정보 미매칭 ${missing}건입니다. 차량현황을 수정하거나 Excel에 본부, 부, 팀을 입력한 뒤 다시 업로드하세요.`:`${rows.length}대 검토 준비 완료. 확정하면 부서정보와 비용을 이 월도에 고정하고 보관파일을 다운로드합니다.`;
   }catch(error){showToast(error.message);event.target.value='';}
@@ -1543,6 +1557,8 @@ document.getElementById('closingConfirm').addEventListener('click',()=>{
   document.getElementById('closingMessage').textContent=isEditing?'수정 마감 확정 완료. 이전 확정본은 정정 이력에 보관되며 최신 보관파일을 다운로드했습니다.':'마감 확정 완료. 다운로드된 JSON 보관파일을 안전한 폴더에 저장하세요. 다음 접속 시 불러오면 복원됩니다.';
 });
 document.getElementById('closingDownload').addEventListener('click',downloadClosingArchive);
+document.getElementById('closingPagination').addEventListener('click',event=>{const button=event.target.closest('[data-closing-page-step]');if(!button||button.disabled)return;closingPage+=Number(button.dataset.closingPageStep);renderClosing();});
+document.getElementById('closingArchivePagination').addEventListener('click',event=>{const button=event.target.closest('[data-closing-page-step]');if(!button||button.disabled)return;closingArchivePage+=Number(button.dataset.closingPageStep);renderClosing();});
 document.getElementById('closingArchiveRows').addEventListener('click',event=>{
   const button=event.target.closest('[data-closing-export]');
   if(button)exportClosingMonth(button.dataset.closingExport);

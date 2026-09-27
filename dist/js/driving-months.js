@@ -1,5 +1,5 @@
 let drivingPage = 1, drivingArchivePage = 1, drivingDetailExportData = null;
-const drivingPageSize = 20;
+const drivingPageSize = 30;
 function drivingMonthlyTotals(month) {
   const rows = drivingArchive[month]?.rows || drivingData.filter(row=>drivingRowMonth(row)===month);
   const groups = new Map();
@@ -68,6 +68,7 @@ function downloadDrivingDetailExcel() {
   downloadExcel(rows,'일별 운행기록',`일별운행기록_${detail.month}_${normalizePlate(detail.plate)}.xlsx`);
 }
 function drivingPagination(id,total,page) {
+  if (total <= drivingPageSize) { document.getElementById(id).innerHTML = ''; return; }
   const pages=Math.max(1,Math.ceil(total/drivingPageSize));
   document.getElementById(id).innerHTML=`<button class="button" data-page-step="-1" ${page<=1?'disabled':''}>이전</button><span>${page} / ${pages} 페이지 · 총 ${total}건</span><button class="button" data-page-step="1" ${page>=pages?'disabled':''}>다음</button>`;
 }
@@ -102,7 +103,7 @@ renderDrivingArchive = function() {
   document.getElementById('drivingSourceFileName').textContent=saved?'서버 확정자료':'미확정 검토자료';
   document.getElementById('drivingSourceUpdated').textContent=saved?`확정일 ${new Date(saved.confirmedAt).toLocaleString('ko-KR')}`:'월도별 검토 후 확정';
   drivingArchivePage=Math.min(drivingArchivePage,Math.max(1,Math.ceil(months.length/drivingPageSize)));
-  document.getElementById('drivingArchiveList').innerHTML=months.slice((drivingArchivePage-1)*20,drivingArchivePage*20).map(key=>{
+  document.getElementById('drivingArchiveList').innerHTML=months.slice((drivingArchivePage-1)*drivingPageSize,drivingArchivePage*drivingPageSize).map(key=>{
     const items=drivingMonthlyTotals(key),distance=items.reduce((sum,item)=>sum+item.distance,0),item=drivingArchive[key];
     return `<tr><td>${escapeHtml(key)}</td><td>${items.length}대</td><td class="distance-value">${distance.toLocaleString('ko-KR')}km</td><td>${item?'확정':'미확정'}</td><td>${item?escapeHtml(new Date(item.confirmedAt).toLocaleString('ko-KR')):'—'}</td><td><button class="row-edit" data-driving-month="${key}">조회</button></td></tr>`;
   }).join('') || '<tr><td colspan="6" class="empty-table">운행자료를 업로드하면 월별 합계가 표시됩니다.</td></tr>';
@@ -115,8 +116,8 @@ renderDriving = function() {
   document.getElementById('usageVehicleCount').textContent=summary.month?`${summary.count}대`:'—';
   document.getElementById('usageTotalDistance').textContent=summary.month?`${summary.distance.toLocaleString('ko-KR')}km`:'—';
   const items=drivingMonthlyTotals(month).filter(item=>!keyword || [item.plate,item.org?.['차종']].filter(Boolean).join(' ').toLowerCase().includes(keyword));
-  drivingPage=Math.min(drivingPage,Math.max(1,Math.ceil(items.length/20)));
-  document.getElementById('drivingTableBody').innerHTML=items.slice((drivingPage-1)*20,drivingPage*20).map(item=>{
+  drivingPage=Math.min(drivingPage,Math.max(1,Math.ceil(items.length/drivingPageSize)));
+  document.getElementById('drivingTableBody').innerHTML=items.slice((drivingPage-1)*drivingPageSize,drivingPage*drivingPageSize).map(item=>{
     const org=item.org||{};
     return `<tr><td>${escapeHtml(month)}</td><td class="plate"><button class="plate-detail-button" data-driving-detail="${escapeHtml(normalizePlate(item.plate))}" aria-label="${escapeHtml(item.plate)} 일별 운행기록 보기">${escapeHtml(item.plate)}</button></td><td>${escapeHtml(org['차종']||'—')}</td><td class="distance-value">${item.distance.toLocaleString('ko-KR')}km</td><td>${item.days.size}일</td><td>${item.org?'연결 완료':'차량현황 확인'}</td></tr>`;
   }).join('')||'<tr><td colspan="6" class="empty-table">조건에 맞는 월별 차량자료가 없습니다.</td></tr>';

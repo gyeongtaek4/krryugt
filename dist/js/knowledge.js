@@ -4,27 +4,40 @@
   const qnaRows = el('qnaRows'), guideRows = el('guideRows');
   if (!qnaRows || !guideRows) return;
 
-  let qnaItems = [], guideItems = [], qnaEditingId = null;
+  let qnaItems = [], guideItems = [], qnaEditingId = null, qnaPage = 1, guidePage = 1;
+  const knowledgePageSize = 20;
   const isAdmin = () => window.fleetCurrentRole === 'admin';
   const safe = value => escapeHtml(String(value || ''));
   const displayDate = value => value ? new Date(value).toLocaleDateString('ko-KR') : '—';
+  function renderKnowledgePagination(id, total, page, type) {
+    const pager = el(id);
+    if (total <= knowledgePageSize) { pager.innerHTML = ''; return; }
+    const pages = Math.ceil(total / knowledgePageSize);
+    pager.innerHTML = `<button class="button" data-knowledge-page="${type}" data-knowledge-page-step="-1" ${page <= 1 ? 'disabled' : ''}>이전</button><span>${page} / ${pages} 페이지 · 총 ${total}건</span><button class="button" data-knowledge-page="${type}" data-knowledge-page-step="1" ${page >= pages ? 'disabled' : ''}>다음</button>`;
+  }
 
   function renderQna() {
     el('qnaAdminPanel').hidden = !isAdmin();
     const keyword = el('qnaSearch').value.trim().toLowerCase();
     const items = qnaItems.filter(item => `${item.title} ${item.question_body} ${item.answer_body}`.toLowerCase().includes(keyword));
-    qnaRows.innerHTML = items.length ? items.map(item => `<article class="knowledge-item">
+    qnaPage = Math.min(qnaPage, Math.max(1, Math.ceil(items.length / knowledgePageSize)));
+    const pageItems = items.slice((qnaPage - 1) * knowledgePageSize, qnaPage * knowledgePageSize);
+    qnaRows.innerHTML = items.length ? pageItems.map(item => `<article class="knowledge-item">
       <div class="knowledge-item-header"><div><h3>${safe(item.title)}</h3><p class="knowledge-item-meta">등록일 ${displayDate(item.created_at)}${item.updated_at && item.updated_at !== item.created_at ? ` · 수정일 ${displayDate(item.updated_at)}` : ''}</p></div>
       ${isAdmin() ? `<div class="knowledge-actions"><button class="row-edit" type="button" data-qna-edit="${safe(item.id)}">수정</button><button class="row-delete" type="button" data-qna-delete="${safe(item.id)}">삭제</button></div>` : ''}</div>
       <p class="knowledge-question">${safe(item.question_body)}</p><div class="knowledge-answer"><strong>관리자 답변</strong>${safe(item.answer_body)}</div></article>`).join('') : '<p class="knowledge-empty">등록된 Q&amp;A가 없습니다.</p>';
+    renderKnowledgePagination('qnaPagination', items.length, qnaPage, 'qna');
   }
 
   function renderGuides() {
     el('guideAdminPanel').hidden = !isAdmin();
-    guideRows.innerHTML = guideItems.length ? guideItems.map(item => `<article class="knowledge-item">
+    guidePage = Math.min(guidePage, Math.max(1, Math.ceil(guideItems.length / knowledgePageSize)));
+    const pageItems = guideItems.slice((guidePage - 1) * knowledgePageSize, guidePage * knowledgePageSize);
+    guideRows.innerHTML = guideItems.length ? pageItems.map(item => `<article class="knowledge-item">
       <div class="knowledge-item-header"><div><h3>${safe(item.title)}</h3><p class="knowledge-item-meta">등록일 ${displayDate(item.created_at)} · ${safe(item.file_name)} · ${Math.ceil(Number(item.file_size || 0) / 1024)}KB</p></div>
       <div class="knowledge-actions"><button class="row-edit" type="button" data-guide-view="${safe(item.id)}">열람</button><button class="button" type="button" data-guide-download="${safe(item.id)}">다운로드</button>${isAdmin() ? `<button class="row-delete" type="button" data-guide-delete="${safe(item.id)}">삭제</button>` : ''}</div></div>
       ${item.description ? `<p class="knowledge-description">${safe(item.description)}</p>` : ''}<span class="knowledge-guide-file">${safe(item.file_name)}</span></article>`).join('') : '<p class="knowledge-empty">등록된 운행가이드가 없습니다.</p>';
+    renderKnowledgePagination('guidePagination', guideItems.length, guidePage, 'guide');
   }
 
   async function refreshKnowledgeFromSupabase() {
@@ -49,7 +62,14 @@
     el('qnaCancelEdit').hidden = true;
   }
 
-  el('qnaSearch').addEventListener('input', renderQna);
+  el('qnaSearch').addEventListener('input', () => { qnaPage = 1; renderQna(); });
+  ['qnaPagination', 'guidePagination'].forEach(id => el(id).addEventListener('click', event => {
+    const button = event.target.closest('[data-knowledge-page-step]');
+    if (!button || button.disabled) return;
+    if (button.dataset.knowledgePage === 'qna') qnaPage += Number(button.dataset.knowledgePageStep);
+    else guidePage += Number(button.dataset.knowledgePageStep);
+    button.dataset.knowledgePage === 'qna' ? renderQna() : renderGuides();
+  }));
   el('qnaCancelEdit').addEventListener('click', resetQnaForm);
   qnaRows.addEventListener('click', async event => {
     const edit = event.target.closest('[data-qna-edit]');

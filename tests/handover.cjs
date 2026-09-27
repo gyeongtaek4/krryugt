@@ -32,4 +32,7 @@ assert(css.includes('#handoverForm textarea.form-input'));
 assert(css.includes('.handover-detail .handover-pdf') && css.includes('height: 78px'));
 assert(!html.includes('인수인계 내용과 당시 차량·조직 정보는 Supabase에 저장하고'), 'entry storage guide remains');
 assert(!html.includes('기록 당시 차량·조직 정보와 비공개 사진·PDF를 Supabase에 보관합니다.'), 'history storage guide remains');
+assert(html.includes('id="handoverPagination"'), 'handover pagination container is missing');
+assert(source.includes('const handoverPageSize = 20'), 'handover page size is missing');
+assert(source.includes("data-handover-page-step"), 'handover pagination controls are missing');
 console.log('PASS: photo constraints, Supabase save calls and metadata archive format (mock, no live upload).');
