@@ -1686,7 +1686,9 @@ document.getElementById('drivingSearch').addEventListener('input', renderDriving
 document.getElementById('costTrendReferenceMonth').addEventListener('change', renderAdditionalCostTrend);
 document.getElementById('costTrendPeriodMonths').addEventListener('input', renderAdditionalCostTrend);
 
-document.getElementById('allVehiclesButton').addEventListener('click', () => showView('차량계약정보', { recordHistory: true }));
+document.getElementById('dashboardVehiclesShortcut')?.addEventListener('click', () => showView('차량 현황', { recordHistory: true }));
+document.getElementById('dashboardContractAmountShortcut')?.addEventListener('click', () => showView('차량계약정보', { recordHistory: true }));
+document.getElementById('allVehiclesButton')?.addEventListener('click', () => showView('차량계약정보', { recordHistory: true }));
 function toggleNotice(open){
   const popover=document.getElementById('noticePopover'),button=document.getElementById('noticeButton');
   const isOpen=open??popover.hidden;

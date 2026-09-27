@@ -178,19 +178,21 @@
         </section>
         <section class="metrics" aria-label="주요 지표">
           <article class="metric-card">
-            <div class="metric-top"><span class="metric-label">전체 운영 차량</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15h16l-2-6H6l-2 6Zm2 0v4m12-4v4M7 19h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="metric-top"><span class="metric-label">전체 운영 차량</span></div>
             <p class="metric-value" id="dashboardVehicleCount">0대</p>
             <span class="metric-meta">현재 등록된 차량현황 기준</span>
+            <button class="button metric-shortcut" id="dashboardVehiclesShortcut">차량현황 바로가기</button>
           </article>
           <article class="metric-card">
-            <div class="metric-top"><span class="metric-label">렌트 계약금액</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span></div>
+            <div class="metric-top"><span class="metric-label">렌트 계약금액</span></div>
             <p class="metric-value" id="dashboardContractAmount" aria-live="polite">—</p>
             <span class="metric-meta">차량계약정보 전체 월 렌탈료 합계</span>
+            <button class="button metric-shortcut" id="dashboardContractAmountShortcut">차량계약정보 바로가기</button>
           </article>
           <article class="metric-card expiry-overview">
             <div class="metric-top"><span class="metric-label">6개월 내 계약 만료 예정 차량</span></div>
             <p class="metric-value" id="dashboardExpiryCount">0대</p>
-            <div class="expiry-header-actions"><span class="expiry-stat urgent">1개월 내 <strong id="dashboardUrgentCount">0대</strong></span><button class="button" id="allVehiclesButton">계약정보 보기</button></div>
+            <div class="expiry-header-actions"><span class="expiry-stat urgent">1개월 내 <strong id="dashboardUrgentCount">0대</strong></span><button class="button metric-shortcut" id="allVehiclesButton">차량계약정보 바로가기</button></div>
             <span class="metric-meta">현재 월 기준 · 차량번호 중복 제외</span>
           </article>
         </section>
