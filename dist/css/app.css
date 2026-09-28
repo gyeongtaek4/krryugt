@@ -63,7 +63,7 @@ body.sidebar-unpinned .sidebar.open, body.sidebar-collapsed .sidebar.open { tran
 }
 
 .brand-logo { display: block; width: 164px; max-width: 100%; height: auto; }
-.brand-text { font-size: 1.05rem; }
+.brand-text { color: var(--ink-soft); font-size: .95rem; font-weight: 650; letter-spacing: -.02em; }
 .brand-text small { display: block; color: var(--grey); font-size: .7rem; font-weight: 600; letter-spacing: .04em; }
 
 .nav-label { margin: 0 10px 8px; color: var(--grey); font-size: .73rem; font-weight: 700; letter-spacing: .08em; }
