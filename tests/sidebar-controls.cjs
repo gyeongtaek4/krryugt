@@ -3,6 +3,8 @@ const html=fs.readFileSync('dist/index.html','utf8');
 const js=fs.readFileSync('dist/js/app.js','utf8');
 const css=fs.readFileSync('dist/css/app.css','utf8');
 for(const id of ['noticeButton','noticePopover'])assert(html.includes(`id="${id}"`),`missing ${id}`);
+assert(html.includes('class="brand-logo" src="./assets/fujifilm-logo-cropped.png"'), 'sidebar FUJIFILM logo is missing');
+assert(!html.includes('class="brand-mark"'), 'old sidebar vehicle mark remains');
 assert(html.includes('class="smartlink-shortcut"'), 'smartlink shortcut is missing');
 assert(html.includes('href="https://sims2.sksmartlink.com"'), 'smartlink URL is incorrect');
 assert(html.includes('target="_blank" rel="noopener noreferrer"'), 'smartlink must safely open in a new tab');
