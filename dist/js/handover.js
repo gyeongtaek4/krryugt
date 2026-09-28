@@ -193,7 +193,7 @@ document.body.insertAdjacentHTML('beforeend', `
       </form>
       <form id="handoverDeleteForm" hidden>
         <p class="handover-delete-warning" id="handoverDeleteCopy"></p>
-        <label class="form-field"><span>삭제 확인</span><input id="handoverDeleteConfirm" autocomplete="off" placeholder="삭제 입력" required></label>
+        <label class="form-field"><span>삭제 확인</span><input id="handoverDeleteConfirm" autocomplete="off" placeholder="삭제라고 입력하세요" required></label>
         <p class="form-hint">기록과 연결된 외관 사진·PDF도 함께 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</p>
         <div class="upload-error" id="handoverDeleteError"></div>
         <div class="modal-actions"><button class="button" type="button" id="cancelHandoverDelete">취소</button><button class="button danger" type="submit">삭제하기</button></div>

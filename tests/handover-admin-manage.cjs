@@ -13,6 +13,7 @@ for(const text of [
   "storage.from('handover-photos').remove(paths)",
   "handoverDeleteConfirm').value.trim()!=='삭제'"
 ]) assert(js.includes(text),`missing author/admin management UI rule: ${text}`);
+assert(js.includes('placeholder="삭제라고 입력하세요"'),'인수인계 삭제 확인 입력 안내를 표시해야 합니다.');
 for(const text of [
   'handovers_update_author_or_admin',
   'handovers_delete_author_or_admin',
