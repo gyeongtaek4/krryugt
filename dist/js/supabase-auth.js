@@ -4,6 +4,8 @@
   const email = document.getElementById('authEmail');
   const password = document.getElementById('authPassword');
   const passwordConfirm = document.getElementById('authPasswordConfirm');
+  const verificationCode = document.getElementById('authVerificationCode');
+  const verificationField = document.getElementById('authVerificationField');
   const displayName = document.getElementById('authDisplayName');
   const error = document.getElementById('authError');
   const title = document.getElementById('authTitle');
@@ -21,6 +23,7 @@
   let idleLogoutTimer = null;
   let idleLogoutInProgress = false;
   let mode = 'login';
+  let pendingVerificationEmail = '';
   if (!gate || !form) return;
 
   function isCompanyEmail(value) {
@@ -48,19 +51,35 @@
   }
 
   function setMode(nextMode) {
-    mode=nextMode;error.textContent='';error.classList.remove('success');
+    mode=nextMode;pendingVerificationEmail='';error.textContent='';error.classList.remove('success');
     const signup=mode==='signup';
     if (resendConfirmation) {
       resendConfirmation.hidden = signup;
       resendConfirmation.textContent = '인증 메일 다시 보내기';
     }
     document.querySelectorAll('.auth-signup-field').forEach(item=>item.hidden=!signup);
+    document.querySelectorAll('.auth-password-field').forEach(item=>item.hidden=false);
+    verificationField.hidden=true;verificationCode.required=false;email.readOnly=false;
     displayName.required=signup;passwordConfirm.required=signup;
     password.autocomplete=signup?'new-password':'current-password';
     title.textContent=signup?'직원 회원가입':'법인차량 관리';
     copy.textContent=signup?'후지필름 이메일 인증과 관리자 활성화 후 사용할 수 있습니다.':'회사 계정으로 로그인해 주세요.';
     submit.textContent=signup?'가입 신청':'로그인';
     loginModeButton.classList.toggle('active',!signup);signupModeButton.classList.toggle('active',signup);
+  }
+  function setVerificationMode(mail) {
+    mode='verify';pendingVerificationEmail=mail;
+    error.textContent='';error.classList.remove('success');
+    document.querySelectorAll('.auth-signup-field').forEach(item=>item.hidden=true);
+    document.querySelectorAll('.auth-password-field').forEach(item=>item.hidden=true);
+    verificationField.hidden=false;verificationCode.required=true;verificationCode.value='';
+    email.value=mail;email.readOnly=true;
+    title.textContent='이메일 인증';
+    copy.textContent='메일로 받은 6자리 인증번호를 입력해 주세요.';
+    submit.textContent='인증 완료';
+    if(resendConfirmation){resendConfirmation.hidden=false;resendConfirmation.textContent='인증번호 다시 보내기';}
+    loginModeButton.classList.remove('active');signupModeButton.classList.add('active');
+    verificationCode.focus();
   }
   loginModeButton.addEventListener('click',()=>setMode('login'));
   signupModeButton.addEventListener('click',()=>setMode('signup'));
@@ -147,6 +166,19 @@
   form.addEventListener('submit', async event => {
     event.preventDefault();
     error.textContent = '';error.classList.remove('success');
+    if(mode==='verify'){
+      const code=verificationCode.value.replace(/\D/g,'');
+      if(!/^\d{6}$/.test(code)){error.textContent='메일로 받은 6자리 인증번호를 입력해 주세요.';return;}
+      const verifiedEmail=pendingVerificationEmail;
+      submit.disabled=true;
+      const {error: verificationError}=await window.fleetSupabaseClient.auth.verifyOtp({email:verifiedEmail,token:code,type:'signup'});
+      submit.disabled=false;
+      if(verificationError){error.textContent='인증번호가 맞지 않거나 만료되었습니다. 새 번호를 받아 다시 입력해 주세요.';return;}
+      await window.fleetSupabaseClient.auth.signOut({scope:'local'});
+      form.reset();setMode('login');email.value=verifiedEmail;error.classList.add('success');
+      error.textContent='이메일 인증이 완료되었습니다. 관리자 활성화 후 로그인할 수 있습니다.';
+      return;
+    }
     if(mode==='signup'){
       const name=displayName.value.trim(),mail=email.value.trim();
       if(!name){error.textContent='이름을 입력해 주세요.';return;}
@@ -158,10 +190,10 @@
       submit.disabled=false;
       if(signUpError){error.textContent=signUpError.message.includes('already')?'이미 가입된 이메일입니다.':'회원가입을 완료하지 못했습니다.';return;}
       if(data.session)await window.fleetSupabaseClient.auth.signOut();
-      form.reset();setMode('login');email.value=mail;error.classList.add('success');
       const existingUser=data.user?.identities?.length===0;
-      error.textContent=existingUser?'이미 가입된 이메일입니다. 인증 메일이 필요하면 아래 버튼을 눌러 주세요.':'인증 메일을 보냈습니다. 메일 인증 후 관리자가 계정을 활성화하면 로그인할 수 있습니다.';
-      if(resendConfirmation) resendConfirmation.hidden=!isCompanyEmail(mail);
+      if(existingUser){form.reset();setMode('login');email.value=mail;error.classList.add('success');error.textContent='이미 가입된 이메일입니다. 인증번호가 필요하면 아래 버튼을 눌러 주세요.';return;}
+      setVerificationMode(mail);error.classList.add('success');
+      error.textContent='인증번호를 보냈습니다. 메일에서 6자리 번호를 확인해 입력해 주세요.';
       return;
     }
     const { data, error: signInError } = await window.fleetSupabaseClient.auth.signInWithPassword({ email: email.value.trim(), password: password.value });
@@ -180,8 +212,9 @@
     resendConfirmation.disabled=true;
     const {error: resendError}=await window.fleetSupabaseClient.auth.resend({type:'signup',email:mail,options:{emailRedirectTo:emailRedirectUrl()}});
     resendConfirmation.disabled=false;
-    error.classList.add('success');
-    error.textContent=resendError?'인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.':'인증 메일을 다시 보냈습니다. 받은편지함과 스팸함을 확인해 주세요.';
+    if(resendError){error.textContent='인증번호를 보내지 못했습니다. 잠시 후 다시 시도해 주세요.';return;}
+    setVerificationMode(mail);error.classList.add('success');
+    error.textContent='새 인증번호를 보냈습니다. 메일에서 6자리 번호를 확인해 입력해 주세요.';
   });
   logout.addEventListener('click', () => window.fleetSupabaseClient.auth.signOut());
   ['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll'].forEach(eventName => {
