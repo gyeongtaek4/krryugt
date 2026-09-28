@@ -135,12 +135,13 @@
   async function submitAccidentDelete(){
     const deleteButton=manageEl('accidentDeleteButton');
     try{
+      if(!window.fleetCurrentUser||!window.fleetSupabaseClient)throw Error('로그인 세션이 만료되었습니다. 다시 로그인한 뒤 삭제해 주세요.');
       const item=managedAccident();
       if(!item||!canManage(item))throw Error('작성자 또는 관리자만 사고 접수를 삭제할 수 있습니다.');
       if(manageEl('accidentDeleteConfirm').value.trim()!=='삭제')throw Error('삭제 확인란에 삭제를 정확히 입력하세요.');
       deleteButton.disabled=true;deleteButton.textContent='삭제 중…';
       await deleteAccident(item);closeAccidentManage();showToast('사고 접수와 연결된 첨부자료를 삭제했습니다.');
-    }catch(error){manageEl('accidentDeleteError').textContent=error.message;}
+    }catch(error){manageEl('accidentDeleteError').textContent=error.message;showToast(error.message);}
     finally{deleteButton.disabled=false;deleteButton.textContent='사고 접수 삭제';}
   }
   manageEl('accidentDeleteButton').addEventListener('click',submitAccidentDelete);
