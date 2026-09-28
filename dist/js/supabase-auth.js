@@ -49,8 +49,11 @@
 
   function setMode(nextMode) {
     mode=nextMode;error.textContent='';error.classList.remove('success');
-    if (resendConfirmation) resendConfirmation.hidden = true;
     const signup=mode==='signup';
+    if (resendConfirmation) {
+      resendConfirmation.hidden = signup;
+      resendConfirmation.textContent = '인증 메일 다시 보내기';
+    }
     document.querySelectorAll('.auth-signup-field').forEach(item=>item.hidden=!signup);
     displayName.required=signup;passwordConfirm.required=signup;
     password.autocomplete=signup?'new-password':'current-password';
@@ -162,7 +165,12 @@
       return;
     }
     const { data, error: signInError } = await window.fleetSupabaseClient.auth.signInWithPassword({ email: email.value.trim(), password: password.value });
-    if (signInError) { error.textContent = '이메일 또는 비밀번호를 확인해 주세요.'; return; }
+    if (signInError) {
+      const requiresEmailConfirmation = /email not confirmed/i.test(signInError.message || '');
+      error.textContent = requiresEmailConfirmation ? '이메일 인증이 필요합니다. 아래 버튼으로 인증 메일을 다시 보내 주세요.' : '이메일 또는 비밀번호를 확인해 주세요.';
+      if (requiresEmailConfirmation && resendConfirmation) resendConfirmation.hidden = false;
+      return;
+    }
     await applySession(data.session);
   });
   resendConfirmation?.addEventListener('click', async () => {
