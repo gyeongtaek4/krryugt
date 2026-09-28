@@ -732,7 +732,7 @@ td strong { font-size: .8rem; }
 #handoverManageModal textarea { min-height: 86px; padding-top: 11px; padding-bottom: 11px; resize: vertical; line-height: 1.35; }
 #handoverManageModal select:focus, #handoverManageModal textarea:focus { border-color: var(--brand-soft); box-shadow: 0 0 0 3px rgba(1, 145, 109, .08); }
 .handover-delete-warning { margin: 18px 0; padding: 12px; border-radius: 10px; color: #9e4141; background: #fff3f3; font-size: .84rem; font-weight: 700; }
-body.viewer-role #deleteAllVehicles { display: none !important; }
+body.viewer-role #downloadVehicleTemplate, body.viewer-role #exportVehiclesButton, body.viewer-role #deleteAllVehicles { display: none !important; }
 #handoverError { color: #b64040; }
 @media (max-width: 900px) { .handover-history-header { align-items: flex-start; } .handover-history-actions { width: 100%; justify-content: flex-start; } .handover-history-search { width: 100%; } }
 @media print {

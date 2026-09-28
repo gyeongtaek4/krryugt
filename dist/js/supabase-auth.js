@@ -78,7 +78,7 @@
     capacityNavItem.hidden=role!=='admin';
     const readOnly=role==='viewer';
     document.body.classList.toggle('viewer-role',readOnly);
-    ['addVehicleButton','vehicleUploadButton','guideUploadButton','deleteAllVehicles'].forEach(id=>{
+    ['downloadVehicleTemplate','exportVehiclesButton','addVehicleButton','vehicleUploadButton','guideUploadButton','deleteAllVehicles'].forEach(id=>{
       const control = document.getElementById(id);
       if (control) control.hidden=readOnly;
     });
