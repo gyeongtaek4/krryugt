@@ -704,6 +704,8 @@ td strong { font-size: .8rem; }
 .handover-pdf { display: flex; height: 160px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--brand); background: white; border: 1px solid var(--line); border-radius: 10px; font-weight: 800; font-size: 28px; }
 .handover-pdf small { color: var(--ink-soft); font-size: 12px; font-weight: 600; }
 .handover-gallery figcaption { font-size: 12px; color: var(--ink-soft); overflow-wrap: anywhere; margin-top: 5px; }
+.attachment-remove { margin-top: 7px; padding: 5px 9px; border: 1px solid #efc1c1; border-radius: 8px; color: #b64040; background: #fff; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.attachment-remove:hover, .attachment-remove:focus-visible { border-color: #d96a6a; background: #fff3f3; outline: none; }
 .handover-detail .handover-gallery { grid-template-columns: repeat(auto-fill, minmax(104px, 132px)); gap: 9px; margin-top: 12px; }
 .handover-detail .handover-gallery img { height: 78px; border-radius: 8px; }
 .handover-detail .handover-pdf, .handover-detail .attachment-pdf { min-width: 0; min-height: 78px; height: 78px; padding: 8px; border-radius: 8px; font-size: 15px; }

@@ -54,7 +54,7 @@
     validatePhotos(merged);return merged;
   }
   function previewPhotos() {
-    el('accidentPreview').innerHTML=photoDraft.map(photo=>`<figure>${photo.type==='application/pdf'?`<a class="attachment-pdf" href="${safe(photo.data)}" target="_blank" rel="noopener">PDF</a>`:`<img src="${safe(photo.data)}" alt="${safe(photo.name)}">`}<figcaption>${safe(photo.name)}</figcaption></figure>`).join('');
+    el('accidentPreview').innerHTML=photoDraft.map((photo,index)=>`<figure>${photo.type==='application/pdf'?`<a class="attachment-pdf" href="${safe(photo.data)}" target="_blank" rel="noopener">PDF</a>`:`<img src="${safe(photo.data)}" alt="${safe(photo.name)}">`}<figcaption>${safe(photo.name)}</figcaption><button class="attachment-remove" type="button" data-accident-photo-remove="${index}" aria-label="${safe(photo.name)} 첨부 제거">제거</button></figure>`).join('');
   }
   function fileExtension(type) { return type==='image/png'?'png':type==='image/webp'?'webp':type==='application/pdf'?'pdf':'jpg'; }
   async function signedPhotos(paths) {
@@ -117,6 +117,12 @@
     const input=event.target;photoLoading=true;el('accidentSave').disabled=true;el('accidentError').textContent='';
     try{const files=Array.from(input.files);validatePhotos(files);const incoming=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,data:reader.result});reader.onerror=()=>reject(Error('사고 현장 자료를 읽지 못했습니다.'));reader.readAsDataURL(file);})));photoDraft=mergePhotos(incoming);previewPhotos();}
     catch(error){el('accidentError').textContent=error.message;}finally{input.value='';photoLoading=false;el('accidentSave').disabled=false;}
+  });
+  el('accidentPreview').addEventListener('click',event=>{
+    const removeButton=event.target.closest('[data-accident-photo-remove]');
+    if(!removeButton)return;
+    photoDraft.splice(Number(removeButton.dataset.accidentPhotoRemove),1);
+    previewPhotos();
   });
   el('accidentForm').addEventListener('submit',async event=>{
     event.preventDefault();el('accidentError').textContent='';
