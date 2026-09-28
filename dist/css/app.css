@@ -686,7 +686,9 @@ td strong { font-size: .8rem; }
 .knowledge-item-meta { margin: 5px 0 0; color: var(--grey); font-size: .72rem; }
 .knowledge-question, .knowledge-answer, .knowledge-description { margin: 14px 0 0; white-space: pre-wrap; color: var(--ink-soft); font-size: .82rem; line-height: 1.65; }
 .knowledge-answer { padding: 13px 14px; border-radius: 10px; color: var(--ink); background: var(--brand-wash); }
-.knowledge-answer strong { display: block; margin-bottom: 5px; color: var(--brand-dark); font-size: .75rem; }
+.knowledge-question strong, .knowledge-answer strong { color: var(--brand-dark); font-size: .82rem; }
+.knowledge-answer p { margin: 0; }
+.knowledge-answer-meta { margin-top: 7px !important; color: var(--grey); font-size: .72rem; }
 .knowledge-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
 .knowledge-guide-file { display: inline-flex; align-items: center; gap: 8px; margin-top: 13px; color: var(--brand-dark); font-size: .78rem; font-weight: 700; }
 .knowledge-guide-file::before { content: "PDF"; padding: 4px 6px; border-radius: 5px; color: #b65252; background: #fff1f1; font-size: .65rem; }
