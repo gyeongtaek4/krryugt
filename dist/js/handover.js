@@ -6,9 +6,15 @@ let handoverPage = 1;
 const handoverPageSize = 20;
 const handoverEl = id => document.getElementById(id);
 function refreshHandoverVehicles() {
+  syncHandoverFrom();
   renderHandoverVehicleInfo();
   renderHandoverVehicleResults();
 }
+function syncHandoverFrom() {
+  const sender=String(window.fleetCurrentDisplayName||window.fleetCurrentUser?.user_metadata?.display_name||'').trim();
+  if(sender)handoverEl('handoverFrom').value=sender;
+}
+window.syncHandoverFrom=syncHandoverFrom;
 function matchingHandoverVehicles(keyword) {
   const query=normalizePlate(keyword);
   if(!query)return [];

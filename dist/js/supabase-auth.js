@@ -91,7 +91,7 @@
     window.fleetCurrentRole = 'viewer';
     memberNavItem.hidden=true;
     gate.classList.toggle('hidden', Boolean(session));
-    if (!session) { stopIdleLogoutTimer(); return; }
+    if (!session) { window.fleetCurrentDisplayName=''; stopIdleLogoutTimer(); return; }
     if (session) {
       userName.textContent = session.user.email || '로그인 사용자';
       userRole.textContent = '인증 확인 중';
@@ -108,9 +108,11 @@
       // 프로필 표의 실제 역할을 우선 사용하고, 프로필 조회가 제한될 때만 RPC 결과를 사용합니다.
       const role = profile?.role || roleValue;
       window.fleetCurrentRole = role || 'viewer';
-      userName.textContent = profile?.display_name || session.user.email || '로그인 사용자';
+      window.fleetCurrentDisplayName = profile?.display_name || session.user.user_metadata?.display_name || session.user.email || '로그인 사용자';
+      userName.textContent = window.fleetCurrentDisplayName;
       userRole.textContent = role === 'admin' ? '관리자' : '일반회원';
       applyRoleNavigation(role);
+      window.syncHandoverFrom?.();
       if (window.refreshVehiclesFromSupabase) {
         let vehiclesLoaded = await window.refreshVehiclesFromSupabase();
         if (!vehiclesLoaded) {

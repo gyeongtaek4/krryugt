@@ -18,6 +18,7 @@ assert(auth.includes("memberNavItem.hidden=role!=='admin'"));
 assert(auth.includes("new Set(['차량 현황','사고접수 및 이력','차량인수인계','Q&A','운행가이드'])"));
 assert(auth.includes("document.body.classList.toggle('viewer-role',readOnly)"), 'viewer role CSS marker is missing');
 assert(fs.readFileSync('dist/css/app.css','utf8').includes('body.viewer-role #deleteAllVehicles'), 'viewer vehicle total delete button must be hidden');
+assert(auth.includes('window.fleetCurrentDisplayName = profile?.display_name'), 'logged-in display name must be shared with the handover form');
 assert(auth.includes('const idleLogoutMs = 10 * 60 * 1000'), '10-minute idle logout setting is missing');
 assert(auth.includes("auth.signOut({ scope: 'local' })"), 'idle logout is not local session sign-out');
 assert(auth.includes("['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll']"), 'idle activity tracking is missing');
