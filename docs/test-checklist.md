@@ -95,6 +95,7 @@
 ## 2026-09-28 — 관리자 차량 삭제
 
 - [x] Supabase 외래키를 읽기 전용으로 확인해 계약·운행·사고·인수인계가 차량 삭제를 제한하는 원인을 확인했다.
+- [x] `vehicles`·`contracts`·`driving_records`의 관리자 UPDATE/DELETE RLS 정책과 authenticated CRUD 권한을 실제 Supabase SQL Editor에서 읽기 전용으로 확인했다.
 - [x] `admin_delete_vehicles`가 활성 관리자 확인, 계약·운행기록 삭제, 사고·인수인계 이력 보존 차단을 수행하도록 SQL과 화면 호출 코드를 작성했다.
 - [x] Supabase SQL Editor에서 `020_admin_vehicle_delete.sql` 실행 성공과 `admin_delete_vehicles` RPC 노출을 확인했다.
 - [x] `node --check dist/js/app.js`와 `node tests/vehicle-delete-all.cjs`로 관리자·취소·이력 연결 차단 mock 흐름을 확인한다.

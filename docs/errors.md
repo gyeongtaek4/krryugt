@@ -5,7 +5,7 @@
 - 증상: 관리자 화면에서 차량 삭제를 누르면 `관리자 권한을 확인해 주세요`라는 포괄적인 안내가 표시됐다.
 - 읽기 전용 확인: Supabase의 외래키를 조회한 결과 `contracts`, `driving_records`, `vehicle_accidents`, `vehicle_handovers`가 모두 차량을 참조하며 삭제 동작이 `restrict`로 설정돼 있었다. 따라서 관리자여도 연결된 자료가 있으면 직접 차량 삭제가 차단된다.
 - 조치: `admin_delete_vehicles` RPC가 서버에서 활성 관리자 여부를 다시 확인한 뒤 차량과 연결된 계약·운행기록을 함께 삭제하도록 추가했다. 사고·인수인계 이력은 증빙 보존을 위해 자동 삭제하지 않고, 연결된 경우 정확한 안내를 반환한다. 화면은 직접 테이블 삭제 대신 이 RPC를 사용하며 포괄적 권한 오류 대신 실제 차단 사유를 표시한다.
-- 검증: 외래키 4건의 `restrict` 상태를 실제 Supabase SQL Editor에서 읽기 전용으로 확인했다. JavaScript 문법과 삭제 흐름 mock 검증을 실행한다. 실제 차량·계약·운행 자료를 삭제하는 브라우저 검증은 데이터 소실을 피하기 위해 수행하지 않는다.
+- 검증: 외래키 4건의 `restrict` 상태와 `vehicles`·`contracts`·`driving_records`의 관리자 UPDATE/DELETE RLS 정책을 실제 Supabase SQL Editor에서 읽기 전용으로 확인했다. JavaScript 문법과 삭제 흐름 mock 검증을 실행한다. 실제 차량·계약·운행 자료를 삭제하는 브라우저 검증은 데이터 소실을 피하기 위해 수행하지 않는다.
 
 ## 차량계약정보가 0건으로 보인 오류 (2026-09-27)
 
