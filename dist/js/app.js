@@ -596,22 +596,34 @@ function renderVehicles() {
 
 async function deleteVehicleIndices(indices) {
   const rows = indices.map(index => vehicleData[index]).filter(Boolean);
-  if (!rows.length || !window.confirm(`선택한 차량 ${rows.length}건을 삭제할까요? 삭제 후 복구할 수 없습니다.`)) return;
+  if (!rows.length || !window.confirm(`선택한 차량 ${rows.length}건을 삭제할까요? 연결된 계약·운행기록도 함께 삭제되며 복구할 수 없습니다.`)) return;
   try {
     const ids = rows.map(row => row._supabaseId).filter(Boolean);
     if (ids.length && window.fleetSupabaseClient) {
-      const { error } = await window.fleetSupabaseClient.from('vehicles').delete().in('id', ids);
+      const { data, error } = await window.fleetSupabaseClient.rpc('admin_delete_vehicles', { p_vehicle_ids: ids });
       if (error) throw error;
       await refreshVehiclesFromSupabase();
+      await refreshContractsFromSupabase();
+      const result = Array.isArray(data) ? data[0] : data;
+      const contractCount = Number(result?.deleted_contract_count || 0);
+      const drivingCount = Number(result?.deleted_driving_record_count || 0);
+      showToast(`${rows.length}건의 차량을 삭제했습니다.${contractCount || drivingCount ? ` 계약 ${contractCount}건·운행기록 ${drivingCount}건도 함께 삭제했습니다.` : ''}`);
     } else {
       vehicleData = vehicleData.filter((_, index) => !indices.includes(index));
       refreshFilters(); renderVehicles(); renderDriving();
+      showToast(`${rows.length}건의 차량을 삭제했습니다.`);
     }
-    showToast(`${rows.length}건의 차량을 삭제했습니다.`);
   } catch (error) {
     console.error('차량 삭제 오류', error);
-    showToast('차량을 삭제하지 못했습니다. 관리자 권한을 확인해 주세요.');
+    showToast(vehicleDeleteErrorMessage(error));
   }
+}
+
+function vehicleDeleteErrorMessage(error) {
+  const message = String(error?.message || '');
+  if (message.includes('인수인계 이력') || message.includes('사고 이력')) return message;
+  if (error?.code === '42501' || message.includes('관리자만')) return '관리자 계정으로 승인된 로그인인지 확인해 주세요.';
+  return '차량을 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
 async function deleteAllVehicles() {
@@ -627,15 +639,20 @@ async function deleteAllVehicles() {
     const { count, error: countError } = await client.from('vehicles').select('id', { count: 'exact', head: true });
     if (countError) throw countError;
     if (!count) { showToast('삭제할 차량이 없습니다.'); return; }
-    const answer = window.prompt(`검색·필터와 관계없이 등록된 차량 ${count}건을 모두 삭제합니다. 복구할 수 없으므로 필요하면 자료를 먼저 내려받으세요. 계속하려면 '전체삭제'를 입력하세요.`);
+    const answer = window.prompt(`검색·필터와 관계없이 등록된 차량 ${count}건과 연결된 계약·운행기록을 모두 삭제합니다. 복구할 수 없으므로 필요하면 자료를 먼저 내려받으세요. 계속하려면 '전체삭제'를 입력하세요.`);
     if (answer !== '전체삭제') return;
-    const { count: deletedCount, error } = await client.from('vehicles').delete({ count: 'exact' }).not('id', 'is', null);
+    const { data, error } = await client.rpc('admin_delete_vehicles', { p_vehicle_ids: null });
     if (error) throw error;
     await refreshVehiclesFromSupabase();
-    showToast(`차량 ${deletedCount ?? count}건을 전체 삭제했습니다.`);
+    await refreshContractsFromSupabase();
+    const result = Array.isArray(data) ? data[0] : data;
+    const deletedCount = Number(result?.deleted_vehicle_count ?? count);
+    const contractCount = Number(result?.deleted_contract_count || 0);
+    const drivingCount = Number(result?.deleted_driving_record_count || 0);
+    showToast(`차량 ${deletedCount}건을 전체 삭제했습니다.${contractCount || drivingCount ? ` 계약 ${contractCount}건·운행기록 ${drivingCount}건도 함께 삭제했습니다.` : ''}`);
   } catch (error) {
     console.error('차량 전체 삭제 오류', error);
-    showToast(error.code === '23503' ? '계약·운행자료에 연결된 차량이 있어 전체 삭제가 차단되었습니다.' : '전체 삭제하지 못했습니다. 권한과 연결 상태를 확인해 주세요.');
+    showToast(vehicleDeleteErrorMessage(error));
   } finally {
     button.disabled = false;
   }
