@@ -40,6 +40,12 @@
 - `supabase/013_admin_password_reset.sql`은 관리자만 다른 회원의 Auth 비밀번호를 초기 비밀번호로 변경할 수 있는 RPC를 구성한다. service_role 키는 브라우저 코드에 넣지 않는다.
 - `supabase/021_company_email_verification.sql`은 회사 이메일 계정만 활성화할 수 있도록 관리자 활성화 RPC를 보강한다. 기존 활성 관리자 예외는 SQL Editor에서 해당 사용자의 ID만 `profile_email_exceptions`에 1회 등록한다.
 
+### 2026-09-28 실제 적용·확인
+
+- Supabase의 `Confirm email`이 켜져 있고, 인증 뒤 복귀 주소에 현재 Vercel 운영 주소가 등록된 것을 확인했다.
+- `021_company_email_verification.sql`을 실행하고 기존 활성 Gmail 관리자 계정을 사용자 ID 예외로 등록했다. 확인 쿼리 결과는 관리자 예외 등록 `true`, 회사 이메일 허용 `true`, 회사 외 이메일 허용 `false`다.
+- 배포 주소에서 회원가입 화면의 회사 이메일 인증·관리자 활성화 안내를 확인했다. 실제 회사 이메일로 메일 수신, 링크 인증, 관리자 활성화, 로그인까지의 전 과정은 운영 계정을 새로 만들지 않아 아직 확인하지 않았다.
+
 ### 2026-09-22 실제 적용
 
 - Supabase SQL Editor에서 `013_admin_password_reset.sql`을 실행해 성공했다. 함수 생성·실행 권한만 적용했으며, 이 적용 과정에서 특정 회원의 비밀번호를 초기화하지 않았다.
