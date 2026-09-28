@@ -202,13 +202,14 @@
     if (signInError) {
       const requiresEmailConfirmation = /email not confirmed/i.test(signInError.message || '');
       const invalidCredentials = /invalid login credentials/i.test(signInError.message || '');
-      let locked=false;
+      let locked=false,failedAttempts=0;
       if(invalidCredentials){
-        const {data: lockResult,error: lockError}=await window.fleetSupabaseClient.rpc('record_login_failure',{p_email:mail});
+        const {data: attemptResult,error: lockError}=await window.fleetSupabaseClient.rpc('record_login_failure_with_count',{p_email:mail});
         if(lockError) console.warn('로그인 실패 횟수 저장 오류',lockError);
-        locked=lockResult===true;
+        failedAttempts=Number(attemptResult)||0;
+        locked=failedAttempts>=5;
       }
-      error.textContent = requiresEmailConfirmation ? '이메일 인증이 필요합니다. 아래 버튼으로 인증 메일을 다시 보내 주세요.' : locked ? '비밀번호를 5회 틀려 계정이 잠겼습니다. 관리자에게 잠금 해제를 요청해 주세요.' : '이메일 또는 비밀번호를 확인해 주세요.';
+      error.textContent = requiresEmailConfirmation ? '이메일 인증이 필요합니다. 아래 버튼으로 인증 메일을 다시 보내 주세요.' : locked ? '비밀번호를 5회 틀려 계정이 잠겼습니다. 관리자에게 잠금 해제를 요청해 주세요.' : failedAttempts>0 ? `비밀번호가 올바르지 않습니다. (${failedAttempts}/5회 오류)` : '이메일 또는 비밀번호를 확인해 주세요.';
       if (requiresEmailConfirmation && resendConfirmation) resendConfirmation.hidden = false;
       return;
     }

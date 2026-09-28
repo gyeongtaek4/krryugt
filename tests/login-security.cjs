@@ -7,7 +7,8 @@ const sql=fs.readFileSync('supabase/026_login_security.sql','utf8');
 
 for(const id of ['changePasswordButton','passwordChangeModal','passwordChangeForm','currentPassword','newPassword','newPasswordConfirm']) assert(html.includes(`id="${id}"`),`missing ${id}`);
 assert(auth.includes("rpc('login_is_locked'"));
-assert(auth.includes("rpc('record_login_failure'"));
+assert(auth.includes("rpc('record_login_failure_with_count'"));
+assert(auth.includes('(${failedAttempts}/5회 오류)'));
 assert(auth.includes("rpc('clear_login_failures'"));
 assert(auth.includes("auth.updateUser({password:newPassword.value})"));
 assert(auth.includes('비밀번호를 5회 틀려 계정이 잠겼습니다.'));
