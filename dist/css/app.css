@@ -44,6 +44,7 @@ body.sidebar-unpinned .app-shell, body.sidebar-collapsed .app-shell { grid-templ
   padding: 26px 18px 20px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
   background: var(--white);
   border-right: 1px solid var(--line);
   transition: transform .22s ease, box-shadow .22s ease;
@@ -101,6 +102,11 @@ body.sidebar-unpinned .sidebar.open, body.sidebar-collapsed .sidebar.open { tran
 .nav-button:hover { color: var(--brand-dark); background: var(--brand-wash); }
 .nav-button.active { color: var(--brand-dark); background: var(--brand-wash); font-weight: 750; }
 .nav-button.active::after { content: ""; width: 5px; height: 5px; margin-left: auto; border-radius: 50%; background: var(--brand); }
+.sidebar-external-link { margin-top: auto; padding: 22px 2px 0; flex: 0 0 auto; }
+.smartlink-shortcut { min-height: 42px; padding: 0 12px; display: flex; align-items: center; gap: 9px; border: 1px solid #cde8e1; border-radius: 12px; color: var(--brand-dark); background: #f7fcfa; font-size: .78rem; font-weight: 750; text-decoration: none; transition: border-color .18s ease, background-color .18s ease, transform .18s ease; }
+.smartlink-shortcut svg { width: 17px; height: 17px; flex: 0 0 auto; }
+.smartlink-shortcut:hover { border-color: var(--brand-soft); background: var(--brand-wash); transform: translateY(-1px); }
+.smartlink-shortcut:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 .main { grid-column: 2; min-width: 0; }
 
