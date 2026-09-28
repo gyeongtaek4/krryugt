@@ -19,7 +19,7 @@
     summary.textContent=`전체 ${members.length}명 · 활성 ${activeCount}명 · 비활성 ${disabledCount}명`;
     rows.innerHTML=filtered.map(item=>{
       const self=item.id===window.fleetCurrentUser?.id,disabled=self?' disabled':'';
-      return `<tr class="member-status-${escapeHtml(item.status||'')}" data-member-id="${escapeHtml(item.id)}"><td><input class="member-name" maxlength="50" value="${escapeHtml(item.display_name||'')}"></td><td>${escapeHtml(item.email||'')}</td><td>${escapeHtml(String(item.created_at||'').slice(0,10))}</td><td><select class="member-role"${disabled}>${Object.entries(roleLabel).map(([value,label])=>`<option value="${value}"${item.role===value?' selected':''}>${label}</option>`).join('')}</select></td><td><select class="member-status"${disabled}>${Object.entries(statusLabel).map(([value,label])=>`<option value="${value}"${item.status===value?' selected':''}>${label}</option>`).join('')}</select></td><td><div class="member-actions"><button class="row-edit member-save">저장</button>${self?'<small class="member-self">내 계정</small>':'<button class="row-edit member-password-reset" type="button">비밀번호 초기화</button>'}</div></td></tr>`;
+      return `<tr class="member-status-${escapeHtml(item.status||'')}" data-member-id="${escapeHtml(item.id)}"><td><input class="member-name" maxlength="50" value="${escapeHtml(item.display_name||'')}"></td><td>${escapeHtml(item.email||'')}</td><td>${escapeHtml(String(item.created_at||'').slice(0,10))}</td><td><select class="member-role"${disabled}>${Object.entries(roleLabel).map(([value,label])=>`<option value="${value}"${item.role===value?' selected':''}>${label}</option>`).join('')}</select></td><td><select class="member-status"${disabled}>${Object.entries(statusLabel).map(([value,label])=>`<option value="${value}"${item.status===value?' selected':''}>${label}</option>`).join('')}</select></td><td><div class="member-actions"><button class="row-edit member-save">저장</button>${self?'<small class="member-self">내 계정</small>':'<button class="row-edit member-password-reset" type="button">비밀번호 초기화</button><button class="row-delete member-delete" type="button">계정 삭제</button>'}</div></td></tr>`;
     }).join('')||`<tr><td colspan="6" class="empty-table">${members.length?'조회 조건에 맞는 회원이 없습니다.':'가입한 회원이 없습니다.'}</td></tr>`;
   }
 
@@ -33,6 +33,16 @@
   search.addEventListener('input',renderMembers);
 
   rows.addEventListener('click',async event=>{
+    const deleteButton=event.target.closest('.member-delete');
+    if(deleteButton){
+      const row=deleteButton.closest('[data-member-id]'),name=row.querySelector('.member-name').value.trim()||'선택한 회원';
+      if(!confirm(`${name} 회원의 로그인 계정과 회원정보를 영구 삭제할까요? 업무 이력이 있는 회원은 삭제되지 않고 비활성화를 안내합니다.`))return;
+      deleteButton.disabled=true;
+      const {error}=await window.fleetSupabaseClient.rpc('admin_delete_member',{p_user_id:row.dataset.memberId});
+      deleteButton.disabled=false;
+      if(error){showToast(error.message||'회원 계정을 삭제하지 못했습니다.');return;}
+      await refreshMembersFromSupabase();showToast(`${name} 회원 계정을 삭제했습니다.`);return;
+    }
     const resetButton=event.target.closest('.member-password-reset');
     if(resetButton){
       const row=resetButton.closest('[data-member-id]'),name=row.querySelector('.member-name').value.trim()||'선택한 회원';
