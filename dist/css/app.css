@@ -751,6 +751,9 @@ td strong { font-size: .8rem; }
 .auth-tabs button.active { color: var(--brand-dark); background: white; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
 .auth-signup-field[hidden] { display: none; }
 .auth-error.success { color: var(--brand-dark); }
+.auth-resend { width: 100%; margin: 4px 0 0; padding: 7px; border: 0; color: var(--brand-dark); background: transparent; font-size: .78rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.auth-resend:hover { color: var(--brand); }
+.auth-resend[hidden] { display: none; }
 .member-panel { margin-top: 24px; }
 .member-header { align-items: center; }
 .member-tools { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }

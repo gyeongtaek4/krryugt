@@ -9,6 +9,7 @@
   const title = document.getElementById('authTitle');
   const copy = document.getElementById('authCopy');
   const submit = document.getElementById('authSubmit');
+  const resendConfirmation = document.getElementById('authResendConfirmation');
   const loginModeButton = document.getElementById('authModeLogin');
   const signupModeButton = document.getElementById('authModeSignup');
   const userName = document.getElementById('userName');
@@ -21,6 +22,13 @@
   let idleLogoutInProgress = false;
   let mode = 'login';
   if (!gate || !form) return;
+
+  function isCompanyEmail(value) {
+    return /^[^\s@]+@fujifilm\.com$/i.test(String(value || '').trim());
+  }
+  function emailRedirectUrl() {
+    return `${window.location.origin}${window.location.pathname}`;
+  }
 
   function stopIdleLogoutTimer() {
     if (idleLogoutTimer) window.clearTimeout(idleLogoutTimer);
@@ -41,12 +49,13 @@
 
   function setMode(nextMode) {
     mode=nextMode;error.textContent='';error.classList.remove('success');
+    if (resendConfirmation) resendConfirmation.hidden = true;
     const signup=mode==='signup';
     document.querySelectorAll('.auth-signup-field').forEach(item=>item.hidden=!signup);
     displayName.required=signup;passwordConfirm.required=signup;
     password.autocomplete=signup?'new-password':'current-password';
     title.textContent=signup?'직원 회원가입':'법인차량 관리';
-    copy.textContent=signup?'가입 후 관리자가 계정을 활성화하면 사용할 수 있습니다.':'회사 계정으로 로그인해 주세요.';
+    copy.textContent=signup?'후지필름 이메일 인증과 관리자 활성화 후 사용할 수 있습니다.':'회사 계정으로 로그인해 주세요.';
     submit.textContent=signup?'가입 신청':'로그인';
     loginModeButton.classList.toggle('active',!signup);signupModeButton.classList.toggle('active',signup);
   }
@@ -138,20 +147,33 @@
     if(mode==='signup'){
       const name=displayName.value.trim(),mail=email.value.trim();
       if(!name){error.textContent='이름을 입력해 주세요.';return;}
+      if(!isCompanyEmail(mail)){error.textContent='@fujifilm.com 회사 이메일로만 가입할 수 있습니다.';return;}
       if(password.value.length<8){error.textContent='비밀번호는 8자 이상으로 입력해 주세요.';return;}
       if(password.value!==passwordConfirm.value){error.textContent='비밀번호 확인이 일치하지 않습니다.';return;}
       submit.disabled=true;
-      const {data,error:signUpError}=await window.fleetSupabaseClient.auth.signUp({email:mail,password:password.value,options:{data:{display_name:name}}});
+      const {data,error:signUpError}=await window.fleetSupabaseClient.auth.signUp({email:mail,password:password.value,options:{data:{display_name:name,emailRedirectTo:emailRedirectUrl()}}});
       submit.disabled=false;
       if(signUpError){error.textContent=signUpError.message.includes('already')?'이미 가입된 이메일입니다.':'회원가입을 완료하지 못했습니다.';return;}
       if(data.session)await window.fleetSupabaseClient.auth.signOut();
-      form.reset();setMode('login');error.classList.add('success');
-      error.textContent=data.user?.identities?.length===0?'이미 가입된 이메일입니다.':'회원가입이 완료되었습니다. 이메일 확인 후 관리자가 계정을 활성화하면 로그인할 수 있습니다.';
+      form.reset();setMode('login');email.value=mail;error.classList.add('success');
+      const existingUser=data.user?.identities?.length===0;
+      error.textContent=existingUser?'이미 가입된 이메일입니다. 인증 메일이 필요하면 아래 버튼을 눌러 주세요.':'인증 메일을 보냈습니다. 메일 인증 후 관리자가 계정을 활성화하면 로그인할 수 있습니다.';
+      if(resendConfirmation) resendConfirmation.hidden=!isCompanyEmail(mail);
       return;
     }
     const { data, error: signInError } = await window.fleetSupabaseClient.auth.signInWithPassword({ email: email.value.trim(), password: password.value });
     if (signInError) { error.textContent = '이메일 또는 비밀번호를 확인해 주세요.'; return; }
     await applySession(data.session);
+  });
+  resendConfirmation?.addEventListener('click', async () => {
+    const mail=email.value.trim();
+    error.textContent='';error.classList.remove('success');
+    if(!isCompanyEmail(mail)){error.textContent='@fujifilm.com 회사 이메일을 입력해 주세요.';return;}
+    resendConfirmation.disabled=true;
+    const {error: resendError}=await window.fleetSupabaseClient.auth.resend({type:'signup',email:mail,options:{emailRedirectTo:emailRedirectUrl()}});
+    resendConfirmation.disabled=false;
+    error.classList.add('success');
+    error.textContent=resendError?'인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.':'인증 메일을 다시 보냈습니다. 받은편지함과 스팸함을 확인해 주세요.';
   });
   logout.addEventListener('click', () => window.fleetSupabaseClient.auth.signOut());
   ['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll'].forEach(eventName => {
