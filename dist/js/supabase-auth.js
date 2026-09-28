@@ -15,6 +15,16 @@
   const userName = document.getElementById('userName');
   const userRole = document.getElementById('userRole');
   const logout = document.getElementById('logoutButton');
+  const changePasswordButton = document.getElementById('changePasswordButton');
+  const passwordChangeModal = document.getElementById('passwordChangeModal');
+  const passwordChangeForm = document.getElementById('passwordChangeForm');
+  const passwordChangeError = document.getElementById('passwordChangeError');
+  const currentPassword = document.getElementById('currentPassword');
+  const newPassword = document.getElementById('newPassword');
+  const newPasswordConfirm = document.getElementById('newPasswordConfirm');
+  const closePasswordChange = document.getElementById('closePasswordChange');
+  const cancelPasswordChange = document.getElementById('cancelPasswordChange');
+  const savePasswordChange = document.getElementById('savePasswordChange');
   const memberNavItem = document.getElementById('memberNavItem');
   const capacityNavItem = document.getElementById('capacityNavItem');
   const idleLogoutMs = 10 * 60 * 1000;
@@ -28,6 +38,16 @@
   }
   function emailRedirectUrl() {
     return `${window.location.origin}${window.location.pathname}`;
+  }
+  async function isLoginLocked(mail) {
+    const { data, error: lockError } = await window.fleetSupabaseClient.rpc('login_is_locked', { p_email: mail });
+    if (lockError) { console.warn('로그인 잠금 상태 조회 오류', lockError); return false; }
+    return data === true;
+  }
+  function closePasswordDialog() {
+    passwordChangeModal?.classList.remove('open');
+    passwordChangeForm?.reset();
+    if (passwordChangeError) passwordChangeError.textContent = '';
   }
 
   function stopIdleLogoutTimer() {
@@ -93,6 +113,12 @@
     gate.classList.toggle('hidden', Boolean(session));
     if (!session) { window.fleetCurrentDisplayName=''; stopIdleLogoutTimer(); return; }
     if (session) {
+      if (await isLoginLocked(session.user.email || '')) {
+        await window.fleetSupabaseClient.auth.signOut({ scope: 'local' });
+        gate.classList.remove('hidden');
+        error.textContent='비밀번호를 5회 틀려 계정이 잠겼습니다. 관리자에게 잠금 해제를 요청해 주세요.';
+        return;
+      }
       userName.textContent = session.user.email || '로그인 사용자';
       userRole.textContent = '인증 확인 중';
       const [{ data: profile, error: profileError }, { data: roleValue, error: roleError }] = await Promise.all([
@@ -167,13 +193,27 @@
       if(resendConfirmation) resendConfirmation.hidden=!isCompanyEmail(mail);
       return;
     }
-    const { data, error: signInError } = await window.fleetSupabaseClient.auth.signInWithPassword({ email: email.value.trim(), password: password.value });
+    const mail=email.value.trim();
+    if (await isLoginLocked(mail)) {
+      error.textContent='비밀번호를 5회 틀려 계정이 잠겼습니다. 관리자에게 잠금 해제를 요청해 주세요.';
+      return;
+    }
+    const { data, error: signInError } = await window.fleetSupabaseClient.auth.signInWithPassword({ email: mail, password: password.value });
     if (signInError) {
       const requiresEmailConfirmation = /email not confirmed/i.test(signInError.message || '');
-      error.textContent = requiresEmailConfirmation ? '이메일 인증이 필요합니다. 아래 버튼으로 인증 메일을 다시 보내 주세요.' : '이메일 또는 비밀번호를 확인해 주세요.';
+      const invalidCredentials = /invalid login credentials/i.test(signInError.message || '');
+      let locked=false;
+      if(invalidCredentials){
+        const {data: lockResult,error: lockError}=await window.fleetSupabaseClient.rpc('record_login_failure',{p_email:mail});
+        if(lockError) console.warn('로그인 실패 횟수 저장 오류',lockError);
+        locked=lockResult===true;
+      }
+      error.textContent = requiresEmailConfirmation ? '이메일 인증이 필요합니다. 아래 버튼으로 인증 메일을 다시 보내 주세요.' : locked ? '비밀번호를 5회 틀려 계정이 잠겼습니다. 관리자에게 잠금 해제를 요청해 주세요.' : '이메일 또는 비밀번호를 확인해 주세요.';
       if (requiresEmailConfirmation && resendConfirmation) resendConfirmation.hidden = false;
       return;
     }
+    const {error: clearError}=await window.fleetSupabaseClient.rpc('clear_login_failures');
+    if(clearError) console.warn('로그인 실패 횟수 초기화 오류',clearError);
     await applySession(data.session);
   });
   resendConfirmation?.addEventListener('click', async () => {
@@ -185,6 +225,29 @@
     resendConfirmation.disabled=false;
     error.classList.add('success');
     error.textContent=resendError?'인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.':'인증 메일을 다시 보냈습니다. 받은편지함과 스팸함에서 링크를 열어 주세요.';
+  });
+  changePasswordButton?.addEventListener('click',()=>{
+    if(!window.fleetCurrentUser)return;
+    passwordChangeForm?.reset();
+    if(passwordChangeError)passwordChangeError.textContent='';
+    passwordChangeModal?.classList.add('open');
+    currentPassword?.focus();
+  });
+  [closePasswordChange,cancelPasswordChange].forEach(button=>button?.addEventListener('click',closePasswordDialog));
+  passwordChangeModal?.addEventListener('click',event=>{if(event.target===passwordChangeModal)closePasswordDialog();});
+  passwordChangeForm?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    if(!window.fleetCurrentUser)return;
+    passwordChangeError.textContent='';
+    if(newPassword.value.length<8){passwordChangeError.textContent='새 비밀번호는 8자 이상으로 입력해 주세요.';return;}
+    if(newPassword.value!==newPasswordConfirm.value){passwordChangeError.textContent='새 비밀번호 확인이 일치하지 않습니다.';return;}
+    savePasswordChange.disabled=true;
+    const {error: verifyError}=await window.fleetSupabaseClient.auth.signInWithPassword({email:window.fleetCurrentUser.email,password:currentPassword.value});
+    if(verifyError){savePasswordChange.disabled=false;passwordChangeError.textContent='현재 비밀번호가 올바르지 않습니다.';return;}
+    const {error: updateError}=await window.fleetSupabaseClient.auth.updateUser({password:newPassword.value});
+    savePasswordChange.disabled=false;
+    if(updateError){passwordChangeError.textContent='비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.';console.warn('비밀번호 변경 오류',updateError);return;}
+    closePasswordDialog();showToast('비밀번호를 변경했습니다. 다음 로그인부터 새 비밀번호를 사용하세요.');
   });
   logout.addEventListener('click', () => window.fleetSupabaseClient.auth.signOut());
   ['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll'].forEach(eventName => {

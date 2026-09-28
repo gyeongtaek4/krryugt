@@ -18,14 +18,16 @@
     const filtered=visibleMembers();
     summary.textContent=`전체 ${members.length}명 · 활성 ${activeCount}명 · 비활성 ${disabledCount}명`;
     rows.innerHTML=filtered.map(item=>{
-      const self=item.id===window.fleetCurrentUser?.id,disabled=self?' disabled':'';
-      return `<tr class="member-status-${escapeHtml(item.status||'')}" data-member-id="${escapeHtml(item.id)}"><td><input class="member-name" maxlength="50" value="${escapeHtml(item.display_name||'')}"></td><td>${escapeHtml(item.email||'')}</td><td>${escapeHtml(String(item.created_at||'').slice(0,10))}</td><td><select class="member-role"${disabled}>${Object.entries(roleLabel).map(([value,label])=>`<option value="${value}"${item.role===value?' selected':''}>${label}</option>`).join('')}</select></td><td><select class="member-status"${disabled}>${Object.entries(statusLabel).map(([value,label])=>`<option value="${value}"${item.status===value?' selected':''}>${label}</option>`).join('')}</select></td><td><div class="member-actions"><button class="row-edit member-save">저장</button>${self?'<small class="member-self">내 계정</small>':'<button class="row-edit member-password-reset" type="button">비밀번호 초기화</button><button class="row-delete member-delete" type="button">계정 삭제</button>'}</div></td></tr>`;
+      const self=item.id===window.fleetCurrentUser?.id,disabled=self?' disabled':'',locked=Boolean(item.login_locked_at);
+      const lockClass=locked?' member-login-locked':'';
+      const lockControls=locked?'<span class="member-lock-status">로그인 잠김</span><button class="row-edit member-unlock" type="button">잠금 해제</button>':'';
+      return `<tr class="member-status-${escapeHtml(item.status||'')}${lockClass}" data-member-id="${escapeHtml(item.id)}"><td><input class="member-name" maxlength="50" value="${escapeHtml(item.display_name||'')}"></td><td>${escapeHtml(item.email||'')}</td><td>${escapeHtml(String(item.created_at||'').slice(0,10))}</td><td><select class="member-role"${disabled}>${Object.entries(roleLabel).map(([value,label])=>`<option value="${value}"${item.role===value?' selected':''}>${label}</option>`).join('')}</select></td><td><select class="member-status"${disabled}>${Object.entries(statusLabel).map(([value,label])=>`<option value="${value}"${item.status===value?' selected':''}>${label}</option>`).join('')}</select></td><td><div class="member-actions"><button class="row-edit member-save">저장</button>${self?'<small class="member-self">내 계정</small>':`${lockControls}<button class="row-edit member-password-reset" type="button">비밀번호 초기화</button><button class="row-delete member-delete" type="button">계정 삭제</button>`}</div></td></tr>`;
     }).join('')||`<tr><td colspan="6" class="empty-table">${members.length?'조회 조건에 맞는 회원이 없습니다.':'가입한 회원이 없습니다.'}</td></tr>`;
   }
 
   async function refreshMembersFromSupabase(){
     if(window.fleetCurrentRole!=='admin')throw Error('관리자만 회원관리를 사용할 수 있습니다.');
-    const {data,error}=await window.fleetSupabaseClient.from('profiles').select('id,email,display_name,role,status,created_at').order('created_at',{ascending:false});
+    const {data,error}=await window.fleetSupabaseClient.from('profiles').select('id,email,display_name,role,status,created_at,failed_login_attempts,login_locked_at').order('created_at',{ascending:false});
     if(error)throw Error('회원목록을 불러오지 못했습니다. 006_members.sql 실행이 필요할 수 있습니다.');
     members=data||[];renderMembers();
   }
@@ -33,6 +35,16 @@
   search.addEventListener('input',renderMembers);
 
   rows.addEventListener('click',async event=>{
+    const unlockButton=event.target.closest('.member-unlock');
+    if(unlockButton){
+      const row=unlockButton.closest('[data-member-id]'),name=row.querySelector('.member-name').value.trim()||'선택한 회원';
+      if(!confirm(`${name} 회원의 로그인 잠금을 해제할까요?`))return;
+      unlockButton.disabled=true;
+      const {error}=await window.fleetSupabaseClient.rpc('admin_unlock_member',{p_user_id:row.dataset.memberId});
+      unlockButton.disabled=false;
+      if(error){showToast(error.message||'로그인 잠금을 해제하지 못했습니다.');return;}
+      await refreshMembersFromSupabase();showToast(`${name} 회원의 로그인 잠금을 해제했습니다.`);return;
+    }
     const deleteButton=event.target.closest('.member-delete');
     if(deleteButton){
       const row=deleteButton.closest('[data-member-id]'),name=row.querySelector('.member-name').value.trim()||'선택한 회원';
