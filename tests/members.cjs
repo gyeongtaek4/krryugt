@@ -24,6 +24,7 @@ assert(auth.includes('const idleLogoutMs = 10 * 60 * 1000'), '10-minute idle log
 assert(auth.includes("auth.signOut({ scope: 'local' })"), 'idle logout is not local session sign-out');
 assert(auth.includes("['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll']"), 'idle activity tracking is missing');
 assert(client.includes('storage: window.sessionStorage'), 'tab session storage is not configured');
+assert(client.includes('multiTab: false'), 'different browser tabs must not broadcast their auth state');
 assert(!auth.includes('vehicleUploadGuide'), 'removed vehicle upload guide must not be controlled by role navigation');
 assert(app.includes("page === '회원관리'"));
 assert(app.includes("const canEdit=window.fleetCurrentRole==='admin'"));
