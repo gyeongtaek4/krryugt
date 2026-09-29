@@ -129,7 +129,7 @@
       if (roleError) console.warn('역할 조회 오류', roleError);
       if(!profile || profile.status!=='active'){
         const message='비활성화된 계정입니다. 관리자에게 문의하세요.';
-        await window.fleetSupabaseClient.auth.signOut();gate.classList.remove('hidden');error.textContent=message;return;
+        await window.fleetSupabaseClient.auth.signOut({ scope: 'local' });gate.classList.remove('hidden');error.textContent=message;return;
       }
       // 프로필 표의 실제 역할을 우선 사용하고, 프로필 조회가 제한될 때만 RPC 결과를 사용합니다.
       const role = profile?.role || roleValue;
@@ -186,7 +186,7 @@
       const {data,error:signUpError}=await window.fleetSupabaseClient.auth.signUp({email:mail,password:password.value,options:{data:{display_name:name,emailRedirectTo:emailRedirectUrl()}}});
       submit.disabled=false;
       if(signUpError){error.textContent=signUpError.message.includes('already')?'이미 가입된 이메일입니다.':'회원가입을 완료하지 못했습니다.';return;}
-      if(data.session)await window.fleetSupabaseClient.auth.signOut();
+      if(data.session)await window.fleetSupabaseClient.auth.signOut({ scope: 'local' });
       form.reset();setMode('login');email.value=mail;error.classList.add('success');
       const existingUser=data.user?.identities?.length===0;
       error.textContent=existingUser?'이미 가입된 이메일입니다. 인증 메일이 필요하면 아래 버튼을 눌러 주세요.':'인증 메일을 보냈습니다. 메일의 링크를 열어 인증한 뒤 관리자가 계정을 활성화하면 로그인할 수 있습니다.';
@@ -250,7 +250,7 @@
     if(updateError){passwordChangeError.textContent='비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.';console.warn('비밀번호 변경 오류',updateError);return;}
     closePasswordDialog();showToast('비밀번호를 변경했습니다. 다음 로그인부터 새 비밀번호를 사용하세요.');
   });
-  logout.addEventListener('click', () => window.fleetSupabaseClient.auth.signOut());
+  logout.addEventListener('click', () => window.fleetSupabaseClient.auth.signOut({ scope: 'local' }));
   ['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll'].forEach(eventName => {
     window.addEventListener(eventName, resetIdleLogoutTimer, { passive: eventName !== 'keydown' });
   });

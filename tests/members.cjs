@@ -25,6 +25,8 @@ assert(auth.includes("auth.signOut({ scope: 'local' })"), 'idle logout is not lo
 assert(auth.includes("['mousemove', 'keydown', 'pointerdown', 'touchstart', 'scroll']"), 'idle activity tracking is missing');
 assert(client.includes('storage: window.sessionStorage'), 'tab session storage is not configured');
 assert(client.includes('multiTab: false'), 'different browser tabs must not broadcast their auth state');
+assert(client.includes('storageKey: tabAuthStorageKey'), 'each browser tab must use a separate Supabase auth storage key');
+assert(auth.includes("logout.addEventListener('click', () => window.fleetSupabaseClient.auth.signOut({ scope: 'local' }))"), 'manual logout must only affect the current tab');
 assert(!auth.includes('vehicleUploadGuide'), 'removed vehicle upload guide must not be controlled by role navigation');
 assert(app.includes("page === '회원관리'"));
 assert(app.includes("const canEdit=window.fleetCurrentRole==='admin'"));
