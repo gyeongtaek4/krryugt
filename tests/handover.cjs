@@ -21,6 +21,7 @@ assert(source.includes('Object.fromEntries'));
 assert(source.includes('fleet-handover-server-v2'));
 assert(source.includes("from('vehicle_handovers').insert"));
 assert(source.includes("storage.from('handover-photos').upload"));
+assert(source.includes('window.fleetAttachmentCompression.prepare(file)'));
 assert(source.includes("'application/pdf'"));
 assert(source.includes('handoverPhotoDraft=merged'));
 assert(source.includes('window.fleetCurrentDisplayName'));

@@ -73,18 +73,20 @@ function validateHandoverPhotos(photos) {
   if (!Array.isArray(photos) || !photos.length || photos.length > 6) throw Error('외관 사진 또는 PDF를 1~6개 첨부하세요.');
   let bytes = 0;
   for (const photo of photos) {
+    const type = String(photo?.type || photo?.data?.slice(5, 20) || '');
+    const maximum = type.startsWith('image/') ? 1024*1024 : 5*1024*1024;
     if (!photo || typeof photo.name !== 'string' || photo.name.length > 255 ||
-      !Number.isSafeInteger(photo.size) || photo.size < 1 || photo.size > 5*1024*1024 ||
+      !Number.isSafeInteger(photo.size) || photo.size < 1 || photo.size > maximum ||
       typeof photo.data !== 'string' || !/^data:(image\/(jpeg|png|webp)|application\/pdf);base64,[A-Za-z0-9+/]+={0,2}$/.test(photo.data) ||
-      photo.data.length > 7*1024*1024) throw Error('첨부파일 형식 또는 크기가 올바르지 않습니다.');
+      photo.data.length > 7*1024*1024) throw Error('사진은 파일당 1MB 이하, PDF는 파일당 5MB 이하로 첨부하세요.');
     bytes += Math.max(photo.size, Math.floor(photo.data.split(',')[1].length*3/4));
   }
   if (bytes > 20*1024*1024) throw Error('첨부파일은 총 20MB 이하로 선택하세요.');
 }
 function mergeHandoverPhotos(current, incoming) {
-  const merged=[...current],keys=new Set(current.map(photo=>`${photo.name}\u0000${photo.size}\u0000${photo.lastModified||0}`));
+  const merged=[...current],keys=new Set(current.map(photo=>`${photo.sourceName||photo.name}\u0000${photo.sourceSize||photo.size}\u0000${photo.lastModified||0}`));
   for(const photo of incoming){
-    const key=`${photo.name}\u0000${photo.size}\u0000${photo.lastModified||0}`;
+    const key=`${photo.sourceName||photo.name}\u0000${photo.sourceSize||photo.size}\u0000${photo.lastModified||0}`;
     if(!keys.has(key)){keys.add(key);merged.push(photo);}
   }
   validateHandoverPhotos(merged);
@@ -286,13 +288,12 @@ handoverEl('handoverPhotos').addEventListener('change',async event=>{
   handoverPhotoLoading=true; handoverEl('handoverSave').disabled=true; handoverEl('handoverError').textContent='';
   try {
     if (!files.length) return;
-    if (files.some(file=>!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type) || file.size>5*1024*1024)) throw Error('JPG/PNG/WebP/PDF, 파일당 5MB 이하 자료를 선택하세요.');
-    const photos=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{
-      const reader=new FileReader(); reader.onload=()=>resolve({name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,data:reader.result}); reader.onerror=()=>reject(Error('첨부파일을 읽지 못했습니다.')); reader.readAsDataURL(file);
-    })));
+    if (files.length+handoverPhotoDraft.length>6) throw Error('외관 사진 또는 PDF를 1~6개 첨부하세요.');
+    handoverEl('handoverError').textContent='사진을 확인하고 필요한 경우 압축하는 중입니다.';
+    const photos=await Promise.all(files.map(file=>window.fleetAttachmentCompression.prepare(file)));
     const merged=mergeHandoverPhotos(handoverPhotoDraft,photos);
     if(merged.length===handoverPhotoDraft.length)throw Error('이미 추가된 파일입니다.');
-    handoverPhotoDraft=merged;handoverEl('handoverPreview').innerHTML=handoverGallery(merged);
+    handoverPhotoDraft=merged;handoverEl('handoverPreview').innerHTML=handoverGallery(merged);handoverEl('handoverError').textContent='';
   } catch(error) {handoverEl('handoverError').textContent=error.message;}
   finally {input.value='';handoverPhotoLoading=false;handoverEl('handoverSave').disabled=false;}
 });

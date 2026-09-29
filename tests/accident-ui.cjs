@@ -19,6 +19,8 @@ assert(js.includes('data-accident-vehicle'));
 assert(js.includes("담당(정) ${vehicle['담당자(정)']||'미지정'} · 담당(부) ${vehicle['담당자(부)']||'미지정'}"));
 assert(js.includes("from('vehicle_accidents').insert"));
 assert(js.includes("from('accident-photos').upload"));
+assert(js.includes('window.fleetAttachmentCompression.prepare(file)'));
+assert(js.includes('IMAGE_MAX_BYTES'));
 assert(js.includes('data-accident-photo-remove'));
 assert(js.includes("photoDraft.splice(Number(removeButton.dataset.accidentPhotoRemove),1)"));
 assert(js.includes('replacement_vehicle_number'));

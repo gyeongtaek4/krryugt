@@ -42,19 +42,21 @@
     if(photos.length>3)throw Error('사고 현장 자료는 최대 3개까지 첨부할 수 있습니다.');
     let total=0;
     photos.forEach(photo=>{
-      if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(photo.type)||photo.size<1||photo.size>5*1024*1024)throw Error('JPG/PNG/WebP/PDF 파일만 파일당 5MB 이하로 첨부하세요.');
+      const isImage=window.fleetAttachmentCompression.isImage(photo);
+      const maximum=isImage?window.fleetAttachmentCompression.IMAGE_MAX_BYTES:window.fleetAttachmentCompression.PDF_MAX_BYTES;
+      if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(photo.type)||photo.size<1||photo.size>maximum)throw Error(isImage?'사진은 파일당 1MB 이하로 첨부하세요.':'PDF는 파일당 5MB 이하로 첨부하세요.');
       total+=photo.size;
     });
     if(total>15*1024*1024)throw Error('사고 현장 자료는 총 15MB 이하로 첨부하세요.');
   }
   function mergePhotos(incoming) {
-    const keys=new Set(photoDraft.map(photo=>`${photo.name}\u0000${photo.size}\u0000${photo.lastModified}`));
+    const keys=new Set(photoDraft.map(photo=>`${photo.sourceName||photo.name}\u0000${photo.sourceSize||photo.size}\u0000${photo.lastModified}`));
     const merged=[...photoDraft];
-    incoming.forEach(photo=>{const key=`${photo.name}\u0000${photo.size}\u0000${photo.lastModified}`;if(!keys.has(key)){keys.add(key);merged.push(photo);}});
+    incoming.forEach(photo=>{const key=`${photo.sourceName||photo.name}\u0000${photo.sourceSize||photo.size}\u0000${photo.lastModified}`;if(!keys.has(key)){keys.add(key);merged.push(photo);}});
     validatePhotos(merged);return merged;
   }
   function previewPhotos() {
-    el('accidentPreview').innerHTML=photoDraft.map((photo,index)=>`<figure>${photo.type==='application/pdf'?`<a class="attachment-pdf" href="${safe(photo.data)}" target="_blank" rel="noopener">PDF</a>`:`<img src="${safe(photo.data)}" alt="${safe(photo.name)}">`}<figcaption>${safe(photo.name)}</figcaption><button class="attachment-remove" type="button" data-accident-photo-remove="${index}" aria-label="${safe(photo.name)} 첨부 제거">제거</button></figure>`).join('');
+    el('accidentPreview').innerHTML=photoDraft.map((photo,index)=>`<figure>${photo.type==='application/pdf'?`<a class="attachment-pdf" href="${safe(photo.data)}" target="_blank" rel="noopener">PDF</a>`:`<img src="${safe(photo.data)}" alt="${safe(photo.name)}">`}<figcaption>${safe(photo.name)}${photo.compressed?' · 압축됨':''}</figcaption><button class="attachment-remove" type="button" data-accident-photo-remove="${index}" aria-label="${safe(photo.name)} 첨부 제거">제거</button></figure>`).join('');
   }
   function fileExtension(type) { return type==='image/png'?'png':type==='image/webp'?'webp':type==='application/pdf'?'pdf':'jpg'; }
   async function signedPhotos(paths) {
@@ -115,7 +117,7 @@
   el('accidentVehicleSuggestions').addEventListener('click',event=>{const option=event.target.closest('[data-accident-vehicle]');if(option)selectAccidentVehicle(option.dataset.accidentVehicle);});
   el('accidentPhotos').addEventListener('change',async event=>{
     const input=event.target;photoLoading=true;el('accidentSave').disabled=true;el('accidentError').textContent='';
-    try{const files=Array.from(input.files);validatePhotos(files);const incoming=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,data:reader.result});reader.onerror=()=>reject(Error('사고 현장 자료를 읽지 못했습니다.'));reader.readAsDataURL(file);})));photoDraft=mergePhotos(incoming);previewPhotos();}
+    try{const files=Array.from(input.files);if(files.length+photoDraft.length>3)throw Error('사고 현장 자료는 최대 3개까지 첨부할 수 있습니다.');el('accidentError').textContent='사진을 확인하고 필요한 경우 압축하는 중입니다.';const incoming=await Promise.all(files.map(file=>window.fleetAttachmentCompression.prepare(file)));photoDraft=mergePhotos(incoming);previewPhotos();el('accidentError').textContent='';}
     catch(error){el('accidentError').textContent=error.message;}finally{input.value='';photoLoading=false;el('accidentSave').disabled=false;}
   });
   el('accidentPreview').addEventListener('click',event=>{
