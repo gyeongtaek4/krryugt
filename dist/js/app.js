@@ -95,7 +95,6 @@ async function refreshContractsFromSupabase() {
       '계약종료': record.contract_end_month.slice(0, 7) };
   });
   refreshContractFilters(); renderContracts();
-  document.getElementById('contractSourceFileName').textContent = 'Supabase 저장 계약정보';
   document.getElementById('contractSourceUpdated').textContent = '현재 차량현황의 조직·담당자 기준';
   return true;
 }
@@ -1488,7 +1487,6 @@ document.getElementById('confirmContractUpload').addEventListener('click', async
     ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'].forEach(id => document.getElementById(id).value = '');
     refreshContractFilters();
     renderContracts();
-    document.getElementById('contractSourceFileName').textContent = file.name;
     document.getElementById('contractSourceUpdated').textContent = `${new Date().toLocaleString('ko-KR')} 반영`;
     toggleContractModal(false);
     showView('차량계약정보');
