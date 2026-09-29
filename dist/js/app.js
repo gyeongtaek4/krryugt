@@ -1085,6 +1085,7 @@ async function saveVehicleFileToSupabase(rows) {
 function openContractForm(index = null) {
   editingContractIndex = index;
   document.getElementById('contractForm').reset();
+  populateContractVehicleOptions();
   document.getElementById('contractFormError').classList.remove('show');
   document.getElementById('contractFormTitle').textContent = index === null ? '차량계약정보 직접 추가' : '차량계약정보 수정';
   if (index !== null) {
@@ -1104,7 +1105,7 @@ function openContractForm(index = null) {
   contractFormModal.classList.add('open');
   fillContractVehicleFields();
   document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('cfHeadquarters').focus(), 0);
+  setTimeout(() => document.getElementById('cfPlate').focus(), 0);
 }
 
 function closeContractForm() {
@@ -1122,6 +1123,17 @@ function fillContractVehicleFields() {
     field.required = false;
     field.placeholder = '차량번호 입력 시 자동 연결';
   });
+}
+
+function populateContractVehicleOptions() {
+  const select = document.getElementById('cfPlate');
+  const selected = select.value;
+  select.innerHTML = `<option value="">차량현황 차량 선택</option>${vehicleData
+    .slice()
+    .sort((a, b) => normalizePlate(a['차량번호']).localeCompare(normalizePlate(b['차량번호']), 'ko'))
+    .map(vehicle => `<option value="${escapeHtml(vehicle['차량번호'])}">${escapeHtml(vehicle['차량번호'])} · ${escapeHtml(vehicle['차종'] || '차종 미입력')}</option>`)
+    .join('')}`;
+  select.value = selected;
 }
 
 function openDrivingForm(index = null) {
@@ -1312,7 +1324,7 @@ document.getElementById('addVehicleButton').addEventListener('click', () => open
 document.getElementById('deleteAllVehicles').addEventListener('click', deleteAllVehicles);
 document.getElementById('addContractButton').addEventListener('click', () => openContractForm());
 document.getElementById('deleteAllContracts').addEventListener('click', () => deleteContracts(true));
-document.getElementById('cfPlate').addEventListener('input', fillContractVehicleFields);
+document.getElementById('cfPlate').addEventListener('change', fillContractVehicleFields);
 document.getElementById('addDrivingButton').addEventListener('click', () => openDrivingForm());
 document.getElementById('exportVehiclesButton').addEventListener('click', exportVehicleData);
 document.getElementById('exportContractsButton').addEventListener('click', exportContractData);
