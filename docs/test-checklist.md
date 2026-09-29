@@ -13,6 +13,7 @@
 - [x] 로그인 실패 5회 서버 잠금, 정상 로그인 시 실패 횟수 초기화, 관리자 `잠금 해제`, 본인 비밀번호 변경 화면과 `026_login_security.sql` 권한 구성을 `login-security.cjs`로 정적 검사한다. 2026-09-28 Supabase SQL Editor에서 실패 횟수·잠금 시각 열과 실패 기록·관리자 잠금 해제 RPC가 모두 생성된 것을 실제 확인했다. 실제 계정으로 5회 실패 → 잠김 → 관리자 해제 → 재로그인, 본인 비밀번호 변경은 별도 확인이 필요하다.
 - [x] 로그인 실패 시 `n/5회 오류` 안내와 `027_login_failure_count.sql`의 실패 횟수 RPC 연결을 `login-security.cjs`로 정적 검사한다. 2026-09-28 Supabase SQL Editor에서 RPC 적용 성공을 확인했다. 실제 로그인 화면에서 숫자 변화와 5회 잠김 전환은 배포 후 확인이 필요하다.
 - [x] 이전 HTML과 최신 JavaScript가 섞여 로그인 처리가 멈추지 않도록 Vercel의 `no-store` 캐시 정책과 선택적 이벤트 연결 보호를 `deployment-cache.cjs`로 정적 검사한다. 최신 배포본에서 실제 로그인 확인이 필요하다.
+- [x] Supabase URL·Publishable key가 저장소의 설정 파일에 직접 남지 않고, Vercel 환경변수로 `scripts/build.cjs`가 생성하도록 `supabase-config-check.cjs`로 정적 검사한다. 2026-09-29 Vercel Production 환경에 두 공개 설정값을 등록했다. Production 배포 뒤 로그인·자료 조회 실제 확인은 추가로 필요하며, Preview 배포를 쓸 경우 같은 변수를 Preview에도 등록한다.
 - [x] 관리자 전용 `용량확인` 메뉴·Storage/DB 사용량·잔여용량·80% 경고와 `019_admin_capacity_usage.sql`의 관리자 RPC 권한을 `capacity-usage.cjs`로 정적 검사했다. 2026-09-27 Supabase SQL Editor에서 RPC 적용 성공을 확인했다. 배포 후 실제 관리자 화면의 용량 수치와 일반회원 메뉴 숨김은 추가 확인이 필요하다.
 - [x] 차량현황·차량계약정보의 Excel 업로드 안내 배너와 제거된 차량 안내 ID 참조가 없는지 `members.cjs`로 정적 검사한다. 상단 양식 내려받기·Excel 업로드 버튼은 유지한다.
 - [x] 운행기록데이터의 Excel 안내 배너·중복 파일 선택 버튼·관련 코드 참조가 제거되고, 상단 `운행기록 Excel 업로드` 동작은 유지되는지 `driving-summary-layout.cjs`로 정적 검사한다.

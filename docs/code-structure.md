@@ -8,7 +8,7 @@
 
 ## 기능 JavaScript
 
-- `dist/js/supabase-config.js`: Supabase Project URL과 Publishable key 설정
+- `dist/js/supabase-config.js`: Vercel 환경변수로 배포 시 생성되는 Supabase Project URL·Publishable key 설정 파일. 저장소에는 빈 템플릿만 둔다.
 - `dist/js/supabase-client.js`: 브라우저 Supabase 연결 객체
 - `dist/js/supabase-auth.js`: 로그인·로그아웃·역할 적용·10분 무활동 자동 로그아웃
 - `dist/js/members.js`: 회원가입, 관리자 회원관리, 계정 상태·역할 관리
@@ -25,13 +25,14 @@
 
 - `supabase/001_initial_schema.sql`부터 `019_admin_capacity_usage.sql`까지: Supabase 표·함수·RLS·Storage 정책 변경 이력
 - 구조화된 정보는 Supabase DB, 사진·PDF 첨부는 비공개 Storage에 저장한다.
-- 공개 배포 코드에는 Publishable key만 두며, Secret key와 service role key는 저장하지 않는다.
+- Vercel 환경변수 `FLEET_SUPABASE_URL`·`FLEET_SUPABASE_PUBLISHABLE_KEY`를 `scripts/build.cjs`가 배포 파일에 주입한다. Publishable key는 브라우저 연결에 필요한 공개값이므로 배포 화면에서는 확인될 수 있지만, 저장소 소스에는 넣지 않는다. Secret key와 service role key는 저장하지 않는다.
 
 ## 검사와 배포
 
 - `scripts/preview.cjs`: 로컬 미리보기 서버
 - `tests/*.cjs`: 화면 구조, 업로드, 계산, 권한 연결을 확인하는 정적·mock 검사
-- `vercel.json`: 배포 파일의 캐시 정책. 이전 HTML과 최신 JavaScript가 섞이지 않도록 최신 파일을 다시 확인한다.
+- `scripts/build.cjs`: Vercel 환경변수로 `dist/js/supabase-config.js`를 생성한다.
+- `vercel.json`: 환경변수 생성 빌드와 배포 파일의 캐시 정책. 이전 HTML과 최신 JavaScript가 섞이지 않도록 최신 파일을 다시 확인한다.
 
 대표 검사 명령:
 

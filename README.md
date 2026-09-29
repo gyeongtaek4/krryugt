@@ -43,6 +43,15 @@ node --check dist/js/dialogs.js
 
 배포에는 `dist/` 폴더 전체가 포함되어야 합니다. 최신 배포 화면이 보이지 않으면 Chrome에서 `Ctrl + F5`로 새로고침합니다.
 
+## Supabase 환경변수
+
+Supabase URL과 Publishable key는 코드에 직접 저장하지 않고 Vercel 환경변수로 관리합니다. Vercel 프로젝트의 **Settings → Environment Variables**에 아래 두 값을 최소한 Production 환경에 등록하세요. Preview·Development 배포도 사용할 경우에는 해당 환경에도 같은 값을 추가합니다.
+
+- `FLEET_SUPABASE_URL`
+- `FLEET_SUPABASE_PUBLISHABLE_KEY`
+
+배포 시 `node scripts/build.cjs`가 이 값으로 브라우저 연결용 설정 파일을 생성합니다. 로컬에서 미리 볼 때도 같은 이름의 환경변수를 설정한 뒤 해당 빌드 명령을 먼저 실행해야 합니다. Secret key·service_role key는 어떤 환경에도 이 프로젝트의 브라우저용 설정으로 넣으면 안 됩니다.
+
 ## 문서 안내
 
 - [확정 요구사항](docs/requirements.md)
