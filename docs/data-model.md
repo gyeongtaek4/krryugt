@@ -18,7 +18,7 @@
 ## 구현된 Supabase 연결 (2026-09-17)
 
 - 로그인·RLS와 vehicles 조회·추가·수정·Excel 저장·삭제 연결. vehicles의 `cc`는 팀과 담당자(정) 사이에 관리하는 차량 기본정보다.
-- contracts는 vehicle_id로 vehicles와 연결하여 조회·직접 추가·수정·Excel 저장한다. 조직·CC·담당자는 현재 vehicles 기준으로 표시한다.
+- contracts는 vehicle_id로 vehicles와 연결하여 조회·직접 추가·수정·Excel 저장한다. 조직·CC·담당자는 현재 vehicles 기준으로 표시한다. 차량은 contracts 행이 없더라도 계약 화면에 `계약 입력` 대기 행으로 표시하며, 렌탈료·계약기간을 저장하는 시점에만 실제 contracts 행을 만든다.
 - 계약 시작·종료는 해당 월 1일 date, 월 렌탈료는 부가세 포함 정수로 저장한다.
 - 이하 메모리·미구현 설명은 초기 설계 기록이며, 운행·비용 마감의 서버 저장은 아직 후속 단계다.
 

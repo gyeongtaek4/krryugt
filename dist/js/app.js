@@ -87,13 +87,21 @@ async function refreshContractsFromSupabase() {
     showToast('차량계약정보 서버 조회에 실패했습니다.');
     return false;
   }
-  contractData = (data || []).map(record => {
+  const savedContracts = (data || []).map(record => {
     const vehicle = vehicleData.find(row => row._supabaseId === record.vehicle_id) || {};
     return { ...vehicle, _supabaseId: record.id, _vehicleId: record.vehicle_id,
       _rentalCompany: record.rental_company, _isActive: record.is_active,
       '렌탈료': String(record.monthly_rental_fee), '계약시작': record.contract_start_month.slice(0, 7),
       '계약종료': record.contract_end_month.slice(0, 7) };
   });
+  // 차량을 먼저 등록하면 계약 엑셀을 올리기 전에도 계약 화면에 입력 대기 행을 보인다.
+  // 실제 contracts 행은 렌탈료·계약기간이 입력된 뒤에만 생성한다.
+  const contractedVehicleIds = new Set(savedContracts.map(row => row._vehicleId));
+  const pendingContracts = vehicleData
+    .filter(vehicle => !contractedVehicleIds.has(vehicle._supabaseId))
+    .map(vehicle => ({ ...vehicle, _vehicleId: vehicle._supabaseId, _pendingContract: true,
+      '렌탈료': '', '계약시작': '', '계약종료': '' }));
+  contractData = [...savedContracts, ...pendingContracts];
   refreshContractFilters(); renderContracts();
   document.getElementById('contractSourceUpdated').textContent = '현재 차량현황의 조직·담당자 기준';
   return true;
@@ -760,16 +768,17 @@ function renderContracts() {
       <td>${escapeHtml(row['본부'])}</td><td>${escapeHtml(row['부'])}</td><td>${escapeHtml(row['팀'])}</td><td>${escapeHtml(row['CC'] || '-')}</td>
       <td><div class="person"><span class="person-avatar">${escapeHtml(initials(row['담당자(정)']))}</span><strong>${escapeHtml(row['담당자(정)'] || '-')}</strong></div></td>
       <td><div class="person secondary"><span class="person-avatar">${escapeHtml(initials(row['담당자(부)']))}</span><span>${escapeHtml(row['담당자(부)'] || '-')}</span></div></td>
-      <td>${escapeHtml(row['차종'])}</td><td class="plate">${escapeHtml(row['차량번호'])}</td><td class="money">${rentalNumber(row['렌탈료']).toLocaleString('ko-KR')}원</td>
-      <td><div class="contract-period"><strong>${escapeHtml(formatYearMonth(row['계약시작']))} ~ ${escapeHtml(formatYearMonth(row['계약종료']))}</strong></div></td>
-      <td><div class="contract-period"><strong>총 ${total}개월</strong><span class="remaining-badge ${stateClass}">${remainingText}</span></div></td><td><button class="row-edit" data-contract-edit="${item.index}">수정</button> <button class="row-delete" data-contract-delete="${item.index}">삭제</button></td>
+      <td>${escapeHtml(row['차종'])}</td><td class="plate">${escapeHtml(row['차량번호'])}</td><td class="money">${row._pendingContract ? '<span class="read-only-label">미등록</span>' : `${rentalNumber(row['렌탈료']).toLocaleString('ko-KR')}원`}</td>
+      <td>${row._pendingContract ? '<span class="read-only-label">계약기간 입력 필요</span>' : `<div class="contract-period"><strong>${escapeHtml(formatYearMonth(row['계약시작']))} ~ ${escapeHtml(formatYearMonth(row['계약종료']))}</strong></div>`}</td>
+      <td>${row._pendingContract ? '<span class="read-only-label">계약정보 미등록</span>' : `<div class="contract-period"><strong>총 ${total}개월</strong><span class="remaining-badge ${stateClass}">${remainingText}</span></div>`}</td><td><button class="row-edit" data-contract-edit="${item.index}">${row._pendingContract ? '계약 입력' : '수정'}</button>${row._pendingContract ? '' : ` <button class="row-delete" data-contract-delete="${item.index}">삭제</button>`}</td>
     </tr>`;
   }).join('') : '<tr><td class="empty-table" colspan="12">조건에 맞는 계약정보가 없습니다.</td></tr>';
-  const totalFee = contractData.reduce((sum, row) => sum + rentalNumber(row['렌탈료']), 0);
+  const savedContractRows = contractData.filter(row => !row._pendingContract);
+  const totalFee = savedContractRows.reduce((sum, row) => sum + rentalNumber(row['렌탈료']), 0);
   document.getElementById('dashboardContractAmount').textContent = `${totalFee.toLocaleString('ko-KR')}원`;
   const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 12; }).length;
   document.getElementById('contractRecordCount').textContent = `${filtered.length}건`;
-  document.getElementById('totalContracts').textContent = `${contractData.length}대`;
+  document.getElementById('totalContracts').textContent = `${savedContractRows.length}대`;
   document.getElementById('totalRentalFee').textContent = `${Math.round(totalFee / 10000).toLocaleString('ko-KR')}만원`;
   document.getElementById('contractsExpiring').textContent = `${expiring}대`;
 }
