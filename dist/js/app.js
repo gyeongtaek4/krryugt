@@ -822,16 +822,37 @@ function renderDashboardCurrentData() {
   document.getElementById('dashboardVehicleCount').textContent = `${vehicleData.length}대`;
   const departments = dashboardDepartmentTree();
   document.getElementById('dashboardDepartments').innerHTML = departments.length ? dashboardDepartmentAccordionMarkup() : '<p class="empty-table">등록된 차량이 없습니다.</p>';
+  updateDepartmentAccordionButton();
   const expiring = contractData.filter(row => { const months = remainingMonths(row['계약종료']); return months > 0 && months <= 6; });
   const countVehicles = rows => new Set(rows.map(row => normalizePlate(row['차량번호']))).size;
   document.getElementById('dashboardExpiryCount').textContent = `${countVehicles(expiring)}대`;
   document.getElementById('dashboardUrgentCount').textContent = `${countVehicles(expiring.filter(row => remainingMonths(row['계약종료']) <= 1))}대`;
 }
 
+function dashboardDepartmentNodes() {
+  return [...document.querySelectorAll('#dashboardDepartments details.department-node')];
+}
+
+function updateDepartmentAccordionButton() {
+  const button = document.getElementById('toggleDashboardDepartments');
+  if (!button) return;
+  const nodes = dashboardDepartmentNodes();
+  const allOpen = nodes.length > 0 && nodes.every(node => node.open);
+  button.disabled = nodes.length === 0;
+  button.textContent = allOpen ? '전체 접기' : '전체 펼치기';
+  button.setAttribute('aria-expanded', String(allOpen));
+}
+
 function setDepartmentAccordionState(open) {
-  document.querySelectorAll('#dashboardDepartments details.department-node').forEach(node => {
+  dashboardDepartmentNodes().forEach(node => {
     node.open = open;
   });
+  updateDepartmentAccordionButton();
+}
+
+function toggleDepartmentAccordionState() {
+  const nodes = dashboardDepartmentNodes();
+  setDepartmentAccordionState(!nodes.length || !nodes.every(node => node.open));
 }
 
 function vehicleForPlate(plate) {
@@ -1304,8 +1325,8 @@ async function readDrivingFile(file) {
 }
 
 document.getElementById('menuButton').addEventListener('click', () => toggleSidebar(isNarrowScreen() ? !sidebar.classList.contains('open') : !sidebarExpanded));
-document.getElementById('expandDashboardDepartments')?.addEventListener('click', () => setDepartmentAccordionState(true));
-document.getElementById('collapseDashboardDepartments')?.addEventListener('click', () => setDepartmentAccordionState(false));
+document.getElementById('toggleDashboardDepartments')?.addEventListener('click', toggleDepartmentAccordionState);
+document.getElementById('dashboardDepartments')?.addEventListener('toggle', () => setTimeout(updateDepartmentAccordionButton, 0), true);
 scrim.addEventListener('click', () => toggleSidebar(false));
 window.addEventListener('resize',applySidebarPreference);
 document.getElementById('vehicleUploadButton').addEventListener('click', () => toggleModal(true));
