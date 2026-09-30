@@ -13,7 +13,7 @@
 - `dist/js/supabase-auth.js`: 로그인·로그아웃·역할 적용·10분 무활동 자동 로그아웃
 - `dist/js/members.js`: 회원가입, 관리자 회원관리, 계정 상태·역할 관리
 - `dist/js/app.js`: 차량·계약·운행·비용·대시보드·메뉴 이동의 공통 처리
-- `dist/js/attachment-compression.js`: 인수인계·사고 현장 사진의 1MB 자동 압축 공통 처리. PDF는 원본을 유지한다.
+- `dist/js/attachment-compression.js`: 인수인계·사고 현장 사진의 1MB 자동 압축과 3MB 초과 PDF의 3MB 이하 압축 공통 처리. PDF 압축에는 페이지 렌더링용 외부 라이브러리를 사용한다.
 - `dist/js/driving-months.js`: 운행 월자료 조회·저장·집계·페이지 이동
 - `dist/js/handover.js`: 차량인수인계 입력·첨부·이력·동의
 - `dist/js/accidents.js`: 사고접수·첨부·이력·관리자 처리 코멘트

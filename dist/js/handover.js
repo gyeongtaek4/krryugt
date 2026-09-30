@@ -74,11 +74,11 @@ function validateHandoverPhotos(photos) {
   let bytes = 0;
   for (const photo of photos) {
     const type = String(photo?.type || photo?.data?.slice(5, 20) || '');
-    const maximum = type.startsWith('image/') ? 1024*1024 : 5*1024*1024;
+    const maximum = type.startsWith('image/') ? 1024*1024 : 3*1024*1024;
     if (!photo || typeof photo.name !== 'string' || photo.name.length > 255 ||
       !Number.isSafeInteger(photo.size) || photo.size < 1 || photo.size > maximum ||
       typeof photo.data !== 'string' || !/^data:(image\/(jpeg|png|webp)|application\/pdf);base64,[A-Za-z0-9+/]+={0,2}$/.test(photo.data) ||
-      photo.data.length > 7*1024*1024) throw Error('사진은 파일당 1MB 이하, PDF는 파일당 5MB 이하로 첨부하세요.');
+      photo.data.length > 5*1024*1024) throw Error('사진은 파일당 1MB 이하, PDF는 파일당 3MB 이하로 첨부하세요.');
     bytes += Math.max(photo.size, Math.floor(photo.data.split(',')[1].length*3/4));
   }
   if (bytes > 20*1024*1024) throw Error('첨부파일은 총 20MB 이하로 선택하세요.');

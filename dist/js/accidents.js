@@ -44,7 +44,7 @@
     photos.forEach(photo=>{
       const isImage=window.fleetAttachmentCompression.isImage(photo);
       const maximum=isImage?window.fleetAttachmentCompression.IMAGE_MAX_BYTES:window.fleetAttachmentCompression.PDF_MAX_BYTES;
-      if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(photo.type)||photo.size<1||photo.size>maximum)throw Error(isImage?'사진은 파일당 1MB 이하로 첨부하세요.':'PDF는 파일당 5MB 이하로 첨부하세요.');
+      if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(photo.type)||photo.size<1||photo.size>maximum)throw Error(isImage?'사진은 파일당 1MB 이하로 첨부하세요.':'PDF는 파일당 3MB 이하로 첨부하세요.');
       total+=photo.size;
     });
     if(total>15*1024*1024)throw Error('사고 현장 자료는 총 15MB 이하로 첨부하세요.');
