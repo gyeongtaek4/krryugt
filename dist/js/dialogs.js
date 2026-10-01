@@ -57,7 +57,7 @@
 
   <div class="modal-backdrop" id="contractFormModal" role="dialog" aria-modal="true" aria-labelledby="contractFormTitle">
     <div class="modal">
-      <div class="modal-header"><div><h2 id="contractFormTitle">차량계약정보 직접 추가</h2><p>차량현황에 등록된 차량만 선택할 수 있습니다. 조직·담당자는 자동 연결되며, 렌탈료는 부가세 포함입니다.</p></div><button class="close-button" id="closeContractForm" aria-label="닫기">✕</button></div>
+      <div class="modal-header"><div><h2 id="contractFormTitle">차량계약정보 직접 추가</h2><p>차량번호를 입력하면 일치하는 등록 차량을 아래에서 선택할 수 있습니다. 조직·담당자는 자동 연결되며, 렌탈료는 부가세 포함입니다.</p></div><button class="close-button" id="closeContractForm" aria-label="닫기">✕</button></div>
       <form id="contractForm">
         <div class="form-grid">
           <div class="form-field"><label for="cfHeadquarters">본부 *</label><input id="cfHeadquarters" required></div>
@@ -67,7 +67,7 @@
           <div class="form-field"><label for="cfPrimary">담당자(정) *</label><input id="cfPrimary" required></div>
           <div class="form-field"><label for="cfSecondary">담당자(부)</label><input id="cfSecondary"></div>
           <div class="form-field"><label for="cfModel">차종 *</label><input id="cfModel" required></div>
-          <div class="form-field"><label for="cfPlate">차량번호 *</label><select class="form-input" id="cfPlate" required><option value="">차량현황 차량 선택</option></select></div>
+          <div class="form-field contract-vehicle-field"><label for="cfPlate">차량번호 *</label><input class="form-input" id="cfPlate" type="search" required autocomplete="off" placeholder="차량번호 또는 관련 단어 입력" aria-autocomplete="list" aria-controls="contractVehicleSuggestions" aria-expanded="false"><div class="contract-vehicle-suggestions" id="contractVehicleSuggestions" role="listbox" hidden></div></div>
           <div class="form-field"><label for="cfFee">월 렌탈료(원) *</label><input id="cfFee" type="number" min="0" step="1000" required></div>
           <div class="form-field"><label for="cfStart">계약시작 *</label><input id="cfStart" type="month" required></div>
           <div class="form-field"><label for="cfEnd">계약종료 *</label><input id="cfEnd" type="month" required></div>
