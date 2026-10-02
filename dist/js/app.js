@@ -1234,10 +1234,22 @@ function downloadExcel(rows, sheetName, fileName) {
   showToast(`${fileName} 파일을 내려받았습니다.`);
 }
 
-function downloadTemplate(columns, sheetName, fileName) {
+function downloadTemplate(columns, sheetName, fileName, textInputColumns = []) {
   if (!window.XLSX) { showToast('Excel 기능을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet([columns]);
+  const inputRows = 300;
+  const textColumnIndexes = textInputColumns
+    .map(column => columns.indexOf(column))
+    .filter(index => index >= 0);
+  textColumnIndexes.forEach(columnIndex => {
+    for (let row = 1; row <= inputRows; row++) {
+      worksheet[XLSX.utils.encode_cell({ c: columnIndex, r: row })] = { t: 's', v: '', z: '@' };
+    }
+  });
+  if (textColumnIndexes.length) {
+    worksheet['!ref'] = XLSX.utils.encode_range({ s: { c: 0, r: 0 }, e: { c: columns.length - 1, r: inputRows } });
+  }
   worksheet['!cols'] = columns.map(column => ({ wch: Math.max(12, String(column).length * 2 + 4) }));
   worksheet['!autofilter'] = { ref: XLSX.utils.encode_range({ s:{ c:0, r:0 }, e:{ c:columns.length - 1, r:0 } }) };
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
@@ -1282,11 +1294,11 @@ function downloadVehicleTemplate() {
 }
 
 function downloadContractTemplate() {
-  downloadTemplate(contractUploadColumns, '차량계약정보 양식', '차량계약정보_업로드양식.xlsx');
+  downloadTemplate(contractUploadColumns, '차량계약정보 양식', '차량계약정보_업로드양식.xlsx', ['계약시작', '계약종료']);
 }
 
 function downloadDrivingTemplate() {
-  downloadTemplate(drivingColumns, '운행기록 양식', '운행기록데이터_업로드양식.xlsx');
+  downloadTemplate(drivingColumns, '운행기록 양식', '운행기록데이터_업로드양식.xlsx', ['운행년월일']);
 }
 
 function downloadClosingTemplate() {
