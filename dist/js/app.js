@@ -118,18 +118,19 @@ function contractSupabasePayload(row) {
   return { vehicle_id: vehicle._supabaseId, monthly_rental_fee: fee, contract_start_month: `${start}-01`, contract_end_month: `${end}-01` };
 }
 
-async function saveContractRows(rows, editingId = null) {
+async function saveContractRows(rows, editingId = null, updateExistingVehicle = false) {
   if (!window.fleetCurrentUser || !window.fleetSupabaseClient) throw Error('로그인 후 이용해 주세요.');
   const seen = new Set();
   const payload = rows.map(row => {
     const record = contractSupabasePayload(row);
-    const key = `${record.vehicle_id}/${record.contract_start_month}/${record.contract_end_month}`;
-    if (seen.has(key)) throw Error(`파일 안에 동일 차량·계약기간이 중복됩니다: ${row['차량번호']}`);
+    const key = record.vehicle_id;
+    if (seen.has(key)) throw Error(`파일 안에 같은 차량번호가 중복됩니다: ${row['차량번호']}`);
     seen.add(key);
-    const matches = contractData.filter(item => item._vehicleId === record.vehicle_id && item['계약시작'] === record.contract_start_month.slice(0, 7) && item['계약종료'] === record.contract_end_month.slice(0, 7) && item._supabaseId !== editingId);
-    if (editingId && matches.length) throw Error('같은 차량·계약기간이 이미 등록되어 있습니다.');
-    if (matches.length > 1) throw Error('저장된 동일 차량·계약기간이 중복됩니다. 계약자료를 확인해 주세요.');
-    const id = editingId || matches[0]?._supabaseId;
+    const matches = contractData.filter(item => item._vehicleId === record.vehicle_id && item._supabaseId && item._supabaseId !== editingId);
+    if (matches.length > 1) throw Error(`저장된 차량계약정보가 중복됩니다: ${row['차량번호']}`);
+    if (editingId && matches.length) throw Error('같은 차량번호의 계약정보가 이미 등록되어 있습니다.');
+    if (!editingId && matches.length && !updateExistingVehicle) throw Error('같은 차량번호의 계약정보가 이미 등록되어 있습니다. 목록의 수정 버튼을 이용하세요.');
+    const id = editingId || (updateExistingVehicle ? matches[0]?._supabaseId : null);
     const existing = contractData.find(item => item._supabaseId === id);
     return id ? { ...record, id, rental_company: existing?._rentalCompany || '', is_active: existing?._isActive ?? true } : record;
   });
@@ -1576,7 +1577,7 @@ document.getElementById('confirmContractUpload').addEventListener('click', async
   try {
     const rows = await readContractFile(file);
     resetFieldFilters('contractsView');
-    await saveContractRows(rows);
+    await saveContractRows(rows, null, true);
     document.getElementById('contractSearch').value = '';
     ['contractHeadquartersFilter', 'contractDivisionFilter', 'contractTeamFilter'].forEach(id => document.getElementById(id).value = '');
     refreshContractFilters();

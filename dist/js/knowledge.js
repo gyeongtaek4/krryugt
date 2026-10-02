@@ -25,7 +25,7 @@
     qnaRows.innerHTML = items.length ? pageItems.map(item => `<article class="knowledge-item">
       <div class="knowledge-item-header"><div><h3>${safe(item.title)}</h3><p class="knowledge-item-meta">등록일 ${displayDate(item.created_at)}${item.updated_at && item.updated_at !== item.created_at ? ` · 수정일 ${displayDate(item.updated_at)}` : ''}</p></div>
       ${isAdmin() ? `<div class="knowledge-actions"><button class="row-edit" type="button" data-qna-edit="${safe(item.id)}">수정</button><button class="row-delete" type="button" data-qna-delete="${safe(item.id)}">삭제</button></div>` : ''}</div>
-      <p class="knowledge-question"><strong>Q:</strong> ${safe(item.question_body)}</p><div class="knowledge-answer"><p><strong>A:</strong> ${safe(item.answer_body)}</p><p class="knowledge-answer-meta">답변 등록일 ${displayDate(item.answered_at || item.created_at)}</p></div></article>`).join('') : '<p class="knowledge-empty">등록된 Q&amp;A가 없습니다.</p>';
+      <p class="knowledge-question"><strong>Q:</strong> ${safe(item.question_body)}</p><div class="knowledge-answer"><p><strong>A:</strong> ${safe(item.answer_body)}</p></div></article>`).join('') : '<p class="knowledge-empty">등록된 Q&amp;A가 없습니다.</p>';
     renderKnowledgePagination('qnaPagination', items.length, qnaPage, 'qna');
   }
 

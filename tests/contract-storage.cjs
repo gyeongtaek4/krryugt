@@ -20,11 +20,13 @@ assert.throws(() => context.contractSupabasePayload({ ...row, '계약종료': '2
 (async () => {
   await assert.rejects(context.saveContractRows([row, row]));
   assert.equal(writes.length, 0);
-  await context.saveContractRows([row]);
+  await assert.rejects(context.saveContractRows([row]), /이미 등록/);
+  assert.equal(writes.length, 0);
+  await context.saveContractRows([row], null, true);
   assert.equal(writes[0][0].id, 'contract-1');
   assert.equal(writes[0][0].rental_company, 'TEST');
   assert.equal(writes[0][0].is_active, false);
-  await context.saveContractRows([{ ...row, '계약시작': '2027-01', '계약종료': '2027-12' }]);
-  assert.equal(writes[1][0].id, undefined);
-  console.log('PASS: registered vehicle matching, amount/period validation, duplicate blocking and contract history storage (mock).');
+  await context.saveContractRows([{ ...row, '계약시작': '2027-01', '계약종료': '2027-12' }], null, true);
+  assert.equal(writes[1][0].id, 'contract-1');
+  console.log('PASS: registered vehicle matching, one-contract-per-vehicle blocking and Excel update storage (mock).');
 })().catch(error => { console.error(error); process.exitCode = 1; });

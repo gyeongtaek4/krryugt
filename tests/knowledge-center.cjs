@@ -14,7 +14,7 @@ assert(js.includes("el('qnaAdminPanel').hidden = !isAdmin()"), 'Q&A admin panel 
 assert(js.includes("el('guideAdminPanel').hidden = !isAdmin()"), 'guide admin panel restriction is missing');
 assert(js.includes('<strong>Q:</strong>'), 'Q&A question prefix is missing');
 assert(js.includes('<strong>A:</strong>'), 'Q&A answer prefix is missing');
-assert(js.includes('답변 등록일 ${displayDate(item.answered_at || item.created_at)}'), 'Q&A answer date is missing');
+assert(!js.includes('답변 등록일 ${displayDate(item.answered_at || item.created_at)}'), 'Q&A answer date must not be displayed');
 assert(js.includes('const knowledgePageSize = 20'), 'knowledge list page size is missing');
 assert(js.includes("renderKnowledgePagination('qnaPagination'"), 'Q&A pagination is missing');
 assert(js.includes("renderKnowledgePagination('guidePagination'"), 'guide pagination is missing');
