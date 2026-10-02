@@ -1074,6 +1074,29 @@ function closeVehicleForm() {
   document.body.style.overflow = '';
 }
 
+function vehicleNumberKey(value) {
+  return normalizePlate(value);
+}
+
+function assertNoDuplicateVehicleNumber(vehicleNumber, editingIndex = null) {
+  const key = vehicleNumberKey(vehicleNumber);
+  if (!key) throw Error('차량번호를 입력해 주세요.');
+  const editingId = editingIndex === null ? null : vehicleData[editingIndex]?._supabaseId;
+  const duplicate = vehicleData.find(vehicle => vehicleNumberKey(vehicle['차량번호']) === key && vehicle._supabaseId !== editingId);
+  if (duplicate) throw Error(`같은 차량번호가 이미 등록되어 있습니다: ${duplicate['차량번호']}`);
+}
+
+function assertNoDuplicateVehicleNumbersInFile(rows) {
+  const seen = new Map();
+  rows.forEach((row, index) => {
+    const key = vehicleNumberKey(row['차량번호']);
+    if (!key) throw Error(`${index + 2}행의 차량번호를 입력해 주세요.`);
+    const firstRow = seen.get(key);
+    if (firstRow) throw Error(`${index + 2}행의 차량번호가 ${firstRow}행과 중복됩니다: ${row['차량번호']}`);
+    seen.set(key, index + 2);
+  });
+}
+
 function vehicleSupabasePayload(row) {
   return {
     vehicle_number: row['차량번호'], vehicle_model: row['차종'], region: row['지역'], parking_lot: row['주차장'],
@@ -1084,6 +1107,7 @@ function vehicleSupabasePayload(row) {
 
 async function saveVehicleToSupabase(row, index) {
   if (!window.fleetCurrentUser || !window.fleetSupabaseClient) throw Error('로그인 세션이 확인되지 않았습니다. 서버에 저장하지 않고 화면에만 표시할 수는 없습니다. 다시 로그인해 주세요.');
+  assertNoDuplicateVehicleNumber(row['차량번호'], index);
   const payload = vehicleSupabasePayload(row);
   if (index !== null && vehicleData[index]?._supabaseId) {
     const { error } = await window.fleetSupabaseClient.from('vehicles').update(payload).eq('id', vehicleData[index]._supabaseId);
@@ -1097,6 +1121,7 @@ async function saveVehicleToSupabase(row, index) {
 
 async function saveVehicleFileToSupabase(rows) {
   if (!window.fleetCurrentUser || !window.fleetSupabaseClient) throw Error('로그인 세션이 확인되지 않았습니다. 서버에 저장하지 않고 화면에만 표시할 수는 없습니다. 다시 로그인해 주세요.');
+  assertNoDuplicateVehicleNumbersInFile(rows);
   const payload = rows.map(vehicleSupabasePayload);
   const { error } = await window.fleetSupabaseClient.from('vehicles').upsert(payload, { onConflict: 'vehicle_number_normalized' });
   if (error) throw error;
