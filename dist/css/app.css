@@ -545,6 +545,22 @@ td strong { font-size: .8rem; }
   .filter-select { flex: 1; min-width: 150px; }
 }
 
+/*
+ * 데스크톱에서는 메뉴를 바꿔도 상단 바와 사이드바가 움직이지 않도록,
+ * 각 화면 본문을 독립된 스크롤 영역으로 둔다. 표가 긴 경우에는 표 안에서도
+ * 바로 스크롤할 수 있어, 화면 전체를 끝까지 내려가지 않아도 된다.
+ */
+@media (min-width: 901px) {
+  html, body { height: 100%; overflow: hidden; }
+  .app-shell { height: 100dvh; min-height: 0; }
+  .main { height: 100dvh; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar, .server-status { flex: 0 0 auto; }
+  .content { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+  .content .table-wrap { max-height: min(50vh, 520px); overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+  .content .vehicle-table thead th { position: sticky; top: 0; z-index: 2; background: var(--white); }
+  .knowledge-list-panel .knowledge-list { max-height: min(50vh, 520px); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+}
+
 @media (max-width: 650px) {
   .content { padding: 25px 16px 36px; }
   .topbar { padding: 0 16px; }
