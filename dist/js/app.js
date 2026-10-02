@@ -1238,7 +1238,7 @@ function downloadTemplate(columns, sheetName, fileName, textInputColumns = []) {
   if (!window.XLSX) { showToast('Excel 기능을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet([columns]);
-  const inputRows = 300;
+  const inputRows = 1000;
   const textColumnIndexes = textInputColumns
     .map(column => columns.indexOf(column))
     .filter(index => index >= 0);

@@ -35,8 +35,8 @@ assert.equal(sheets.length, 2, 'contract and driving templates were not created'
 assert.equal(sheets[0].sheet['2:1'].z, '@', 'contract start month is not formatted as text');
 assert.equal(sheets[0].sheet['3:1'].z, '@', 'contract end month is not formatted as text');
 assert.equal(sheets[1].sheet['2:1'].z, '@', 'driving date is not formatted as text');
-assert.equal(sheets[0].sheet['2:300'].z, '@', 'contract text formatting does not cover input rows');
-assert.equal(sheets[1].sheet['2:300'].z, '@', 'driving text formatting does not cover input rows');
+assert.equal(sheets[0].sheet['2:1000'].z, '@', 'contract text formatting does not cover input rows');
+assert.equal(sheets[1].sheet['2:1000'].z, '@', 'driving text formatting does not cover input rows');
 assert(dialogs.includes('2026-1</strong>, <strong>2026-10'), 'contract month input guidance is missing');
 assert(dialogs.includes('2026-1-1</strong>처럼 입력해도 Excel이 다른 표기로 바꾸지 않으며'), 'driving date input guidance is missing');
 
